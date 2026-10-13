@@ -56,6 +56,20 @@ const PROMO_VIDEO: Video = {
   createdAt: "2026-01-01T00:00:00Z",
 };
 
+const EXTERNAL_VIDEO: Video = {
+  id: 7,
+  beautyCenterId: 9,
+  centerName: "Studio Aurora",
+  title: "",
+  description: "",
+  videoUrl: "",
+  provider: "tiktok",
+  externalUrl: "https://www.tiktok.com/@studio/video/7312345678",
+  externalAuthor: "studio",
+  views: 10,
+  createdAt: "2026-01-01T00:00:00Z",
+};
+
 describe("ClientVideosPage", () => {
   beforeAll(async () => {
     await i18n.changeLanguage("en");
@@ -84,6 +98,24 @@ describe("ClientVideosPage", () => {
     expect(screen.getByText("PROMO")).toBeInTheDocument();
     // A boosted slot must always be labelled as promoted.
     expect(screen.getByText("Promoted")).toBeInTheDocument();
+  });
+
+  it("renders an external post as a deep link to its source platform", async () => {
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({
+      videos: [EXTERNAL_VIDEO],
+      total: 1,
+    });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({
+      videos: [EXTERNAL_VIDEO],
+      total: 1,
+    });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    const link = await screen.findByRole("link", { name: "Watch on TikTok" });
+    expect(link).toHaveAttribute("href", "https://www.tiktok.com/@studio/video/7312345678");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(screen.getByText("@studio")).toBeInTheDocument();
   });
 
   it("toggles a like through the shared use case", async () => {

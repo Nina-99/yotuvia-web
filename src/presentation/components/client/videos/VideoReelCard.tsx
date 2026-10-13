@@ -1,13 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import type { Video } from "yotuvia-core";
+import { isExternalVideo, type ExternalVideoProvider, type Video } from "yotuvia-core";
 
 import { formatCurrency } from "@/presentation/lib/format";
 import { centerDetailPath } from "@/presentation/lib/routes";
 
 /** Seconds of playback below which a visit is not recorded as a real watch. */
 const MIN_WATCH_SECONDS = 3;
+
+/** Brand label for an external provider (brand names are not localized). */
+const PROVIDER_LABELS: Record<ExternalVideoProvider, string> = {
+  native: "",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  instagram: "Instagram",
+};
+
+/** Deep link used to open an external post on its source platform. */
+function externalHref(video: Video): string {
+  return video.externalUrl ?? video.videoUrl;
+}
 
 export interface VideoReelCardProps {
   video: Video;
@@ -129,6 +142,11 @@ export function VideoReelCard({
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // External posts link out to their source platform and are never rehosted;
+  // they render a thumbnail card with a deep-link CTA instead of a <video>.
+  const external = isExternalVideo(video);
+  const providerLabel = video.provider ? PROVIDER_LABELS[video.provider] : "";
+
   const segments = useMemo(
     () => (video.caption ? captionSegments(video.caption) : []),
     [video.caption],
@@ -196,31 +214,54 @@ export function VideoReelCard({
   }, []);
 
   const handleShare = useCallback(() => {
-    void navigator.clipboard?.writeText(video.videoUrl).catch(() => undefined);
-  }, [video.videoUrl]);
+    void navigator.clipboard?.writeText(externalHref(video)).catch(() => undefined);
+  }, [video]);
 
   return (
     <div className="relative h-full w-full snap-start overflow-hidden bg-black">
-      <video
-        ref={videoRef}
-        src={video.videoUrl}
-        poster={video.thumbnailUrl}
-        className="h-full w-full object-cover"
-        loop
-        muted={muted}
-        playsInline
-        preload="metadata"
-        onClick={handleTogglePause}
-        onTimeUpdate={(event) => {
-          const node = event.currentTarget;
-          if (node.duration > 0) setProgress(node.currentTime / node.duration);
-        }}
-      />
+      {external ? (
+        <a
+          href={externalHref(video)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${t("client.feed.external_watch", "Watch on")} ${providerLabel}`}
+          className="group absolute inset-0 block"
+        >
+          {video.thumbnailUrl ? (
+            <img src={video.thumbnailUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-br from-neutral-800 to-black" />
+          )}
+          <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/55 text-white transition-transform group-hover:scale-105">
+              <svg viewBox="0 0 24 24" className="h-8 w-8" fill="currentColor" aria-hidden="true">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+          </span>
+        </a>
+      ) : (
+        <video
+          ref={videoRef}
+          src={video.videoUrl}
+          poster={video.thumbnailUrl}
+          className="h-full w-full object-cover"
+          loop
+          muted={muted}
+          playsInline
+          preload="metadata"
+          onClick={handleTogglePause}
+          onTimeUpdate={(event) => {
+            const node = event.currentTarget;
+            if (node.duration > 0) setProgress(node.currentTime / node.duration);
+          }}
+        />
+      )}
 
       {/* Readability wash behind the controls. */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" aria-hidden="true" />
 
-      {paused ? (
+      {!external && paused ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/50 text-white">
             <svg viewBox="0 0 24 24" className="h-8 w-8" fill="currentColor" aria-hidden="true">
@@ -232,14 +273,22 @@ export function VideoReelCard({
 
       {/* Top controls. */}
       <div className="absolute left-3 top-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onToggleMute}
-          aria-label={t(muted ? "client.feed.unmute" : "client.feed.mute", muted ? "Unmute" : "Mute")}
-          className="rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        >
-          <VolumeIcon muted={muted} className="h-5 w-5" />
-        </button>
+        {external ? (
+          providerLabel ? (
+            <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+              {providerLabel}
+            </span>
+          ) : null
+        ) : (
+          <button
+            type="button"
+            onClick={onToggleMute}
+            aria-label={t(muted ? "client.feed.unmute" : "client.feed.mute", muted ? "Unmute" : "Mute")}
+            className="rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <VolumeIcon muted={muted} className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {video.isPromo ? (
@@ -338,11 +387,12 @@ export function VideoReelCard({
           </p>
         ) : null}
 
-        {(video.serviceName || serviceOffer || video.personnelName) && (
+        {(video.serviceName || serviceOffer || video.personnelName || video.externalAuthor) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/85">
             {video.serviceName ? <span className="font-semibold">{video.serviceName}</span> : null}
             {serviceOffer ? <span className="font-bold text-accent">{serviceOffer}</span> : null}
             {video.personnelName ? <span>✂ {video.personnelName}</span> : null}
+            {video.externalAuthor ? <span>@{video.externalAuthor}</span> : null}
           </div>
         )}
 
@@ -357,10 +407,12 @@ export function VideoReelCard({
         </button>
       </div>
 
-      {/* Progress bar. */}
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/25" aria-hidden="true">
-        <div className="h-full bg-white" style={{ width: `${Math.round(progress * 100)}%` }} />
-      </div>
+      {/* Progress bar (native playback only). */}
+      {!external ? (
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/25" aria-hidden="true">
+          <div className="h-full bg-white" style={{ width: `${Math.round(progress * 100)}%` }} />
+        </div>
+      ) : null}
     </div>
   );
 }
