@@ -216,6 +216,12 @@ const ClientFavoritesPage = lazy(() =>
   })),
 );
 
+const ClientVideosPage = lazy(() =>
+  import("@/presentation/pages/client/ClientVideosPage").then((module) => ({
+    default: module.ClientVideosPage,
+  })),
+);
+
 const ClientProfilePage = lazy(() =>
   import("@/presentation/pages/client/ClientProfilePage").then((module) => ({
     default: module.ClientProfilePage,
@@ -508,6 +514,11 @@ export function AppRouter() {
             <Route path={ROUTES.client.favorites} element={
                 <Suspense fallback={<RouteFallback />}>
                   <ClientFavoritesPage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.client.videos} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <ClientVideosPage />
                 </Suspense>
               } />
             <Route path={ROUTES.client.profile} element={

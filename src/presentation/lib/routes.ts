@@ -92,6 +92,7 @@ export const ROUTES = {
     home: "/app/client",
     reservations: "/app/client/reservations",
     favorites: "/app/client/favorites",
+    videos: "/app/client/videos",
     profile: "/app/client/profile",
   },
   /**

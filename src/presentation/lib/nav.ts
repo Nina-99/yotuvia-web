@@ -90,6 +90,10 @@ const ICONS = {
   clientFavorites: [
     "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z",
   ],
+  clientVideos: [
+    "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
+    "M10 8.5l5.5 3.5-5.5 3.5z",
+  ],
   search: [
     "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z",
     "M21 21l-4.35-4.35",
@@ -191,6 +195,12 @@ export const CLIENT_NAV_SECTIONS: readonly AppNavSection[] = [
     path: ROUTES.client.favorites,
     labelKey: "web.app.nav.client_favorites",
     icon: ICONS.clientFavorites,
+  },
+  {
+    id: "client-videos",
+    path: ROUTES.client.videos,
+    labelKey: "web.app.nav.client_videos",
+    icon: ICONS.clientVideos,
   },
   {
     id: "client-profile",
