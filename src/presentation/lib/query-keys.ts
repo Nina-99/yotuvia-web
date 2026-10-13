@@ -26,6 +26,7 @@ const content = ["content"] as const;
 const profile = ["profile"] as const;
 const platform = ["platform"] as const;
 const availability = ["availability"] as const;
+const tiktok = ["tiktok"] as const;
 
 export interface CenterSearchParams {
   term: string;
@@ -303,6 +304,15 @@ export const queryKeys = {
     centers: () => [...platform, "centers"] as const,
     /** Payment configuration of one chosen centre (platform-scoped read). */
     payment: (centerId: number) => [...platform, "payment", { centerId }] as const,
+  },
+  /**
+   * TikTok connect-account integration (Login Kit + Display API). The
+   * connection is centre-scoped, so the keys carry no id.
+   */
+  tiktok: {
+    all: tiktok,
+    account: () => [...tiktok, "account"] as const,
+    videos: () => [...tiktok, "videos"] as const,
   },
 } as const;
 

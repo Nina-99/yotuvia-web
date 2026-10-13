@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { imageUrl } from "yotuvia-core";
 import type { FeedPostItem } from "yotuvia-core";
 
 import { FeedPostFormModal, SuspendPostDialog } from "@/presentation/components/content";
+import { TikTokConnectSection } from "@/presentation/components/content/TikTokConnectSection";
 import { BoostCampaignDialog } from "@/presentation/components/content";
 import type { BoostCampaignValues } from "@/presentation/components/content";
 import {
@@ -84,6 +86,7 @@ export function ContentPage() {
   const language = i18n.resolvedLanguage ?? i18n.language;
   const { toast } = useToast();
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formTarget, setFormTarget] = useState<FormTarget | null>(null);
   const [formErrorKey, setFormErrorKey] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<FeedPostItem | null>(null);
@@ -222,6 +225,22 @@ export function ContentPage() {
     }
   };
 
+  // The TikTok OAuth callback bounces the browser back here with ?tiktok=...
+  // Surface the outcome once, then strip the param so a refresh is clean.
+  useEffect(() => {
+    const status = searchParams.get("tiktok");
+    if (!status) return;
+    if (status === "connected") {
+      toast(t("web.app.content.tiktok.connected_toast"), { variant: "success" });
+      void postsQuery.refetch();
+    } else {
+      toast(t("web.app.content.tiktok.error_toast"), { variant: "error" });
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete("tiktok");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, toast, t, postsQuery]);
+
   if (centerId <= 0) {
     return (
       <Card>
@@ -245,6 +264,8 @@ export function ContentPage() {
             : t("web.app.content.subtitle_plain")}
         </p>
       </div>
+
+      <TikTokConnectSection />
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-1">

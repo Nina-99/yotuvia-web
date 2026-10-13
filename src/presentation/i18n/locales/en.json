@@ -2452,6 +2452,19 @@
           "active": "Active",
           "external": "External"
         },
+        "tiktok": {
+          "title": "TikTok",
+          "connect_body": "Connect your TikTok account to import your videos into the feed without re-uploading them.",
+          "connect": "Connect TikTok",
+          "connected_as": "Connected as {name}",
+          "disconnect": "Disconnect",
+          "import_videos": "Import videos",
+          "import": "Import",
+          "imported": "Video imported to the feed",
+          "empty": "Your account has no public videos to import.",
+          "connected_toast": "TikTok account connected",
+          "error_toast": "Could not connect the TikTok account"
+        },
         "stats": {
           "views": "{count} views",
           "likes": "{count} likes",
@@ -2906,6 +2919,10 @@
       "content_save": "We couldn't save the post. Please try again.",
       "content_delete": "We couldn't delete the post. Please try again.",
       "content_moderate": "We couldn't moderate the post. Please try again.",
+      "tiktok_connect": "We couldn't start the TikTok connection. Please try again.",
+      "tiktok_import": "We couldn't import the video. Please try again.",
+      "tiktok_disconnect": "We couldn't disconnect TikTok. Please try again.",
+      "tiktok_videos": "We couldn't load your TikTok videos. Please try again.",
       "profile_fetch": "We couldn't load your center profile. Please try again.",
       "profile_save": "We couldn't save the profile. Please try again.",
       "profile_images_fetch": "We couldn't load the gallery. Please try again.",
