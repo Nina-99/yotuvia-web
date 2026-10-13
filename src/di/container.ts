@@ -7,6 +7,7 @@ import type {
   IAuthRepository,
   IAvailabilityRepository,
   IBeautyCenterRepository,
+  IBoostCampaignRepository,
   IClientRepository,
   IDashboardRepository,
   IImageRepository,
@@ -39,6 +40,7 @@ import {
   ApiAuthRepository,
   ApiAvailabilityRepository,
   ApiBeautyCenterRepository,
+  ApiBoostCampaignRepository,
   ApiClientRepository,
   ApiDashboardRepository,
   ApiImageRepository,
@@ -66,6 +68,7 @@ import {
   CountStaffUnreadUseCase,
   CountUnreadNotificationsUseCase,
   CreateAdminReservationUseCase,
+  CreateBoostCampaignUseCase,
   CreateCategoryUseCase,
   CreateImageUseCase,
   CreatePersonnelUseCase,
@@ -112,6 +115,8 @@ import {
   GetVideosFeedUseCase,
   IncrementVideoBookTapsUseCase,
   IncrementVideoViewsUseCase,
+  ListBoostCampaignsUseCase,
+  PauseBoostCampaignUseCase,
   LoginUserUseCase,
   LogoutAllUseCase,
   MarkAdminNotificationReadUseCase,
@@ -171,6 +176,7 @@ const loyaltyRepository = new ApiLoyaltyRepository();
 const adminReservationRepository: IAdminReservationRepository = new ApiAdminReservationRepository();
 const adminClientRepository: IAdminClientRepository = new ApiAdminClientRepository();
 const videoRepository: IVideoRepository = new ApiVideoRepository();
+const boostRepository: IBoostCampaignRepository = new ApiBoostCampaignRepository();
 const postLikeRepository: IPostLikeRepository = new ApiPostLikeRepository();
 const savedVideoRepository: ISavedVideoRepository = new ApiSavedVideoRepository();
 const videoWatchEventRepository: IVideoWatchEventRepository = new ApiVideoWatchEventRepository();
@@ -251,6 +257,11 @@ export const incrementVideoBookTapsUseCase = new IncrementVideoBookTapsUseCase(v
 export const toggleVideoLikeUseCase = new ToggleVideoLikeUseCase(postLikeRepository);
 export const toggleVideoSaveUseCase = new ToggleVideoSaveUseCase(savedVideoRepository);
 export const recordVideoWatchUseCase = new RecordVideoWatchUseCase(videoWatchEventRepository);
+
+/* ── Boost (CPM promotion) ── */
+export const createBoostCampaignUseCase = new CreateBoostCampaignUseCase(boostRepository);
+export const listBoostCampaignsUseCase = new ListBoostCampaignsUseCase(boostRepository);
+export const pauseBoostCampaignUseCase = new PauseBoostCampaignUseCase(boostRepository);
 
 /* ── Client ── */
 export const getClientProfileUseCase = new GetClientProfileUseCase(clientRepository);
@@ -334,6 +345,7 @@ adminReservationRepository,
   postLikeRepository,
   savedVideoRepository,
   videoWatchEventRepository,
+  boostRepository,
   clientRepository,
   adminCenterRepository,
   personnelRepository,
@@ -399,6 +411,11 @@ adminReservationRepository,
   toggleVideoLikeUseCase,
   toggleVideoSaveUseCase,
   recordVideoWatchUseCase,
+
+  /* use cases — boost */
+  createBoostCampaignUseCase,
+  listBoostCampaignsUseCase,
+  pauseBoostCampaignUseCase,
 
   /* use cases — client */
   getClientProfileUseCase,
