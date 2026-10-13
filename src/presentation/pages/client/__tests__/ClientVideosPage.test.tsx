@@ -52,6 +52,7 @@ const PROMO_VIDEO: Video = {
   servicePrice: 15000,
   serviceDuration: 90,
   isPromo: true,
+  isBoosted: true,
   createdAt: "2026-01-01T00:00:00Z",
 };
 
@@ -81,6 +82,8 @@ describe("ClientVideosPage", () => {
     expect(await screen.findByText("Studio Aurora")).toBeInTheDocument();
     expect(screen.getAllByText(/balayage/i).length).toBeGreaterThan(0);
     expect(screen.getByText("PROMO")).toBeInTheDocument();
+    // A boosted slot must always be labelled as promoted.
+    expect(screen.getByText("Promoted")).toBeInTheDocument();
   });
 
   it("toggles a like through the shared use case", async () => {

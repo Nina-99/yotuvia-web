@@ -248,6 +248,12 @@ export function VideoReelCard({
         </span>
       ) : null}
 
+      {video.isBoosted ? (
+        <span className="absolute right-3 top-14 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+          {t("client.feed.sponsored")}
+        </span>
+      ) : null}
+
       {/* Right-side actions. */}
       <div className="absolute bottom-24 right-3 flex flex-col items-center gap-4 text-white">
         <Link
