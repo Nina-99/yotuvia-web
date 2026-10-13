@@ -4,6 +4,8 @@ import { imageUrl } from "yotuvia-core";
 import type { FeedPostItem } from "yotuvia-core";
 
 import { FeedPostFormModal, SuspendPostDialog } from "@/presentation/components/content";
+import { BoostCampaignDialog } from "@/presentation/components/content";
+import type { BoostCampaignValues } from "@/presentation/components/content";
 import {
   Badge,
   Button,
@@ -18,6 +20,11 @@ import {
 } from "@/presentation/components/ui";
 import { useAdminCenter } from "@/presentation/hooks/use-admin-center";
 import { useAuthSession } from "@/presentation/hooks/use-auth-session";
+import {
+  useBoostCampaigns,
+  useCreateBoostCampaign,
+  usePauseBoostCampaign,
+} from "@/presentation/hooks/use-boost-campaigns";
 import {
   useCreateFeedPost,
   useDeleteFeedPost,
@@ -78,6 +85,8 @@ export function ContentPage() {
   const [deleteErrorKey, setDeleteErrorKey] = useState<string | null>(null);
   const [moderationTarget, setModerationTarget] = useState<ModerationTarget | null>(null);
   const [moderationErrorKey, setModerationErrorKey] = useState<string | null>(null);
+  const [boostTarget, setBoostTarget] = useState<FeedPostItem | null>(null);
+  const [boostErrorKey, setBoostErrorKey] = useState<string | null>(null);
 
   const centerQuery = useAdminCenter(centerId);
   const servicesQuery = useServices(centerId, language);
@@ -88,11 +97,45 @@ export function ContentPage() {
   const updatePost = useUpdateFeedPost();
   const deletePost = useDeleteFeedPost();
   const suspendPost = useSuspendFeedPost();
+  const campaignsQuery = useBoostCampaigns(centerId > 0);
+  const createBoost = useCreateBoostCampaign();
+  const pauseBoost = usePauseBoostCampaign();
 
   const posts = useMemo(() => postsQuery.data ?? [], [postsQuery.data]);
   const services = useMemo(() => servicesQuery.data ?? [], [servicesQuery.data]);
   const personnel = useMemo(() => personnelQuery.data ?? [], [personnelQuery.data]);
   const errorMessage = useErrorMessage(postsQuery.error, "web.errors.content_fetch");
+
+  const campaigns = useMemo(() => campaignsQuery.data ?? [], [campaignsQuery.data]);
+  // Latest campaign per post: the list is newest first, so the first seen wins.
+  const campaignByPost = useMemo(() => {
+    const map = new Map<number, (typeof campaigns)[number]>();
+    for (const campaign of campaigns) {
+      if (!map.has(campaign.feedPostId)) map.set(campaign.feedPostId, campaign);
+    }
+    return map;
+  }, [campaigns]);
+
+  const handleBoostSubmit = async (values: BoostCampaignValues) => {
+    if (!boostTarget) return;
+    setBoostErrorKey(null);
+    try {
+      await createBoost.mutateAsync({ feedPostId: boostTarget.id, ...values });
+      toast(t("web.app.content.boost.create_success"), { variant: "success" });
+      setBoostTarget(null);
+    } catch (error) {
+      setBoostErrorKey(toErrorKey(error, "web.errors.boost_create"));
+    }
+  };
+
+  const handlePauseBoost = async (campaignId: number) => {
+    try {
+      await pauseBoost.mutateAsync(campaignId);
+      toast(t("web.app.content.boost.pause_success"), { variant: "success" });
+    } catch {
+      toast(t("web.errors.boost_pause"), { variant: "error" });
+    }
+  };
 
   const handleCreate = async (values: FeedPostCreateValues, file: File) => {
     setFormErrorKey(null);
@@ -241,6 +284,7 @@ export function ContentPage() {
             const label = postLabel(post);
             const suspended = !post.is_active;
             const isStaffPost = post.personnel_id !== undefined && post.personnel_id !== null;
+            const campaign = campaignByPost.get(post.id);
             return (
               <li
                 key={post.id}
@@ -334,6 +378,18 @@ export function ContentPage() {
                         : t("web.app.content.list.actions.suspend")}
                     </Button>
                   ) : null}
+                  {!campaign || campaign.status !== "active" ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        setBoostErrorKey(null);
+                        setBoostTarget(post);
+                      }}
+                    >
+                      {t("web.app.content.boost.action")}
+                    </Button>
+                  ) : null}
                   <Button
                     size="sm"
                     variant="danger"
@@ -346,6 +402,35 @@ export function ContentPage() {
                     {t("web.app.content.list.actions.delete")}
                   </Button>
                 </div>
+
+                {campaign ? (
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
+                    <Badge variant={campaign.status === "active" ? "accent" : "default"}>
+                      {t(`web.app.content.boost.status.${campaign.status}`)}
+                    </Badge>
+                    <span>
+                      {t("web.app.content.boost.spent", {
+                        spent: formatNumber(Math.round(campaign.spentMilli / 1000), language),
+                        budget: formatNumber(Math.round(campaign.budgetMilli / 1000), language),
+                      })}
+                    </span>
+                    <span>
+                      {t("web.app.content.boost.impressions", {
+                        count: formatNumber(campaign.impressions, language),
+                      })}
+                    </span>
+                    {campaign.status === "active" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={pauseBoost.isPending}
+                        onClick={() => void handlePauseBoost(campaign.id)}
+                      >
+                        {t("web.app.content.boost.pause")}
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null}
               </li>
             );
           })}
@@ -383,6 +468,15 @@ export function ContentPage() {
         errorKey={moderationErrorKey}
         onConfirm={(note) => void handleModeration(note)}
         onCancel={() => setModerationTarget(null)}
+      />
+
+      <BoostCampaignDialog
+        open={boostTarget !== null}
+        postLabel={boostTarget ? postLabel(boostTarget) : ""}
+        saving={createBoost.isPending}
+        errorKey={boostErrorKey}
+        onClose={() => setBoostTarget(null)}
+        onSubmit={(values) => void handleBoostSubmit(values)}
       />
 
       <ConfirmDialog

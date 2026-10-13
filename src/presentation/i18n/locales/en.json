@@ -2453,6 +2453,27 @@
           "book_taps": "{count} booking taps",
           "comments": "{count} comments"
         },
+        "boost": {
+          "action": "Promote",
+          "dialog_title": "Promote this post",
+          "dialog_body": "Run a paid campaign for \"{name}\". The budget is charged up front.",
+          "budget_label": "Budget (Yotuvia tokens)",
+          "budget_hint": "Held up front and spent as impressions are delivered.",
+          "bid_label": "Max bid per 1000 impressions (tokens)",
+          "bid_hint": "You pay the second price set by the auction, never above this bid.",
+          "ends_label": "Ends on",
+          "submit": "Start campaign",
+          "pause": "Pause",
+          "create_success": "Campaign started",
+          "pause_success": "Campaign paused",
+          "spent": "{spent} / {budget} tokens spent",
+          "impressions": "{count} impressions",
+          "status": {
+            "active": "Boost active",
+            "paused": "Boost paused",
+            "exhausted": "Boost finished"
+          }
+        },
         "list": {
           "title": "Your posts",
           "total": "{count} posts",
@@ -2867,6 +2888,8 @@
       "promotions_delete": "We couldn't delete the promotion. Please try again.",
       "analytics_fetch": "We couldn't load the analytics. Please try again.",
       "content_fetch": "We couldn't load your posts. Please try again.",
+      "boost_create": "We couldn't start the campaign. Please try again.",
+      "boost_pause": "We couldn't pause the campaign. Please try again.",
       "content_create": "We couldn't publish the post. Please try again.",
       "content_save": "We couldn't save the post. Please try again.",
       "content_delete": "We couldn't delete the post. Please try again.",

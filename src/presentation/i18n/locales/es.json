@@ -2453,6 +2453,27 @@
           "book_taps": "{count} toques de reserva",
           "comments": "{count} comentarios"
         },
+        "boost": {
+          "action": "Promocionar",
+          "dialog_title": "Promocionar esta publicación",
+          "dialog_body": "Creá una campaña paga para \"{name}\". El presupuesto se cobra por adelantado.",
+          "budget_label": "Presupuesto (tokens Yotuvia)",
+          "budget_hint": "Se retiene por adelantado y se consume a medida que se entregan impresiones.",
+          "bid_label": "Puja máxima por 1000 impresiones (tokens)",
+          "bid_hint": "Pagás el segundo precio que fija la subasta, nunca más que esta puja.",
+          "ends_label": "Termina el",
+          "submit": "Iniciar campaña",
+          "pause": "Pausar",
+          "create_success": "Campaña iniciada",
+          "pause_success": "Campaña pausada",
+          "spent": "{spent} / {budget} tokens gastados",
+          "impressions": "{count} impresiones",
+          "status": {
+            "active": "Boost activo",
+            "paused": "Boost pausado",
+            "exhausted": "Boost finalizado"
+          }
+        },
         "list": {
           "title": "Tus publicaciones",
           "total": "{count} publicaciones",
@@ -2867,6 +2888,8 @@
       "promotions_delete": "No pudimos eliminar la promoción. Intentá de nuevo.",
       "analytics_fetch": "No pudimos cargar las analíticas. Intentá de nuevo.",
       "content_fetch": "No pudimos cargar tus publicaciones. Intentá de nuevo.",
+      "boost_create": "No pudimos iniciar la campaña. Intentá de nuevo.",
+      "boost_pause": "No pudimos pausar la campaña. Intentá de nuevo.",
       "content_create": "No pudimos publicar. Intentá de nuevo.",
       "content_save": "No pudimos guardar la publicación. Intentá de nuevo.",
       "content_delete": "No pudimos eliminar la publicación. Intentá de nuevo.",
