@@ -1,0 +1,329 @@
+/*
+ * Landing page motion.
+ *
+ * Imported by `HomePage.tsx`, which the router loads through `React.lazy`, so
+ * this stylesheet ships with the landing chunk and never touches the app entry
+ * CSS. Motion is CSS-first and transform/opacity only: the single piece of
+ * JavaScript is the one-shot `IntersectionObserver` in `use-reveal`, which
+ * decides WHEN an element receives `.ytv-reveal--visible`.
+ *
+ * ACCESSIBILITY: every keyframe/transition is wrapped in
+ * `prefers-reduced-motion: no-preference`, so the default — reduced motion, or
+ * a browser that cannot animate — is a fully visible, static page. Nothing here
+ * is required for content to become visible; the hidden start state is only
+ * added by JS after it has confirmed both the observer and the motion opt-in.
+ *
+ * COLOURS: brand values are kept verbatim (`#cfb53b` is the accent token and
+ * `rgba(207, 181, 59, ...)` its translucent form), mirroring the precedent in
+ * `components/centers/center-marker.css`, so glows read correctly on the
+ * dark-only surface.
+ */
+
+/* ------------------------------------------------------------------------- */
+/* 1. Scroll reveal                                                          */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Hidden start state. `useReveal` adds this class ONLY when the observer
+ * exists and motion is allowed; otherwise it is never added and the element
+ * stays visible from the first paint.
+ */
+.ytv-reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 560ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--ytv-reveal-delay, 0ms);
+  will-change: transform, opacity;
+}
+
+.ytv-reveal--visible {
+  opacity: 1;
+  transform: none;
+  /* Release the compositor layer once the one-shot reveal has played. */
+  will-change: auto;
+}
+
+/* ------------------------------------------------------------------------- */
+/* 2. Hero: staged entrance + ambient drift                                  */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Staged entrance for the headline/subheadline/CTAs. Delays come from an inline
+ * `animation-delay`; `both` fill keeps each stage hidden until its turn. Under
+ * reduced motion the rule does not apply at all, so the copy is visible
+ * immediately.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .ytv-hero-enter {
+    opacity: 0;
+    animation: ytv-rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes ytv-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 16px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .ytv-hero-ambient {
+    animation: ytv-drift 20s ease-in-out infinite alternate;
+  }
+}
+
+/* Decorative gold wash: two soft accent pools on the dark surface. */
+.ytv-hero-ambient {
+  position: absolute;
+  inset: -25% -10%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(42rem 22rem at 15% 20%, rgba(207, 181, 59, 0.16), transparent 60%),
+    radial-gradient(36rem 20rem at 85% 15%, rgba(207, 181, 59, 0.1), transparent 65%);
+}
+
+@keyframes ytv-drift {
+  from {
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(1.5%, 1%, 0) scale(1.05);
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 3. How it works: step progression                                         */
+/* ------------------------------------------------------------------------- */
+
+/* Gold ring that expands out of the number badge as each step appears. */
+@media (prefers-reduced-motion: no-preference) {
+  .ytv-reveal--visible .ytv-step-badge {
+    animation: ytv-step-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .ytv-reveal--visible .ytv-step-badge::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    border: 2px solid rgba(207, 181, 59, 0.6);
+    animation: ytv-step-ring 900ms ease-out both;
+  }
+
+  @keyframes ytv-step-pop {
+    from {
+      transform: scale(0.72);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes ytv-step-ring {
+    from {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    to {
+      transform: scale(1.9);
+      opacity: 0;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 4. Micro-interactions                                                     */
+/* ------------------------------------------------------------------------- */
+
+/* Feature tiles / pricing cards: gentle lift + gold glow on hover. */
+.ytv-card-interactive {
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms ease-out,
+    border-color 200ms ease-out;
+}
+
+.ytv-card-interactive:hover {
+  transform: translate3d(0, -4px, 0);
+  border-color: rgba(207, 181, 59, 0.4);
+  box-shadow: 0 18px 40px -22px rgba(207, 181, 59, 0.55);
+}
+
+.ytv-icon-pop {
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ytv-card-interactive:hover .ytv-icon-pop {
+  transform: scale(1.12);
+}
+
+/* Call to action: lift on hover, settle on press, arrow slides right. */
+.ytv-cta {
+  transition:
+    transform 180ms ease-out,
+    box-shadow 180ms ease-out,
+    background-color 180ms ease-out;
+}
+
+.ytv-cta:hover {
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 14px 30px -18px rgba(207, 181, 59, 0.6);
+}
+
+.ytv-cta:active {
+  transform: translate3d(0, 0, 0);
+}
+
+.ytv-cta-arrow {
+  transition: transform 200ms ease-out;
+}
+
+.ytv-cta:hover .ytv-cta-arrow {
+  transform: translateX(3px);
+}
+
+/* ------------------------------------------------------------------------- */
+/* 5. FAQ accordion                                                          */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * The panel keeps its `hidden` attribute for assistive tech; only the content
+ * fades/slides in when it opens. Height is never animated (the browser lays the
+ * panel out once), so there is no moving-layout animation.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .ytv-faq-panel--open {
+    animation: ytv-faq-open 240ms ease-out both;
+  }
+
+  @keyframes ytv-faq-open {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -6px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 6. Scroll-linked effects: progress bar + hero parallax                    */
+/* ------------------------------------------------------------------------- */
+
+/* Thin accent bar; the fill is scaleX(0) until JS or CSS drives it. */
+.ytv-scroll-progress {
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* Hero foreground drift; the offset is published by `useScrollParallax`. */
+.ytv-hero-parallax {
+  transform: translate3d(0, var(--ytv-parallax-y, 0), 0);
+  will-change: transform;
+}
+
+/*
+ * CSS-first path: where `animation-timeline` is supported the compositor drives
+ * both effects and no scroll listener runs. The JS fallback exists only for
+ * browsers without scroll-driven animation, and the hero drift is skipped
+ * entirely under reduced motion (the media query below prevents the animation).
+ */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ytv-scroll-progress--css {
+      animation: ytv-scroll-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    @keyframes ytv-scroll-progress {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    .ytv-hero-parallax {
+      animation: ytv-hero-parallax linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100vh;
+    }
+
+    @keyframes ytv-hero-parallax {
+      from {
+        transform: translate3d(0, 0, 0);
+      }
+      to {
+        transform: translate3d(0, 64px, 0);
+      }
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 7. Reduced motion: pin everything to its final, static state               */
+/* ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ytv-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .ytv-hero-enter {
+    opacity: 1;
+    animation: none;
+  }
+
+  .ytv-hero-ambient {
+    animation: none;
+  }
+
+  /* No scroll-linked drift; the progress bar stays a static direct readout. */
+  .ytv-hero-parallax {
+    transform: none;
+  }
+
+  .ytv-scroll-progress--css {
+    animation: none;
+  }
+
+  .ytv-card-interactive,
+  .ytv-icon-pop,
+  .ytv-cta,
+  .ytv-cta-arrow {
+    transition: none;
+  }
+
+  .ytv-card-interactive:hover,
+  .ytv-cta:hover,
+  .ytv-cta:active {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .ytv-card-interactive:hover .ytv-icon-pop,
+  .ytv-cta:hover .ytv-cta-arrow {
+    transform: none;
+  }
+
+  .ytv-reveal--visible .ytv-step-badge,
+  .ytv-reveal--visible .ytv-step-badge::before {
+    animation: none;
+  }
+
+  .ytv-faq-panel--open {
+    animation: none;
+  }
+}

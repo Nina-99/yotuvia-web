@@ -1,0 +1,492 @@
+@import "tailwindcss";
+
+/*
+ * Yotuvia is DARK-ONLY: there is exactly one colour theme, so there is no
+ * light token set and no `dark:` variant to branch on. `.dark` on <html> is set
+ * statically in `index.html` (no flash of light) and re-asserted by
+ * `presentation/lib/dark-theme.ts`; the token block below is the only one that
+ * exists and is therefore always active.
+ *
+ * Semantic tokens mirrored from yotuvia-mobile/src/constants/theme.ts
+ * (the single source of truth). Raw hex values are kept faithful to that file
+ * so both shells render identical surfaces. `@theme inline` maps the custom
+ * properties onto Tailwind utilities, so `bg-background` resolves to the dark
+ * surface.
+ */
+.dark {
+  color-scheme: dark;
+
+  --ytv-background: #16140f;
+  --ytv-card: #221f1a;
+  --ytv-card2: #2e2b25;
+  --ytv-border: #3a362e;
+  --ytv-text: #ececec;
+  --ytv-text-muted: #888;
+  --ytv-text-secondary: #666;
+  --ytv-input: #2e2b25;
+  --ytv-input-text: #fff;
+  --ytv-input-placeholder: #636366;
+  --ytv-badge: #3a362e;
+  --ytv-overlay: rgba(0, 0, 0, 0.5);
+  --ytv-on-accent: #121212;
+  --ytv-disabled: #2c2c2e;
+}
+
+@theme inline {
+  --color-background: var(--ytv-background);
+  --color-card: var(--ytv-card);
+  --color-card2: var(--ytv-card2);
+  --color-border: var(--ytv-border);
+  --color-text: var(--ytv-text);
+  --color-text-muted: var(--ytv-text-muted);
+  --color-text-secondary: var(--ytv-text-secondary);
+  --color-input: var(--ytv-input);
+  --color-input-text: var(--ytv-input-text);
+  --color-input-placeholder: var(--ytv-input-placeholder);
+  --color-badge: var(--ytv-badge);
+  --color-overlay: var(--ytv-overlay);
+  --color-on-accent: var(--ytv-on-accent);
+  --color-disabled: var(--ytv-disabled);
+}
+
+/* Constant brand + status tokens (identical in both themes). */
+@theme {
+  --color-accent: #cfb53b;
+  --color-success: #4caf50;
+  --color-warning: #f5a623;
+  --color-danger: #ff453a;
+  --color-info: #0a84ff;
+  --color-link: #007aff;
+  --color-whatsapp: #25d366;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+/*
+ * In-page anchor navigation (the public header/footer link to `/ #features`,
+ * `#how-it-works`, `#contact`, ...). Smooth scrolling is pure CSS and is
+ * DISABLED for a visitor who asked the OS to reduce motion — they get an instant
+ * jump instead of a long scroll animation.
+ *
+ * `scroll-margin-top` keeps the target heading clear of the sticky header
+ * (`PublicLayout` header is ~64px tall), so an anchor never lands under it.
+ * It applies in both modes: an instant jump still needs the offset.
+ */
+html {
+  scroll-behavior: smooth;
+}
+
+:where(section[id]) {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* Slice U1 (feat-visual-depth): app-shell visual-depth utilities             */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Additive `ytv-*` layer over the dark-only tokens above. These utilities
+ * NEVER restyle token values in place: existing `bg-card` / `border-border` /
+ * `shadow-sm` / `animate-pulse` classes keep working untouched, so current
+ * `toHaveClass` assertions stay green. Components adopt them class-by-class
+ * in later slices (Card/Skeleton/lists), which only ADD classes.
+ *
+ * Motion vocabulary is ported from
+ * `presentation/components/landing/landing-motion.css`: every animation or
+ * hover transition resolves to motion under
+ * `prefers-reduced-motion: no-preference`, and the `reduce` block at the
+ * bottom (§5) pins each utility to its static final state (mirrors
+ * landing §7). The landing chunk itself is untouched.
+ */
+
+/* ------------------------------------------------------------------------- */
+/* 1. Elevation scale: borders carry depth, shadows stay subtle               */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Shadows read weakly on dark (`#121212`/`#1e1e1e`), so borders + surface
+ * layering carry depth and the black-shadow scale stays restrained. Levels
+ * compose: `ytv-elev-1 ytv-elev-2 ytv-elev-3` on one element yields border +
+ * layering + ring (later rules win per property; the border is identical).
+ *
+ * `ytv-elev-1` sets no background on purpose: it is the neutral companion
+ * for already-surfaced elements (e.g. Card's `bg-card`). `ytv-elev-2` opts
+ * into `card2` layering for elements that need a lifted surface.
+ */
+/*
+ * A 1px `inset` highlight on the TOP edge reads as light landing on the
+ * surface, which is what separates a "lith" panel from a flat grey one. It is
+ * paired with the shadow so the same shadow property carries both cues.
+ */
+.ytv-elev-1 {
+  border: 1px solid var(--ytv-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.ytv-elev-2 {
+  border: 1px solid var(--ytv-border);
+  background-color: var(--ytv-card2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 4px 12px -4px rgba(0, 0, 0, 0.5);
+}
+
+.ytv-elev-3 {
+  border: 1px solid var(--ytv-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 24px -8px rgba(0, 0, 0, 0.6),
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+/*
+ * Surface light: every card surface carries a faint top-down wash so the flat
+ * `card`/`card2` fills gain a sense of a lit top and a shaded bottom. Kept as
+ * `background-image` on TOP of the token `background-color`, so a component
+ * that composes `bg-card` (or `bg-card2`) is lit automatically, no extra class.
+ */
+.bg-card {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 45%);
+}
+
+.bg-card2 {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 55%);
+}
+
+/* ------------------------------------------------------------------------- */
+/* 2. Motion utilities (gated on `no-preference`; see reduce block §5)        */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Route enter: the AppLayout `Outlet` wrapper remounts per pathname
+ * (`key={location.pathname}` in slice b), so this one-shot fade/slide
+ * replays for free on every route change. `both` fill keeps it hidden until
+ * its first frame; without motion it renders in its final state.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .ytv-app-enter {
+    opacity: 0;
+    animation: ytv-app-rise 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes ytv-app-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 12px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/*
+ * List stagger: items publish their slot via an inline
+ * `--ytv-reveal-delay` (index × 60ms, capped in the list component), using
+ * the same variable vocabulary as landing `.ytv-reveal`, so reveal and
+ * stagger consume one delay source.
+ */
+.ytv-stagger {
+  transition-delay: var(--ytv-reveal-delay, 0ms);
+}
+
+/*
+ * Skeleton shimmer: a translucent white sweep over whatever surface the
+ * Skeleton already renders (`bg-card2` stays the default). `animate-pulse`
+ * remains the default/fallback class on Skeleton, so removing this class —
+ * or disabling motion — degrades to the pulse without a markup change.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .ytv-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ytv-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translate3d(-100%, 0, 0);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+    animation: ytv-shimmer-sweep 1.6s ease-in-out infinite;
+  }
+
+  @keyframes ytv-shimmer-sweep {
+    to {
+      transform: translate3d(100%, 0, 0);
+    }
+  }
+}
+
+/*
+ * Interactive-card hover lift for app surfaces. Reuses the landing
+ * `ytv-card-interactive` vocabulary (200ms lift of -4px) but stays neutral:
+ * the border deepens to the border token and the glow is a faint black
+ * shadow — never the landing gold glow, which is too loud per-view.
+ */
+.ytv-card-interactive--app {
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms ease-out,
+    border-color 200ms ease-out;
+}
+
+.ytv-card-interactive--app:hover {
+  transform: translate3d(0, -4px, 0);
+  border-color: var(--ytv-border);
+  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.7);
+}
+
+/* ------------------------------------------------------------------------- */
+/* 3. Ambient section wash                                                   */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Static accent radial for section headers. Accent peaks at 6% (contract:
+ * 4–8%) via `color-mix` over the existing accent token — no new colours.
+ * Always static: there is no animation to gate, so reduced motion renders
+ * identically. `isolation` + negative z-index keep the wash behind content
+ * but above the element's own background.
+ */
+.ytv-section-glow {
+  position: relative;
+  isolation: isolate;
+}
+
+.ytv-section-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    42rem 16rem at 50% 0%,
+    color-mix(in srgb, var(--color-accent) 7%, transparent),
+    transparent 70%
+  );
+}
+
+/*
+ * Page ambient light: a warm pool of light anchored to the top of every shell
+ * so the background is never a dead flat `#121212`. Applied to the layout
+ * ROOTS (AppLayout / PublicLayout / AuthLayout / full-screen states) via the
+ * `ytv-ambient` class, layered over their `bg-background`. Static by
+ * construction — no animation, so it renders identically under reduced motion.
+ */
+.ytv-ambient {
+  background-image:
+    radial-gradient(
+      90rem 45rem at 50% -12%,
+      color-mix(in srgb, var(--color-accent) 7%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      55rem 30rem at 100% -5%,
+      color-mix(in srgb, var(--color-accent) 4%, transparent),
+      transparent 55%
+    );
+  background-repeat: no-repeat;
+}
+
+/*
+ * Film grain: a fixed, non-interactive noise layer over the whole viewport.
+ * `overlay` blending keeps the deepest blacks black while adding texture to
+ * lit surfaces — it is what stops the UI from looking like flat vector panels.
+ * Purely decorative and static, so it needs no reduced-motion handling. Tune
+ * `opacity` (or drop the rule) if a display makes it too present.
+ */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* 4. Gold specular reflection                                               */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Every solid gold surface (`bg-accent`) gets a slow, diagonal specular
+ * highlight — the way light glides across polished metal. It is applied by
+ * exact class-token match (`[class~="bg-accent"]`) so a single rule covers
+ * EVERY gold fill (primary buttons, badges, the brand/avatar squares, active
+ * pills, the final CTA) with no per-component class. `~=` matches the token
+ * word, so translucent variants like `bg-accent/15` (icon tiles, heatmap) are
+ * intentionally left untouched.
+ *
+ * The sweep lives on `::after`, pinned to `z-index: -1` inside an
+ * `isolation: isolate` stacking context: it paints ABOVE the gold background
+ * but BELOW the glyphs, so `on-accent` text stays crisp while the metal
+ * brightens behind it. The `:not(...)` guard keeps any gold element that is
+ * already positioned (absolute/fixed/sticky) from having its `position`
+ * overridden by this rule.
+ *
+ * Motion is transform-only (compositor path) and gated on `no-preference`; the
+ * reduce block below removes the pseudo entirely so the gold renders static.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  [class~="bg-accent"]:not([class~="absolute"]):not([class~="fixed"]):not([class~="sticky"]) {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  [class~="bg-accent"]:not([class~="absolute"]):not([class~="fixed"]):not([class~="sticky"])::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+      115deg,
+      transparent 38%,
+      rgba(255, 255, 255, 0.5) 50%,
+      transparent 62%
+    );
+    transform: translate3d(-140%, 0, 0);
+    animation: ytv-gold-shine 6s ease-in-out infinite;
+    animation-delay: var(--ytv-gold-shine-delay, 0s);
+  }
+
+  @keyframes ytv-gold-shine {
+    0% {
+      transform: translate3d(-140%, 0, 0);
+    }
+    24% {
+      transform: translate3d(140%, 0, 0);
+    }
+    100% {
+      transform: translate3d(140%, 0, 0);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 5. Cursor spotlight                                                       */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * A soft accent pool that follows the pointer across interactive cards. The
+ * position comes from `--ytv-spot-x`/`--ytv-spot-y`, published by the single
+ * `useCursorSpotlight` listener (one listener for every card). The cards need a
+ * positioning context for the `::after`, which the rule below supplies.
+ *
+ * Gated on BOTH `no-preference` and a fine/hover pointer, so touch devices and
+ * reduced-motion visitors never see it; the JS hook short-circuits for the same
+ * two conditions, so nothing runs on the main thread for them.
+ */
+.ytv-card-interactive,
+.ytv-card-interactive--app {
+  position: relative;
+  isolation: isolate;
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .ytv-card-interactive::after,
+  .ytv-card-interactive--app::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 240ms ease-out;
+    background: radial-gradient(
+      14rem 14rem at var(--ytv-spot-x, 50%) var(--ytv-spot-y, 50%),
+      color-mix(in srgb, var(--color-accent) 16%, transparent),
+      transparent 60%
+    );
+  }
+
+  .ytv-card-interactive:hover::after,
+  .ytv-card-interactive--app:hover::after {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 6. Breathing accent                                                       */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * A slow glow pulse for signature elements (the brand mark). `box-shadow` is a
+ * paint, not a composite, so this is reserved for the one or two elements that
+ * should read as "powered on" — do not sprinkle it. Opt-in class only.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .ytv-breathe {
+    animation: ytv-breathe 5s ease-in-out infinite;
+  }
+
+  @keyframes ytv-breathe {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 0%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 20px -2px color-mix(in srgb, var(--color-accent) 40%, transparent);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 7. Reduced motion: pin every U1 utility to its static final state         */
+/* (mirrors landing-motion.css §7; `.ytv-section-glow` needs no rule — it    */
+/* is static by construction and renders identically under `reduce`)         */
+/* ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ytv-app-enter {
+    opacity: 1;
+    animation: none;
+  }
+
+  .ytv-stagger {
+    transition-delay: 0ms;
+    transition: none;
+  }
+
+  .ytv-shimmer::after {
+    content: none;
+    animation: none;
+  }
+
+  [class~="bg-accent"]::after {
+    content: none;
+    animation: none;
+  }
+
+  .ytv-card-interactive--app {
+    transition: none;
+  }
+
+  .ytv-card-interactive--app:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

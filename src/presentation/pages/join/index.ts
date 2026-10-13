@@ -1,0 +1,1 @@
+export { JoinInvitationPage } from "./JoinInvitationPage";

@@ -1,0 +1,49 @@
+<!doctype html>
+<!--
+  Dark-only product: `class="dark"` is set statically (not by JS) so the dark
+  token block in `index.css` applies on the very first paint with no light flash.
+-->
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Yotuvia — management platform for beauty salons, barbershops and aesthetic centers."
+    />
+    <meta name="theme-color" content="#cfb53b" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Yotuvia" />
+    <meta
+      property="og:title"
+      content="Yotuvia — management for beauty salons, barbershops and aesthetic centers"
+    />
+    <meta
+      property="og:description"
+      content="Agenda, clients, services, staff, loyalty and payments in one platform. Clients can also discover and book beauty centers."
+    />
+    <meta property="og:locale" content="en" />
+    <meta property="og:locale:alternate" content="es" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="Yotuvia — management for beauty salons, barbershops and aesthetic centers"
+    />
+    <meta
+      name="twitter:description"
+      content="Agenda, clients, services, staff, loyalty and payments in one platform."
+    />
+
+    <title>Yotuvia</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+export { CenterSearchSection } from "./CenterSearchSection";
+export { ClientFeaturesSection } from "./ClientFeaturesSection";
+export { FaqSection } from "./FaqSection";
+export { FinalCtaSection } from "./FinalCtaSection";
+export { HeroSection } from "./HeroSection";
+export { HowItWorksSection } from "./HowItWorksSection";
+export { OwnerFeaturesSection } from "./OwnerFeaturesSection";
+export { PricingSection } from "./PricingSection";
+export { ScrollProgress } from "./ScrollProgress";
