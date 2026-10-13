@@ -101,6 +101,47 @@ describe("ClientVideosPage", () => {
     expect(screen.getByText("Promoted")).toBeInTheDocument();
   });
 
+  it("shows the credited professional's photo in the video avatar", async () => {
+    const credited: Video = {
+      ...PROMO_VIDEO,
+      personnelId: 3,
+      personnelName: "Ana Pérez",
+      personnelAvatarUrl: "https://cdn.test/ana.jpg",
+      beautyCenterAvatarUrl: "https://cdn.test/center.jpg",
+    };
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({ videos: [credited], total: 1 });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({ videos: [credited], total: 1 });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    const avatar = await screen.findByRole("link", { name: "Ana Pérez" });
+    expect(avatar.querySelector("img")).toHaveAttribute("src", "https://cdn.test/ana.jpg");
+  });
+
+  it("falls back to the center avatar when the post is center-authored", async () => {
+    const centerAuthored: Video = {
+      ...PROMO_VIDEO,
+      personnelId: undefined,
+      personnelName: undefined,
+      beautyCenterAvatarUrl: "https://cdn.test/center.jpg",
+    };
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({
+      videos: [centerAuthored],
+      total: 1,
+    });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({
+      videos: [centerAuthored],
+      total: 1,
+    });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    // The avatar and the center-name link share the "Studio Aurora" label.
+    const avatars = await screen.findAllByRole("link", { name: "Studio Aurora" });
+    const withImage = avatars.find((node) => node.querySelector("img"));
+    expect(withImage?.querySelector("img")).toHaveAttribute("src", "https://cdn.test/center.jpg");
+  });
+
   it("opens the official embed for an external video that supports one", async () => {
     const user = userEvent.setup();
     mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({
