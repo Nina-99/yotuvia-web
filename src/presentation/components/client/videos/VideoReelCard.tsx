@@ -224,7 +224,10 @@ export function VideoReelCard({
           href={externalHref(video)}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`${t("client.feed.external_watch", "Watch on")} ${providerLabel}`}
+          aria-label={t("client.feed.external_watch", {
+            provider: providerLabel,
+            defaultValue: `Watch on ${providerLabel}`,
+          })}
           className="group absolute inset-0 block"
         >
           {video.thumbnailUrl ? (

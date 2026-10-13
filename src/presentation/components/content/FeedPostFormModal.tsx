@@ -4,17 +4,23 @@ import { useTranslation } from "react-i18next";
 import type { Personnel, Service } from "yotuvia-core";
 
 import { Form, FormAlert, FormField, useZodForm } from "@/presentation/components/form";
-import { Button, Modal, Select, Textarea } from "@/presentation/components/ui";
+import { Button, Input, Modal, Select, Textarea } from "@/presentation/components/ui";
 import {
   EMPTY_FEED_POST_CREATE,
+  EMPTY_FEED_POST_EXTERNAL,
   FEED_POST_CAPTION_MAX,
   FEED_POST_VIDEO_MAX_BYTES,
   contentValidationKeys,
   feedPostCreateSchema,
   feedPostEditSchema,
+  feedPostExternalSchema,
   isAcceptedVideoFile,
 } from "@/presentation/schemas/content.schemas";
-import type { FeedPostCreateValues, FeedPostEditValues } from "@/presentation/schemas/content.schemas";
+import type {
+  FeedPostCreateValues,
+  FeedPostEditValues,
+  FeedPostExternalValues,
+} from "@/presentation/schemas/content.schemas";
 
 const VIDEO_ACCEPT = "video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm";
 
@@ -210,6 +216,196 @@ function CreateFeedPostForm({
   );
 }
 
+interface LinkExternalFormProps {
+  services: readonly Service[];
+  personnel: readonly Personnel[];
+  saving: boolean;
+  errorKey: string | null;
+  onClose: () => void;
+  onSubmit: (values: FeedPostExternalValues) => void;
+}
+
+/**
+ * Link form: an already-published TikTok/YouTube/Instagram URL instead of an
+ * upload. The video is never rehosted — the backend stores the link and
+ * enriches it via oEmbed — so the only media input is the URL.
+ */
+function LinkExternalFeedPostForm({
+  services,
+  personnel,
+  saving,
+  errorKey,
+  onClose,
+  onSubmit,
+}: LinkExternalFormProps) {
+  const { t } = useTranslation();
+  const form = useZodForm<FeedPostExternalValues>({
+    schema: feedPostExternalSchema,
+    defaultValues: EMPTY_FEED_POST_EXTERNAL,
+  });
+
+  return (
+    <Form
+      form={form}
+      id="feed-post-external-form"
+      className="flex max-h-[65vh] flex-col gap-4 overflow-y-auto"
+      onSubmit={onSubmit}
+    >
+      <FormAlert message={errorKey} variant="error" />
+
+      <FormField name="externalUrl" label={t("web.app.content.form.external_url")}>
+        {({ field, invalid, id }) => (
+          <Input
+            {...field}
+            id={id}
+            type="url"
+            inputMode="url"
+            placeholder="https://www.tiktok.com/@usuario/video/..."
+            helperText={t("web.app.content.form.external_url_hint")}
+            aria-invalid={invalid || undefined}
+          />
+        )}
+      </FormField>
+
+      <FormField name="caption" label={t("web.app.content.form.caption")}>
+        {({ field, invalid, describedBy, id }) => (
+          <Textarea
+            {...field}
+            id={id}
+            rows={3}
+            maxLength={FEED_POST_CAPTION_MAX}
+            aria-invalid={invalid || undefined}
+            aria-describedby={describedBy}
+          />
+        )}
+      </FormField>
+
+      <FormField name="serviceId" label={t("web.app.content.form.service")}>
+        {({ field, invalid, describedBy, id }) => (
+          <Select {...field} id={id} aria-invalid={invalid || undefined} aria-describedby={describedBy}>
+            <option value="">{t("web.app.content.form.service_none")}</option>
+            {services.map((service) => (
+              <option key={service.id} value={service.id}>
+                {service.name}
+              </option>
+            ))}
+          </Select>
+        )}
+      </FormField>
+
+      <FormField name="personnelId" label={t("web.app.content.form.personnel")}>
+        {({ field, invalid, describedBy, id }) => (
+          <Select {...field} id={id} aria-invalid={invalid || undefined} aria-describedby={describedBy}>
+            <option value="">{t("web.app.content.form.personnel_none")}</option>
+            {personnel.map((person) => (
+              <option key={person.id} value={person.id}>
+                {personnelName(person)}
+              </option>
+            ))}
+          </Select>
+        )}
+      </FormField>
+
+      <FormField name="isPromo" label={t("web.app.content.form.is_promo")}>
+        {({ field, describedBy, id }) => (
+          <label htmlFor={id} className="flex items-center gap-2 text-sm text-text">
+            <input
+              id={id}
+              type="checkbox"
+              name={field.name}
+              ref={field.ref}
+              onBlur={field.onBlur}
+              checked={Boolean(field.value)}
+              onChange={(event) => field.onChange(event.target.checked)}
+              aria-describedby={describedBy}
+              className="h-4 w-4 rounded border-border accent-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            />
+            {t("web.app.content.form.is_promo_hint")}
+          </label>
+        )}
+      </FormField>
+
+      <div className="flex items-center justify-end gap-3">
+        <Button variant="outline" onClick={onClose} disabled={saving}>
+          {t("web.app.content.form.cancel")}
+        </Button>
+        <Button type="submit" loading={saving}>
+          {t("web.app.content.form.submit_link")}
+        </Button>
+      </div>
+    </Form>
+  );
+}
+
+/**
+ * Create-mode body: a segmented toggle picks between uploading a new video and
+ * linking an already-published one. Both branches share the same tags/promo
+ * fields but submit through different endpoints.
+ */
+function CreatePostBody({
+  services,
+  personnel,
+  saving,
+  errorKey,
+  onClose,
+  onSubmit,
+  onSubmitExternal,
+}: Omit<CreateFormProps, "onSubmit"> & {
+  onSubmit: (values: FeedPostCreateValues, file: File) => void;
+  onSubmitExternal: (values: FeedPostExternalValues) => void;
+}) {
+  const { t } = useTranslation();
+  const [mode, setMode] = useState<"upload" | "external">("upload");
+
+  const tabs: ReadonlyArray<{ id: "upload" | "external"; label: string }> = [
+    { id: "upload", label: t("web.app.content.form.tab_upload") },
+    { id: "external", label: t("web.app.content.form.tab_external") },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div role="tablist" aria-label={t("web.app.content.form.create_title")} className="flex gap-2">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={mode === tab.id}
+            onClick={() => setMode(tab.id)}
+            className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+              mode === tab.id
+                ? "border-accent bg-accent/10 text-text"
+                : "border-border bg-card2 text-text-muted hover:text-text"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {mode === "upload" ? (
+        <CreateFeedPostForm
+          services={services}
+          personnel={personnel}
+          saving={saving}
+          errorKey={errorKey}
+          onClose={onClose}
+          onSubmit={onSubmit}
+        />
+      ) : (
+        <LinkExternalFeedPostForm
+          services={services}
+          personnel={personnel}
+          saving={saving}
+          errorKey={errorKey}
+          onClose={onClose}
+          onSubmit={onSubmitExternal}
+        />
+      )}
+    </div>
+  );
+}
+
 interface EditFormProps {
   defaultValues: FeedPostEditValues;
   saving: boolean;
@@ -289,6 +485,7 @@ export type FeedPostFormModalProps =
       errorKey: string | null;
       onClose: () => void;
       onSubmit: (values: FeedPostCreateValues, file: File) => void;
+      onSubmitExternal: (values: FeedPostExternalValues) => void;
     }
   | {
       mode: "edit";
@@ -323,13 +520,14 @@ export function FeedPostFormModal(props: FeedPostFormModalProps) {
       className="max-w-xl"
     >
       {props.mode === "create" ? (
-        <CreateFeedPostForm
+        <CreatePostBody
           services={props.services}
           personnel={props.personnel}
           saving={props.saving}
           errorKey={props.errorKey}
           onClose={props.onClose}
           onSubmit={props.onSubmit}
+          onSubmitExternal={props.onSubmitExternal}
         />
       ) : (
         <EditFeedPostForm

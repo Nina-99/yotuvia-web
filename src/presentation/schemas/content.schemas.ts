@@ -31,8 +31,40 @@ export const contentValidationKeys = {
   videoRequired: "web.app.content.form.errors.video_required",
   videoType: "web.app.content.form.errors.video_type",
   videoSize: "web.app.content.form.errors.video_size",
+  externalUrlRequired: "web.app.content.form.errors.external_url_required",
+  externalUrlInvalid: "web.app.content.form.errors.external_url_invalid",
   noteRequired: "web.app.content.suspend.note_required",
 } as const;
+
+/**
+ * Hosts the backend accepts for an external video link. Mirrors the strict
+ * matcher in `yotuvia-api/service/external_provider.go`: the host must be the
+ * domain or a subdomain of it (`tiktok.com.evil.test` must NOT pass), and
+ * `youtu.be` is the only bare alias.
+ */
+const EXTERNAL_PROVIDER_HOSTS: ReadonlyArray<{ domain: string; bare?: boolean }> = [
+  { domain: "tiktok.com" },
+  { domain: "youtube.com" },
+  { domain: "instagram.com" },
+  { domain: "youtu.be", bare: true },
+];
+
+/** True when the URL links to a supported external video host. */
+export function isSupportedExternalUrl(rawUrl: string): boolean {
+  let host: string;
+  try {
+    const parsed = new URL(rawUrl.trim());
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    host = parsed.hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return EXTERNAL_PROVIDER_HOSTS.some(({ domain, bare }) => {
+    if (host === domain) return true;
+    if (bare) return false;
+    return host.endsWith(`.${domain}`);
+  });
+}
 
 /** Select sentinel for the optional service tag. */
 export const NO_SERVICE_VALUE = "";
@@ -80,6 +112,34 @@ export const feedPostCreateSchema = z
 
 export type FeedPostCreateValues = z.infer<typeof feedPostCreateSchema>;
 
+/**
+ * Link-external form: the same target rule as create, but the media requirement
+ * is a supported video URL instead of an uploaded file.
+ */
+export const feedPostExternalSchema = z
+  .object({
+    externalUrl: z
+      .string()
+      .trim()
+      .min(1, contentValidationKeys.externalUrlRequired)
+      .refine(isSupportedExternalUrl, contentValidationKeys.externalUrlInvalid),
+    caption: captionField,
+    isPromo: z.boolean(),
+    serviceId: z.string(),
+    personnelId: z.string(),
+  })
+  .superRefine((values, ctx) => {
+    if (values.caption === "" && values.serviceId === NO_SERVICE_VALUE && !values.isPromo) {
+      ctx.addIssue({
+        code: "custom",
+        message: contentValidationKeys.target,
+        path: ["caption"],
+      });
+    }
+  });
+
+export type FeedPostExternalValues = z.infer<typeof feedPostExternalSchema>;
+
 /** Edit form: only the fields `UpdateFeedPostRequest` accepts. */
 export const feedPostEditSchema = z.object({
   caption: captionField.min(1, contentValidationKeys.captionRequired),
@@ -101,6 +161,14 @@ export const EMPTY_FEED_POST_CREATE: FeedPostCreateValues = {
   serviceId: NO_SERVICE_VALUE,
   personnelId: NO_PERSONNEL_VALUE,
   videoName: "",
+};
+
+export const EMPTY_FEED_POST_EXTERNAL: FeedPostExternalValues = {
+  externalUrl: "",
+  caption: "",
+  isPromo: false,
+  serviceId: NO_SERVICE_VALUE,
+  personnelId: NO_PERSONNEL_VALUE,
 };
 
 /** Pre-fills the edit form from an existing post. */

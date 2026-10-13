@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   updateFeedPost: vi.fn(),
   deleteFeedPost: vi.fn(),
   suspendFeedPost: vi.fn(),
+  createExternalFeedPost: vi.fn(),
   createFeedPostWithVideo: vi.fn(),
   centerExecute: vi.fn(),
   servicesExecute: vi.fn(),
@@ -29,6 +30,7 @@ vi.mock("yotuvia-core", async (importOriginal) => {
     updateFeedPost: mocks.updateFeedPost,
     deleteFeedPost: mocks.deleteFeedPost,
     suspendFeedPost: mocks.suspendFeedPost,
+    createExternalFeedPost: mocks.createExternalFeedPost,
     // Resolves the stored relative media path against the API base URL.
     imageUrl: (path: string) => `https://api.test${path}`,
   };
@@ -175,6 +177,56 @@ describe("ContentPage", () => {
 
     // Invalidation refetches the list with the same query.
     await waitFor(() => expect(mocks.getMyFeedPosts).toHaveBeenCalledTimes(2));
+  });
+
+  it("links an external video through the create dialog's link tab", async () => {
+    const user = userEvent.setup();
+    mocks.createExternalFeedPost.mockResolvedValue({ ...STAFF_POST, id: 14, provider: "tiktok" });
+
+    renderWithProviders(<ContentPage />, { route: ROUTES.app.content });
+
+    await screen.findByText("New balayage");
+    await user.click(screen.getByRole("button", { name: "New post" }));
+
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("tab", { name: "Link a video" }));
+    await user.type(
+      within(dialog).getByLabelText("Video link"),
+      "https://www.tiktok.com/@studio/video/7312345678",
+    );
+    await user.type(within(dialog).getByLabelText("Caption"), "From TikTok");
+    await user.click(within(dialog).getByRole("button", { name: "Link" }));
+
+    await waitFor(() => expect(mocks.createExternalFeedPost).toHaveBeenCalledTimes(1));
+    expect(mocks.createExternalFeedPost).toHaveBeenCalledWith({
+      external_url: "https://www.tiktok.com/@studio/video/7312345678",
+      caption: "From TikTok",
+      service_id: undefined,
+      personnel_id: undefined,
+      is_promo: false,
+    });
+    expect(mocks.createFeedPostWithVideo).not.toHaveBeenCalled();
+    await waitFor(() => expect(mocks.getMyFeedPosts).toHaveBeenCalledTimes(2));
+  });
+
+  it("rejects an external link from an unsupported host", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<ContentPage />, { route: ROUTES.app.content });
+
+    await screen.findByText("New balayage");
+    await user.click(screen.getByRole("button", { name: "New post" }));
+
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("tab", { name: "Link a video" }));
+    await user.type(within(dialog).getByLabelText("Video link"), "https://example.com/watch?v=1");
+    await user.type(within(dialog).getByLabelText("Caption"), "Nope");
+    await user.click(within(dialog).getByRole("button", { name: "Link" }));
+
+    expect(
+      await within(dialog).findByText("The link must be from TikTok, YouTube or Instagram."),
+    ).toBeInTheDocument();
+    expect(mocks.createExternalFeedPost).not.toHaveBeenCalled();
   });
 
   it("rejects a video the backend would refuse (extension guard)", async () => {

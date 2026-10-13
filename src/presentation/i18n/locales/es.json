@@ -1146,7 +1146,7 @@
       "filter_title": "Filtrar por categoría",
       "promo_badge": "PROMO",
       "sponsored": "Promocionado",
-      "external_watch": "Ver en",
+      "external_watch": "Ver en {provider}",
       "book_cta": "Reservar",
       "like": "Me gusta",
       "save": "Guardar",
@@ -2446,7 +2446,8 @@
         "badges": {
           "promo": "Promo",
           "suspended": "Suspendida",
-          "active": "Activa"
+          "active": "Activa",
+          "external": "Externo"
         },
         "stats": {
           "views": "{count} vistas",
@@ -2521,7 +2522,12 @@
           "personnel_none": "Sin integrante",
           "is_promo": "Promoción",
           "is_promo_hint": "Marcar esta publicación como promoción",
+          "tab_upload": "Subir video",
+          "tab_external": "Enlazar video",
+          "external_url": "Enlace del video",
+          "external_url_hint": "Pegá el enlace de un video de TikTok, YouTube o Instagram. El video no se copia: se enlaza a su plataforma.",
           "submit_create": "Publicar",
+          "submit_link": "Enlazar",
           "submit_save": "Guardar cambios",
           "cancel": "Cancelar",
           "errors": {
@@ -2530,7 +2536,9 @@
             "target": "Agregá un texto, etiquetá un servicio o marcala como promoción.",
             "video_required": "Elegí un archivo de video.",
             "video_type": "Solo se aceptan archivos MP4, MOV o WEBM.",
-            "video_size": "El video debe pesar 100 MB o menos."
+            "video_size": "El video debe pesar 100 MB o menos.",
+            "external_url_required": "Pegá el enlace del video.",
+            "external_url_invalid": "El enlace debe ser de TikTok, YouTube o Instagram."
           }
         }
       },

@@ -1146,7 +1146,7 @@
       "filter_title": "Filter by category",
       "promo_badge": "PROMO",
       "sponsored": "Promoted",
-      "external_watch": "Watch on",
+      "external_watch": "Watch on {provider}",
       "book_cta": "Book",
       "like": "Like",
       "save": "Save",
@@ -2446,7 +2446,8 @@
         "badges": {
           "promo": "Promo",
           "suspended": "Suspended",
-          "active": "Active"
+          "active": "Active",
+          "external": "External"
         },
         "stats": {
           "views": "{count} views",
@@ -2521,7 +2522,12 @@
           "personnel_none": "No staff member",
           "is_promo": "Promotion",
           "is_promo_hint": "Mark this post as a promotion",
+          "tab_upload": "Upload video",
+          "tab_external": "Link a video",
+          "external_url": "Video link",
+          "external_url_hint": "Paste a TikTok, YouTube or Instagram video link. The video is not copied — it links to its platform.",
           "submit_create": "Publish",
+          "submit_link": "Link",
           "submit_save": "Save changes",
           "cancel": "Cancel",
           "errors": {
@@ -2530,7 +2536,9 @@
             "target": "Add a caption, tag a service or mark it as a promotion.",
             "video_required": "Choose a video file.",
             "video_type": "Only MP4, MOV or WEBM files are accepted.",
-            "video_size": "The video must be 100 MB or smaller."
+            "video_size": "The video must be 100 MB or smaller.",
+            "external_url_required": "Paste the video link.",
+            "external_url_invalid": "The link must be from TikTok, YouTube or Instagram."
           }
         }
       },

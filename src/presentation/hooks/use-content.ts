@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createExternalFeedPost,
   deleteFeedPost,
   getMyFeedPosts,
   suspendFeedPost,
@@ -76,6 +77,38 @@ export function useCreateFeedPost() {
   return attachErrorKey(
     useMutation<FeedPostItem, Error, CreateFeedPostVariables>({
       mutationFn: (variables) => createFeedPostWithVideo(variables),
+      onSuccess: () => invalidate(),
+    }),
+    "web.errors.content_create",
+  );
+}
+
+export interface LinkExternalFeedPostVariables {
+  /** Public URL of an already-published TikTok/YouTube/Instagram video. */
+  externalUrl: string;
+  caption?: string;
+  serviceId?: number;
+  personnelId?: number;
+  isPromo?: boolean;
+}
+
+/**
+ * Links an already-published external video (`POST /feed-posts/external`).
+ * Unlike the upload path this needs no browser shim: core's
+ * `createExternalFeedPost` posts JSON, which works unchanged in the browser.
+ */
+export function useLinkExternalFeedPost() {
+  const invalidate = useInvalidateContent();
+  return attachErrorKey(
+    useMutation<FeedPostItem, Error, LinkExternalFeedPostVariables>({
+      mutationFn: ({ externalUrl, caption, serviceId, personnelId, isPromo }) =>
+        createExternalFeedPost({
+          external_url: externalUrl,
+          caption,
+          service_id: serviceId,
+          personnel_id: personnelId,
+          is_promo: isPromo,
+        }),
       onSuccess: () => invalidate(),
     }),
     "web.errors.content_create",

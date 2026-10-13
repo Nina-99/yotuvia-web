@@ -28,6 +28,7 @@ import {
 import {
   useCreateFeedPost,
   useDeleteFeedPost,
+  useLinkExternalFeedPost,
   useMyFeedPosts,
   useSuspendFeedPost,
   useUpdateFeedPost,
@@ -40,7 +41,11 @@ import { formatDateTime, formatNumber } from "@/presentation/lib/format";
 import {
   feedPostToEditValues,
 } from "@/presentation/schemas/content.schemas";
-import type { FeedPostCreateValues, FeedPostEditValues } from "@/presentation/schemas/content.schemas";
+import type {
+  FeedPostCreateValues,
+  FeedPostEditValues,
+  FeedPostExternalValues,
+} from "@/presentation/schemas/content.schemas";
 
 type FormTarget = { mode: "create" } | { mode: "edit"; post: FeedPostItem };
 
@@ -94,6 +99,7 @@ export function ContentPage() {
   const postsQuery = useMyFeedPosts(centerId > 0);
 
   const createPost = useCreateFeedPost();
+  const linkExternalPost = useLinkExternalFeedPost();
   const updatePost = useUpdateFeedPost();
   const deletePost = useDeleteFeedPost();
   const suspendPost = useSuspendFeedPost();
@@ -142,6 +148,23 @@ export function ContentPage() {
     try {
       await createPost.mutateAsync({
         file,
+        caption: values.caption.trim() || undefined,
+        serviceId: values.serviceId === "" ? undefined : Number(values.serviceId),
+        personnelId: values.personnelId === "" ? undefined : Number(values.personnelId),
+        isPromo: values.isPromo,
+      });
+      toast(t("web.app.content.create_success"), { variant: "success" });
+      setFormTarget(null);
+    } catch (error) {
+      setFormErrorKey(toErrorKey(error, "web.errors.content_create"));
+    }
+  };
+
+  const handleLinkExternal = async (values: FeedPostExternalValues) => {
+    setFormErrorKey(null);
+    try {
+      await linkExternalPost.mutateAsync({
+        externalUrl: values.externalUrl.trim(),
         caption: values.caption.trim() || undefined,
         serviceId: values.serviceId === "" ? undefined : Number(values.serviceId),
         personnelId: values.personnelId === "" ? undefined : Number(values.personnelId),
@@ -285,6 +308,9 @@ export function ContentPage() {
             const suspended = !post.is_active;
             const isStaffPost = post.personnel_id !== undefined && post.personnel_id !== null;
             const campaign = campaignByPost.get(post.id);
+            const external = post.provider !== undefined && post.provider !== "native";
+            const openHref =
+              external && post.external_url ? post.external_url : imageUrl(post.video_url);
             return (
               <li
                 key={post.id}
@@ -298,6 +324,9 @@ export function ContentPage() {
                       </span>
                       {post.is_promo ? (
                         <Badge variant="accent">{t("web.app.content.badges.promo")}</Badge>
+                      ) : null}
+                      {external ? (
+                        <Badge variant="info">{t("web.app.content.badges.external")}</Badge>
                       ) : null}
                       {suspended ? (
                         <Badge variant="warning">{t("web.app.content.badges.suspended")}</Badge>
@@ -337,7 +366,7 @@ export function ContentPage() {
                   </div>
 
                   <a
-                    href={imageUrl(post.video_url)}
+                    href={openHref}
                     target="_blank"
                     rel="noreferrer"
                     className="text-xs font-medium text-link underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -442,10 +471,11 @@ export function ContentPage() {
           mode="create"
           services={services}
           personnel={personnel}
-          saving={createPost.isPending}
+          saving={createPost.isPending || linkExternalPost.isPending}
           errorKey={formErrorKey}
           onClose={() => setFormTarget(null)}
           onSubmit={(values, file) => void handleCreate(values, file)}
+          onSubmitExternal={(values) => void handleLinkExternal(values)}
         />
       ) : null}
 
