@@ -207,6 +207,10 @@ export const queryKeys = {
      * invitee is signed out), so the key carries only the token.
      */
     invitation: (token: string) => [...personnel, "invitation", { token }] as const,
+    /** One professional's public profile (`GET /personnel/:id`). */
+    profile: (personnelId: number) => [...personnel, "profile", { personnelId }] as const,
+    /** One professional's public videos (`GET /feed-posts/personnel/:id`). */
+    videos: (personnelId: number) => [...personnel, "videos", { personnelId }] as const,
   },
   tokens: {
     all: tokens,

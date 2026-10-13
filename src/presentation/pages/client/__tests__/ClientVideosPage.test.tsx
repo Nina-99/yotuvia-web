@@ -116,6 +116,7 @@ describe("ClientVideosPage", () => {
 
     const avatar = await screen.findByRole("link", { name: "Ana Pérez" });
     expect(avatar.querySelector("img")).toHaveAttribute("src", "https://cdn.test/ana.jpg");
+    expect(avatar).toHaveAttribute("href", "/app/client/professionals/3");
   });
 
   it("falls back to the center avatar when the post is center-authored", async () => {
@@ -140,6 +141,7 @@ describe("ClientVideosPage", () => {
     const avatars = await screen.findAllByRole("link", { name: "Studio Aurora" });
     const withImage = avatars.find((node) => node.querySelector("img"));
     expect(withImage?.querySelector("img")).toHaveAttribute("src", "https://cdn.test/center.jpg");
+    expect(withImage).toHaveAttribute("href", "/centers/9");
   });
 
   it("opens the official embed for an external video that supports one", async () => {

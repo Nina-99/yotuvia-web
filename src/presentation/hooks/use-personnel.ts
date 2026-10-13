@@ -1,11 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CreatePersonnelData, Personnel, UpdatePersonnelData } from "yotuvia-core";
+import type {
+  CreatePersonnelData,
+  Personnel,
+  UpdatePersonnelData,
+  VideoFeedResult,
+} from "yotuvia-core";
 
 import {
   createPersonnelUseCase,
   deletePersonnelUseCase,
+  followPersonnelUseCase,
   generateInvitationUseCase,
+  getPersonnelFeedUseCase,
+  getPersonnelProfileUseCase,
   getPersonnelUseCase,
+  unfollowPersonnelUseCase,
   updatePersonnelUseCase,
 } from "@/di/container";
 import { attachErrorKey } from "@/presentation/lib/errors";
@@ -51,6 +60,51 @@ export function useCenterPersonnel(centerId: number, options: CenterPersonnelOpt
     queryFn: () => getPersonnelUseCase.execute(centerId),
     enabled: centerId > 0 && isEnabled,
   });
+}
+
+/**
+ * One professional's PUBLIC profile (`GET /personnel/:id`). The endpoint needs
+ * a JWT, so the professional page lives in the authenticated client area.
+ */
+export function usePersonnelProfile(personnelId: number) {
+  return useQuery<Personnel>({
+    queryKey: queryKeys.personnel.profile(personnelId),
+    queryFn: () => getPersonnelProfileUseCase.execute(personnelId),
+    enabled: personnelId > 0,
+  });
+}
+
+/** One professional's public videos (`GET /feed-posts/personnel/:id`). */
+export function usePersonnelFeed(personnelId: number) {
+  return useQuery<VideoFeedResult>({
+    queryKey: queryKeys.personnel.videos(personnelId),
+    queryFn: () => getPersonnelFeedUseCase.execute(personnelId),
+    enabled: personnelId > 0,
+  });
+}
+
+/**
+ * Follow/unfollow a professional. The server returns the resulting state, which
+ * we write straight into the profile cache so the button flips without a
+ * refetch.
+ */
+export function useTogglePersonnelFollow(personnelId: number) {
+  const queryClient = useQueryClient();
+  return attachErrorKey(
+    useMutation<boolean, Error, boolean>({
+      mutationFn: (follow) =>
+        follow
+          ? followPersonnelUseCase.execute(personnelId)
+          : unfollowPersonnelUseCase.execute(personnelId),
+      onSuccess: (isFollowing) => {
+        queryClient.setQueryData<Personnel>(
+          queryKeys.personnel.profile(personnelId),
+          (prev) => (prev ? { ...prev, isFollowing } : prev),
+        );
+      },
+    }),
+    "web.errors.personnel_follow",
+  );
 }
 
 function useInvalidatePersonnel(): () => Promise<void> {

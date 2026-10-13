@@ -94,6 +94,12 @@ export const ROUTES = {
     favorites: "/app/client/favorites",
     videos: "/app/client/videos",
     profile: "/app/client/profile",
+    /**
+     * One professional's public profile, reached from a credited video avatar.
+     * Registered path; build links with `professionalProfilePath`. Lives in the
+     * CLIENT area because `GET /personnel/:id` requires a JWT.
+     */
+    professional: "/app/client/professionals/:personnelId",
   },
   /**
    * Staff (`PERSONNEL`) area, mirrored from the client block: the professional
@@ -120,6 +126,16 @@ export const ROUTES = {
  */
 export function centerDetailPath(centerId: number): string {
   return `/centers/${centerId}`;
+}
+
+/**
+ * Link to one professional's public profile.
+ *
+ * Single source of truth for the route: the video reel's credited avatar and any
+ * other surface that points at a professional use this helper.
+ */
+export function professionalProfilePath(personnelId: number): string {
+  return `/app/client/professionals/${personnelId}`;
 }
 
 /**

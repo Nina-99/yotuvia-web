@@ -228,6 +228,12 @@ const ClientProfilePage = lazy(() =>
   })),
 );
 
+const ProfessionalProfilePage = lazy(() =>
+  import("@/presentation/pages/client/ProfessionalProfilePage").then((module) => ({
+    default: module.ProfessionalProfilePage,
+  })),
+);
+
 /**
  * Staff-area pages are code-split for the same reason as the client area: a
  * staff member is the only role that renders them and the scan page additionally
@@ -524,6 +530,11 @@ export function AppRouter() {
             <Route path={ROUTES.client.profile} element={
                 <Suspense fallback={<RouteFallback />}>
                   <ClientProfilePage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.client.professional} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <ProfessionalProfilePage />
                 </Suspense>
               } />
           </Route>

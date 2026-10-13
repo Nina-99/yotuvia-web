@@ -2900,6 +2900,7 @@
       "personnel_save": "We couldn't save the staff member. Please try again.",
       "personnel_delete": "We couldn't delete the staff member. Please try again.",
       "personnel_invite": "We couldn't generate the invitation. Please try again.",
+      "personnel_follow": "We couldn't update the follow. Please try again.",
       "admin_dashboard_fetch": "Error fetching dashboard statistics",
       "tokens_fetch": "We couldn't load your token activity. Please try again.",
       "tokens_process": "We couldn't process the top-up. Please try again.",

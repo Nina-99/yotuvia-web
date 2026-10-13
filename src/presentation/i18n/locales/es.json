@@ -2900,6 +2900,7 @@
       "personnel_save": "No pudimos guardar al integrante. Intentá de nuevo.",
       "personnel_delete": "No pudimos eliminar al integrante. Intentá de nuevo.",
       "personnel_invite": "No pudimos generar la invitación. Intentá de nuevo.",
+      "personnel_follow": "No pudimos actualizar el seguimiento. Intentá de nuevo.",
       "admin_dashboard_fetch": "Error al obtener las estadísticas del panel",
       "tokens_fetch": "No pudimos cargar tu actividad de tokens. Intentá de nuevo.",
       "tokens_process": "No pudimos procesar la recarga. Intentá de nuevo.",

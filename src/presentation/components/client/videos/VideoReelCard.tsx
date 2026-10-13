@@ -11,7 +11,7 @@ import {
 import { ExternalEmbedModal } from "./ExternalEmbedModal";
 
 import { formatCurrency } from "@/presentation/lib/format";
-import { centerDetailPath } from "@/presentation/lib/routes";
+import { centerDetailPath, professionalProfilePath } from "@/presentation/lib/routes";
 
 /** Seconds of playback below which a visit is not recorded as a real watch. */
 const MIN_WATCH_SECONDS = 3;
@@ -181,14 +181,16 @@ export function VideoReelCard({
   const [embedOpen, setEmbedOpen] = useState(false);
 
   // The creator avatar shows the credited professional when the post is theirs,
-  // otherwise the center. Web has no PUBLIC professional profile route, so the
-  // avatar always links to the center (the center page lists its team); only the
-  // photo/initial switches.
+  // otherwise the center, and links to the matching profile page.
   const credited = video.personnelId != null;
   const creatorName = credited ? video.personnelName ?? video.centerName : video.centerName;
   const creatorAvatarUrl = credited
     ? video.personnelAvatarUrl
     : video.beautyCenterAvatarUrl;
+  const creatorHref =
+    credited && video.personnelId != null
+      ? professionalProfilePath(video.personnelId)
+      : centerDetailPath(video.beautyCenterId);
 
   const segments = useMemo(
     () => (video.caption ? captionSegments(video.caption) : []),
@@ -355,7 +357,7 @@ export function VideoReelCard({
       {/* Right-side actions. */}
       <div className="absolute bottom-24 right-3 flex flex-col items-center gap-4 text-white">
         <Link
-          to={centerDetailPath(video.beautyCenterId)}
+          to={creatorHref}
           aria-label={creatorName}
           className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-accent text-lg font-bold text-on-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
