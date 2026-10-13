@@ -318,4 +318,52 @@ describe("BookingPage (client-only)", () => {
     expect(screen.queryByText("✅ Reservation confirmed!")).not.toBeInTheDocument();
     expect(screen.queryByText("reservations screen")).not.toBeInTheDocument();
   });
+
+  it("preloads the tagged service, professional and source post from the query string", async () => {
+    const actor = userEvent.setup();
+
+    renderWithProviders(
+      <>
+        <ReservationsProbe />
+        <BookingTree />
+      </>,
+      { route: "/centers/7/book?serviceIds=3&personnelId=5&sourcePostId=42" },
+    );
+
+    // The tagged service arrives pre-checked (video→booking funnel).
+    const serviceCheckbox = await screen.findByRole("checkbox", { name: /Corte/ });
+    expect(serviceCheckbox).toBeChecked();
+
+    await actor.click(screen.getByRole("button", { name: "Next" }));
+
+    // The prefilled professional narrows the availability search.
+    await waitFor(() =>
+      expect(mocks.searchAvailabilityUseCase.execute).toHaveBeenCalledWith({
+        serviceIds: [3],
+        from: TODAY,
+        to: TODAY,
+        centerId: 7,
+        personnelId: 5,
+      }),
+    );
+
+    await actor.click(await screen.findByRole("radio", { name: /09:00/ }));
+    await actor.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", { name: "Confirm reservation" });
+    await actor.click(screen.getByRole("button", { name: "Confirm reservation" }));
+    await actor.click(
+      within(await screen.findByRole("dialog")).getByRole("button", {
+        name: "Confirm reservation",
+      }),
+    );
+
+    expect(mocks.createReservationUseCase.execute).toHaveBeenCalledWith({
+      beautyCenterId: 7,
+      services: [{ serviceId: 3 }],
+      date: TODAY,
+      startTime: "09:00",
+      personnelId: 5,
+      sourcePostId: 42,
+    });
+  });
 });

@@ -128,9 +128,27 @@ export function centerDetailPath(centerId: number): string {
  * `routes/RequireAuth.tsx` guards `/centers/:centerId/book`, so a guest who
  * follows this link is sent to `/login` with the intended destination and comes
  * back to the booking flow right after signing in.
+ *
+ * `prefill` carries an optional starting selection (the video→booking funnel):
+ * the tagged service(s), the professional and the source feed post used only for
+ * attribution. Each field is omitted from the query string when absent, so a
+ * plain booking link stays byte-identical.
  */
-export function centerBookingPath(centerId: number): string {
-  return `${centerDetailPath(centerId)}/book`;
+export interface BookingPrefill {
+  serviceIds?: readonly number[];
+  personnelId?: number;
+  sourcePostId?: number;
+}
+
+export function centerBookingPath(centerId: number, prefill: BookingPrefill = {}): string {
+  const params = new URLSearchParams();
+  if (prefill.serviceIds && prefill.serviceIds.length > 0) {
+    params.set("serviceIds", prefill.serviceIds.join(","));
+  }
+  if (prefill.personnelId) params.set("personnelId", String(prefill.personnelId));
+  if (prefill.sourcePostId) params.set("sourcePostId", String(prefill.sourcePostId));
+  const query = params.toString();
+  return `${centerDetailPath(centerId)}/book${query ? `?${query}` : ""}`;
 }
 
 /**

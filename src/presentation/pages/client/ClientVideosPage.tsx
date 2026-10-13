@@ -156,7 +156,13 @@ export function ClientVideosPage() {
   const handleBook = useCallback(
     (video: Video) => {
       void feed.incrementBookTaps(video.id);
-      navigate(centerBookingPath(video.beautyCenterId));
+      navigate(
+        centerBookingPath(video.beautyCenterId, {
+          serviceIds: video.serviceId ? [video.serviceId] : undefined,
+          personnelId: video.personnelId,
+          sourcePostId: video.id,
+        }),
+      );
     },
     [feed, navigate],
   );

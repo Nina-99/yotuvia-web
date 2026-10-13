@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { FormAlert } from "@/presentation/components/form";
 import {
@@ -54,6 +54,22 @@ interface SlotOption {
   duration: number;
 }
 
+/** Reads a positive integer id from a query param, or null when absent/invalid. */
+function parsePositiveId(raw: string | null): number | null {
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isInteger(value) && value > 0 ? value : null;
+}
+
+/** Reads a comma-separated id list from a query param, dropping anything invalid. */
+function parseIdList(raw: string | null): number[] {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((value) => Number(value.trim()))
+    .filter((value) => Number.isInteger(value) && value > 0);
+}
+
 /**
  * CLIENT-only booking flow (`/centers/:centerId/book`).
  *
@@ -81,6 +97,7 @@ interface SlotOption {
 export function BookingPage() {
   const { t, i18n } = useTranslation();
   const { centerId: rawCenterId } = useParams<{ centerId: string }>();
+  const [searchParams] = useSearchParams();
   const centerId = Number(rawCenterId ?? 0);
   const language = i18n.resolvedLanguage ?? i18n.language;
   const navigate = useNavigate();
@@ -90,8 +107,18 @@ export function BookingPage() {
   const personnelQuery = useCenterPersonnel(centerId);
 
   const [step, setStep] = useState<BookingStep>("services");
-  const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>([]);
-  const [personnelId, setPersonnelId] = useState<number | null>(null);
+  // Prefilled from the query string (video→booking funnel). Seeded once via lazy
+  // initializers — no effect needed — and still fully editable by the client.
+  const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>(() =>
+    parseIdList(searchParams.get("serviceIds")),
+  );
+  const [personnelId, setPersonnelId] = useState<number | null>(() =>
+    parsePositiveId(searchParams.get("personnelId")),
+  );
+  const sourcePostId = useMemo(
+    () => parsePositiveId(searchParams.get("sourcePostId")) ?? undefined,
+    [searchParams],
+  );
   const [date, setDate] = useState(() => toDateKey(new Date()));
   const [startTime, setStartTime] = useState<string | null>(null);
   const [stepErrorKey, setStepErrorKey] = useState<string | null>(null);
@@ -229,13 +256,20 @@ export function BookingPage() {
     }
 
     try {
+      // Drop any prefilled id that is not in this center's catalog, so an
+      // unknown service from a stale link never reaches the server.
+      const validServiceIds = parsed.data.serviceIds.filter((serviceId) =>
+        services.some((service) => service.id === serviceId),
+      );
       await createReservation.mutateAsync({
         beautyCenterId: centerId,
-        services: parsed.data.serviceIds.map((serviceId) => ({ serviceId })),
+        services: validServiceIds.map((serviceId) => ({ serviceId })),
         date: parsed.data.date,
         startTime: parsed.data.startTime,
         // Omitted (never `null`) when "Any": the server then picks a professional.
         personnelId: parsed.data.personnelId ?? undefined,
+        // Video→booking funnel attribution; omitted when no feed post led here.
+        ...(sourcePostId !== undefined ? { sourcePostId } : {}),
         // Loyalty choice: omitted when earning so legacy payloads stay
         // byte-identical — absent means auto-apply server-side.
         ...(applyLoyalty ? {} : { applyLoyalty: false as const }),
