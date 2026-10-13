@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { isExternalVideo, type ExternalVideoProvider, type Video } from "yotuvia-core";
+import {
+  buildExternalEmbedHtml,
+  isExternalVideo,
+  type ExternalVideoProvider,
+  type Video,
+} from "yotuvia-core";
+
+import { ExternalEmbedModal } from "./ExternalEmbedModal";
 
 import { formatCurrency } from "@/presentation/lib/format";
 import { centerDetailPath } from "@/presentation/lib/routes";
@@ -114,6 +121,26 @@ function VolumeIcon({ muted, className }: IconProps & { muted: boolean }) {
   );
 }
 
+/** Thumbnail + play affordance shared by the embed button and the deep link. */
+function ExternalMediaThumb({ video }: { video: Video }) {
+  return (
+    <>
+      {video.thumbnailUrl ? (
+        <img src={video.thumbnailUrl} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <div className="h-full w-full bg-gradient-to-br from-neutral-800 to-black" />
+      )}
+      <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/55 text-white transition-transform group-hover:scale-105">
+          <svg viewBox="0 0 24 24" className="h-8 w-8" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </span>
+      </span>
+    </>
+  );
+}
+
 /**
  * One full-height slide of the client video reel.
  *
@@ -146,6 +173,12 @@ export function VideoReelCard({
   // they render a thumbnail card with a deep-link CTA instead of a <video>.
   const external = isExternalVideo(video);
   const providerLabel = video.provider ? PROVIDER_LABELS[video.provider] : "";
+  // TikTok/YouTube have an official embed; Instagram (null) stays a deep link.
+  const embedHtml = useMemo(
+    () => (external ? buildExternalEmbedHtml(video) : null),
+    [external, video],
+  );
+  const [embedOpen, setEmbedOpen] = useState(false);
 
   const segments = useMemo(
     () => (video.caption ? captionSegments(video.caption) : []),
@@ -220,29 +253,32 @@ export function VideoReelCard({
   return (
     <div className="relative h-full w-full snap-start overflow-hidden bg-black">
       {external ? (
-        <a
-          href={externalHref(video)}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={t("client.feed.external_watch", {
-            provider: providerLabel,
-            defaultValue: `Watch on ${providerLabel}`,
-          })}
-          className="group absolute inset-0 block"
-        >
-          {video.thumbnailUrl ? (
-            <img src={video.thumbnailUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-neutral-800 to-black" />
-          )}
-          <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/55 text-white transition-transform group-hover:scale-105">
-              <svg viewBox="0 0 24 24" className="h-8 w-8" fill="currentColor" aria-hidden="true">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </span>
-          </span>
-        </a>
+        embedHtml ? (
+          <button
+            type="button"
+            onClick={() => setEmbedOpen(true)}
+            aria-label={t("client.feed.external_play", {
+              provider: providerLabel,
+              defaultValue: `Play on ${providerLabel}`,
+            })}
+            className="group absolute inset-0 block h-full w-full text-left"
+          >
+            <ExternalMediaThumb video={video} />
+          </button>
+        ) : (
+          <a
+            href={externalHref(video)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t("client.feed.external_watch", {
+              provider: providerLabel,
+              defaultValue: `Watch on ${providerLabel}`,
+            })}
+            className="group absolute inset-0 block"
+          >
+            <ExternalMediaThumb video={video} />
+          </a>
+        )
       ) : (
         <video
           ref={videoRef}
@@ -415,6 +451,15 @@ export function VideoReelCard({
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/25" aria-hidden="true">
           <div className="h-full bg-white" style={{ width: `${Math.round(progress * 100)}%` }} />
         </div>
+      ) : null}
+
+      {external && embedHtml ? (
+        <ExternalEmbedModal
+          open={embedOpen}
+          onClose={() => setEmbedOpen(false)}
+          video={video}
+          providerLabel={providerLabel}
+        />
       ) : null}
     </div>
   );

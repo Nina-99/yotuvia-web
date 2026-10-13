@@ -65,6 +65,7 @@ const EXTERNAL_VIDEO: Video = {
   videoUrl: "",
   provider: "tiktok",
   externalUrl: "https://www.tiktok.com/@studio/video/7312345678",
+  externalId: "7312345678",
   externalAuthor: "studio",
   views: 10,
   createdAt: "2026-01-01T00:00:00Z",
@@ -100,7 +101,8 @@ describe("ClientVideosPage", () => {
     expect(screen.getByText("Promoted")).toBeInTheDocument();
   });
 
-  it("renders an external post as a deep link to its source platform", async () => {
+  it("opens the official embed for an external video that supports one", async () => {
+    const user = userEvent.setup();
     mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({
       videos: [EXTERNAL_VIDEO],
       total: 1,
@@ -112,10 +114,34 @@ describe("ClientVideosPage", () => {
 
     renderWithProviders(<ClientVideosPage />);
 
-    const link = await screen.findByRole("link", { name: "Watch on TikTok" });
-    expect(link).toHaveAttribute("href", "https://www.tiktok.com/@studio/video/7312345678");
+    const play = await screen.findByRole("button", { name: "Play on TikTok" });
+    await user.click(play);
+
+    const embed = await screen.findByTestId("external-embed");
+    expect(embed.tagName).toBe("IFRAME");
+    expect(embed.getAttribute("sandbox")).toContain("allow-scripts");
+    // The third-party player must load only when shown, from the embed HTML.
+    expect(embed.getAttribute("srcdoc")).toContain("tiktok-embed");
+    // The modal titles the embed with the author; the card also shows it.
+    expect(screen.getAllByText("@studio").length).toBeGreaterThan(0);
+  });
+
+  it("keeps a deep link for a provider without a frameable embed", async () => {
+    const instagram: Video = {
+      ...EXTERNAL_VIDEO,
+      id: 8,
+      provider: "instagram",
+      externalUrl: "https://www.instagram.com/reel/abc123/",
+      externalId: "abc123",
+    };
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({ videos: [instagram], total: 1 });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({ videos: [instagram], total: 1 });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    const link = await screen.findByRole("link", { name: "Watch on Instagram" });
+    expect(link).toHaveAttribute("href", "https://www.instagram.com/reel/abc123/");
     expect(link).toHaveAttribute("target", "_blank");
-    expect(screen.getByText("@studio")).toBeInTheDocument();
   });
 
   it("toggles a like through the shared use case", async () => {

@@ -1,4 +1,9 @@
 import { z } from "zod";
+import { isSupportedExternalUrl } from "yotuvia-core";
+
+// Re-exported so the schema's callers keep a single import site; the matcher
+// itself lives in core so web and mobile reject the same hosts.
+export { isSupportedExternalUrl };
 
 /**
  * Feed-post form schemas for the owner content section.
@@ -36,35 +41,7 @@ export const contentValidationKeys = {
   noteRequired: "web.app.content.suspend.note_required",
 } as const;
 
-/**
- * Hosts the backend accepts for an external video link. Mirrors the strict
- * matcher in `yotuvia-api/service/external_provider.go`: the host must be the
- * domain or a subdomain of it (`tiktok.com.evil.test` must NOT pass), and
- * `youtu.be` is the only bare alias.
- */
-const EXTERNAL_PROVIDER_HOSTS: ReadonlyArray<{ domain: string; bare?: boolean }> = [
-  { domain: "tiktok.com" },
-  { domain: "youtube.com" },
-  { domain: "instagram.com" },
-  { domain: "youtu.be", bare: true },
-];
 
-/** True when the URL links to a supported external video host. */
-export function isSupportedExternalUrl(rawUrl: string): boolean {
-  let host: string;
-  try {
-    const parsed = new URL(rawUrl.trim());
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
-    host = parsed.hostname.toLowerCase();
-  } catch {
-    return false;
-  }
-  return EXTERNAL_PROVIDER_HOSTS.some(({ domain, bare }) => {
-    if (host === domain) return true;
-    if (bare) return false;
-    return host.endsWith(`.${domain}`);
-  });
-}
 
 /** Select sentinel for the optional service tag. */
 export const NO_SERVICE_VALUE = "";
