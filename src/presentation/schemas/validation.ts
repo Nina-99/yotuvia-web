@@ -9,6 +9,7 @@ import {
   password as corePassword,
   phone as corePhone,
   text as coreText,
+  time as coreTime,
   type AmountBounds,
   type DateBounds,
   type LengthBounds,
@@ -217,6 +218,16 @@ export function decimalFromField(
 /** A real calendar day (`YYYY-MM-DD`); a day that does not exist is rejected here. */
 export function zIsoDate(bounds: DateBounds = {}, options: FieldOptions = {}) {
   return z.string().trim().superRefine(refineField((value) => coreIsoDate(value, bounds), options));
+}
+
+/**
+ * A 24-hour `HH:MM` clock time — the shape every API DTO declares (`len=5`).
+ *
+ * A time is not a date, so it needs its own rule rather than a regex retyped in
+ * each schema.
+ */
+export function zTime(options: FieldOptions = {}) {
+  return z.string().trim().superRefine(refineField((value) => coreTime(value), options));
 }
 
 /**

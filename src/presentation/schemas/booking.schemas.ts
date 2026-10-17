@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { isoDate } from "yotuvia-core";
 
-import { validationKeys, zIsoDate } from "./validation";
+import { zIsoDate, zTime } from "./validation";
 
 /**
  * Booking-flow schemas.
@@ -14,9 +14,6 @@ import { validationKeys, zIsoDate } from "./validation";
  * Message rule (same as every other schema in this folder): messages are i18n
  * keys, never literals.
  */
-
-/** 24h `HH:MM` slot start, as the API expects it. */
-export const BOOKING_TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /**
  * True when the visitor has picked a day that EXISTS.
@@ -38,7 +35,7 @@ export const bookingDraftSchema = z.object({
       message: "web.centers.booking.required_services",
     }),
   date: zIsoDate(),
-  startTime: z.string().regex(BOOKING_TIME_PATTERN, validationKeys.required),
+  startTime: zTime(),
   /** `null` means "any professional": the server assigns one. */
   personnelId: z.number().int().positive().nullable(),
 });

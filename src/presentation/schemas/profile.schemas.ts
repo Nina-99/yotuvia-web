@@ -6,6 +6,7 @@ import {
   compactTranslation,
   fullTranslation,
   hasAnyTranslation,
+  isValidTime,
 } from "yotuvia-core";
 import type { BeautyCenter, PaymentConfig, SocialMedia, WorkingHour } from "yotuvia-core";
 
@@ -20,6 +21,7 @@ import {
   zInteger,
   zOptionalPassword,
   zText,
+  zTime,
 } from "./validation";
 
 /**
@@ -44,7 +46,6 @@ import {
  * "delete not supported" instead of pretending.
  */
 
-const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 const URL_PATTERN = /^https?:\/\/\S+$/i;
 /**
  * Accepts an absolute `http(s)` URL or a root-relative path — the two shapes
@@ -110,16 +111,27 @@ export const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6] as const;
 
 /* ── Working hours ──────────────────────────────────────────────── */
 
+/** A working-hour clock time; both failures read as the same copy. */
+function workingHourTime() {
+  return zTime({
+    overrides: {
+      required: profileValidationKeys.hoursTime,
+      invalid_format: profileValidationKeys.hoursTime,
+    },
+  });
+}
+
 export const workingHourSchema = z
   .object({
     dayOfWeek: z.number().int().min(0).max(6),
-    startTime: z.string().regex(TIME_PATTERN, profileValidationKeys.hoursTime),
-    endTime: z.string().regex(TIME_PATTERN, profileValidationKeys.hoursTime),
+    startTime: workingHourTime(),
+    endTime: workingHourTime(),
   })
   .superRefine((value, ctx) => {
+    // Zero-padded `HH:MM` compares correctly as a string, so no arithmetic.
     if (
-      TIME_PATTERN.test(value.startTime) &&
-      TIME_PATTERN.test(value.endTime) &&
+      isValidTime(value.startTime) &&
+      isValidTime(value.endTime) &&
       value.endTime <= value.startTime
     ) {
       ctx.addIssue({

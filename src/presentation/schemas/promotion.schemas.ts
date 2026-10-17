@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LIMITS, integer, isoDate, parseAmount, type AdminPromotion } from "yotuvia-core";
+import { LIMITS, integer, isoDate, isValidTime, parseAmount, type AdminPromotion } from "yotuvia-core";
 
 import { dateKeyFromApi } from "@/presentation/lib/dates";
 import type {
@@ -75,8 +75,6 @@ export const promotionValidationKeys = {
  * grouping could only ever produce a value the API rejects.
  */
 const PERCENT_PATTERN = /^\d+(\.\d{1,2})?$/;
-/** `HH:MM`; the core has no time rule (it validates dates only). */
-const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /** True when the value is a day that EXISTS, not merely `YYYY-MM-DD`-shaped. */
 function isValidDateKey(value: string): boolean {
@@ -112,7 +110,7 @@ function parseApplicableHours(value: string): readonly { start: string; end: str
       const start = record.start;
       const end = record.end;
       if (typeof start !== "string" || typeof end !== "string") return null;
-      if (!TIME_PATTERN.test(start) || !TIME_PATTERN.test(end)) return null;
+      if (!isValidTime(start) || !isValidTime(end)) return null;
       ranges.push({ start, end });
     }
     return ranges;
