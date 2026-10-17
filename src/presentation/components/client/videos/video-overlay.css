@@ -1,0 +1,55 @@
+/**
+ * Overlay motion for the client video slide.
+ *
+ * Kept in one co-located sheet (like landing-motion.css) so the animations are
+ * declared once and every label reuses them.
+ */
+
+/**
+ * Continuous LED-sign scroll.
+ *
+ * The travel distance is per-instance — it depends on the MEASURED text width —
+ * and arrives as a custom property, so a single keyframe serves every label.
+ */
+@keyframes ytv-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--ytv-marquee-distance, 0px));
+  }
+}
+
+/**
+ * The place meta (open status + distance) breathes: readable on arrival, then
+ * out of the way, on a loop. Percentages are fractions of the 13.4s cycle
+ * (6s visible, 0.7s out, 6s hidden, 0.7s back) and must stay in step with
+ * PLACE_* in VideoReelCard.
+ */
+@keyframes ytv-breathe {
+  0%,
+  44.78% {
+    opacity: 1;
+  }
+  50%,
+  94.78% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Respect an explicit accessibility request: never animate for someone who
+   asked the platform not to. The status pair simply stays visible. */
+@media (prefers-reduced-motion: reduce) {
+  .ytv-marquee-track,
+  .ytv-breathe,
+  .ytv-breathe * {
+    animation: none !important;
+  }
+
+  .ytv-breathe {
+    opacity: 1 !important;
+  }
+}

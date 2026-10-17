@@ -144,8 +144,7 @@ describe("ClientVideosPage", () => {
     expect(withImage).toHaveAttribute("href", "/centers/9");
   });
 
-  it("opens the official embed for an external video that supports one", async () => {
-    const user = userEvent.setup();
+  it("plays a TikTok post inline in the reel without opening a modal", async () => {
     mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({
       videos: [EXTERNAL_VIDEO],
       total: 1,
@@ -157,16 +156,39 @@ describe("ClientVideosPage", () => {
 
     renderWithProviders(<ClientVideosPage />);
 
-    const play = await screen.findByRole("button", { name: "Play on TikTok" });
+    // The visible slide mounts the official player directly — no tap, no modal.
+    const embed = await screen.findByTestId("external-embed");
+    expect(embed.tagName).toBe("IFRAME");
+    expect(embed.getAttribute("sandbox")).toContain("allow-same-origin");
+    expect(embed.getAttribute("srcdoc")).toContain("tiktok.com/player/v1/");
+    expect(embed.getAttribute("srcdoc")).toContain("autoplay=1");
+    expect(screen.queryByRole("button", { name: "Play on TikTok" })).toBeNull();
+    // The card still credits the external author.
+    expect(screen.getAllByText("@studio").length).toBeGreaterThan(0);
+  });
+
+  it("keeps the framed modal player for a horizontal YouTube post", async () => {
+    const user = userEvent.setup();
+    const youtube: Video = {
+      ...EXTERNAL_VIDEO,
+      id: 9,
+      provider: "youtube",
+      externalUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      externalId: "dQw4w9WgXcQ",
+      externalAuthor: "studio",
+    };
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({ videos: [youtube], total: 1 });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({ videos: [youtube], total: 1 });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    // A 16:9 video does not fit the 9:16 reel, so it stays behind the play gate.
+    expect(screen.queryByTestId("external-embed")).toBeNull();
+    const play = await screen.findByRole("button", { name: "Play on YouTube" });
     await user.click(play);
 
     const embed = await screen.findByTestId("external-embed");
-    expect(embed.tagName).toBe("IFRAME");
-    expect(embed.getAttribute("sandbox")).toContain("allow-scripts");
-    // The third-party player must load only when shown, from the embed HTML.
-    expect(embed.getAttribute("srcdoc")).toContain("tiktok-embed");
-    // The modal titles the embed with the author; the card also shows it.
-    expect(screen.getAllByText("@studio").length).toBeGreaterThan(0);
+    expect(embed.getAttribute("srcdoc")).toContain("youtube.com/embed/dQw4w9WgXcQ");
   });
 
   it("keeps a deep link for a provider without a frameable embed", async () => {
@@ -185,6 +207,94 @@ describe("ClientVideosPage", () => {
     const link = await screen.findByRole("link", { name: "Watch on Instagram" });
     expect(link).toHaveAttribute("href", "https://www.instagram.com/reel/abc123/");
     expect(link).toHaveAttribute("target", "_blank");
+  });
+
+  it("counts a view for an external slide, like an uploaded one", async () => {
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({
+      videos: [EXTERNAL_VIDEO],
+      total: 1,
+    });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({
+      videos: [EXTERNAL_VIDEO],
+      total: 1,
+    });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    // External posts have no <video> element, so the native counting path bailed
+    // out before ever reaching them and their views were silently never counted.
+    await waitFor(() =>
+      expect(mocks.incrementVideoViewsUseCase.execute).toHaveBeenCalledWith(EXTERNAL_VIDEO.id),
+    );
+  });
+
+  it("shows where the center is and its rating when the data exists", async () => {
+    const placed: Video = {
+      ...EXTERNAL_VIDEO,
+      id: 11,
+      centerAddress: "Calle 1, La Paz",
+      centerRating: 4.3,
+      centerReviewCount: 12,
+    };
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({ videos: [placed], total: 1 });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({ videos: [placed], total: 1 });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    expect(await screen.findByTestId("feed-location-11")).toBeTruthy();
+    expect(screen.getByTestId("feed-rating-11")).toHaveTextContent("4.3");
+    expect(screen.getByTestId("feed-rating-11")).toHaveTextContent("12");
+  });
+
+  it("prompts for location only when clicked, never on arrival", async () => {
+    const user = userEvent.setup();
+    // jsdom ships no geolocation at all, so stub it to observe the calls.
+    const watchPosition = vi.fn();
+    const getCurrentPosition = vi.fn();
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { watchPosition, getCurrentPosition, clearWatch: vi.fn() },
+    });
+
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({
+      videos: [EXTERNAL_VIDEO],
+      total: 1,
+    });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({
+      videos: [EXTERNAL_VIDEO],
+      total: 1,
+    });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    // Nothing is asked for on mount: an uninvited permission dialog is the exact
+    // thing the geolocation hook is designed to avoid.
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+    expect(watchPosition).not.toHaveBeenCalled();
+
+    const request = await screen.findByTestId(`feed-request-location-${EXTERNAL_VIDEO.id}`);
+    await user.click(request);
+
+    expect(watchPosition).toHaveBeenCalled();
+  });
+
+  it("gives an inline external slide its own pause and mute controls", async () => {
+    mocks.getPersonalizedFeedUseCase.execute.mockResolvedValue({
+      videos: [EXTERNAL_VIDEO],
+      total: 1,
+    });
+    mocks.getVideosFeedUseCase.execute.mockResolvedValue({
+      videos: [EXTERNAL_VIDEO],
+      total: 1,
+    });
+
+    renderWithProviders(<ClientVideosPage />);
+
+    // Note: the postMessage plumbing into the CROSS-ORIGIN player frame cannot be
+    // asserted here — jsdom has no frame to post into. This locks the controls
+    // being present and wired for the inline external player.
+    expect(await screen.findByTestId(`feed-embed-play-${EXTERNAL_VIDEO.id}`)).toBeTruthy();
+    expect(screen.getByTestId(`feed-embed-mute-${EXTERNAL_VIDEO.id}`)).toBeTruthy();
   });
 
   it("toggles a like through the shared use case", async () => {

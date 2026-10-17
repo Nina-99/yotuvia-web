@@ -56,7 +56,9 @@ describe("registerSchema", () => {
     confirmPassword: "supersecret",
     firstName: "Ana",
     lastName: "Diaz",
-    phone: "123456",
+    // A REAL number: registration now runs the shared phone rule (7–15 digits),
+    // so a placeholder like "123456" is a typo the form catches.
+    phone: "71234567",
     termsAccepted: true,
   };
 

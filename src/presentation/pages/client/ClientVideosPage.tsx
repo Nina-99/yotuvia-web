@@ -8,6 +8,7 @@ import { VideoCommentsDialog, VideoReelCard } from "@/presentation/components/cl
 import { Button, Card, CardContent, Skeleton } from "@/presentation/components/ui";
 import { useVideoComments } from "@/presentation/hooks/use-video-comments";
 import { useVideoFeed } from "@/presentation/hooks/use-video-feed";
+import { useGeolocation } from "@/presentation/hooks/use-geolocation";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useErrorMessage } from "@/presentation/lib/errors";
 import { centerBookingPath } from "@/presentation/lib/routes";
@@ -44,6 +45,18 @@ export function ClientVideosPage() {
   const [commentPostId, setCommentPostId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Location powers the "how far is this place" label. The hook only ever asks
+  // the browser on an explicit click, so a visitor is never ambushed by the
+  // permission dialog on arrival.
+  const { coordinates, request: requestLocation } = useGeolocation();
+  const userCoords = useMemo(
+    () =>
+      coordinates
+        ? { latitude: coordinates.latitude, longitude: coordinates.longitude }
+        : null,
+    [coordinates],
+  );
 
   const feedError = useErrorMessage(feed.error, "web.errors.video_fetch");
 
@@ -263,6 +276,8 @@ export function ClientVideosPage() {
               onBook={handleBook}
               onView={feed.incrementViews}
               onRecordWatch={recordWatch}
+              userCoords={userCoords}
+              onRequestLocation={requestLocation}
             />
           </div>
         ))}

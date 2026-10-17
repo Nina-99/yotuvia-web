@@ -3,12 +3,16 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   buildExternalEmbedHtml,
+  centerOpenStatus,
+  distanceKm,
   isExternalVideo,
   type ExternalVideoProvider,
   type Video,
 } from "yotuvia-core";
 
 import { ExternalEmbedModal } from "./ExternalEmbedModal";
+import { MarqueeText } from "./MarqueeText";
+import { postToPlayer, type PlayerCommand } from "./player-bridge";
 
 import { formatCurrency } from "@/presentation/lib/format";
 import { centerDetailPath, professionalProfilePath } from "@/presentation/lib/routes";
@@ -29,6 +33,22 @@ function externalHref(video: Video): string {
   return video.externalUrl ?? video.videoUrl;
 }
 
+/**
+ * Whether an external TikTok post plays INLINE in the reel.
+ *
+ * Inline is the truest "reel" feel and autoplays, but TikTok's own
+ * like/comment/share rail comes WITH it and cannot be hidden: the player is a
+ * CROSS-ORIGIN iframe, so no stylesheet of ours reaches it (only postMessage
+ * does). Setting this to false keeps the slide to OUR chrome — thumbnail, info,
+ * play affordance — and opens the player in a framed dialog instead, which
+ * CONTAINS the rail rather than removing it.
+ *
+ * Kept TRUE deliberately: the dialog does not actually hide the rail, and it
+ * would cost the autoplay AND the pause/mute controls above (which only exist
+ * for the inline player). Flip to `false` only to compare the two.
+ */
+const INLINE_TIKTOK = true;
+
 export interface VideoReelCardProps {
   video: Video;
   /** Whether this slide is the one currently in view (drives autoplay). */
@@ -43,6 +63,10 @@ export interface VideoReelCardProps {
   /** Fired once when the slide becomes visible (counts a view). */
   onView: (videoId: number) => void;
   onRecordWatch: (videoId: number, seconds: number, percentage: number, completed: boolean) => void;
+  /** The visitor's position, or null until they ask for it. */
+  userCoords: { latitude: number; longitude: number } | null;
+  /** Ask the browser for the position. Only ever called on a click. */
+  onRequestLocation: () => void;
 }
 
 /** Splits a caption into plain-text and hashtag segments. */
@@ -161,6 +185,8 @@ export function VideoReelCard({
   onBook,
   onView,
   onRecordWatch,
+  userCoords,
+  onRequestLocation,
 }: VideoReelCardProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage ?? i18n.language;
@@ -179,6 +205,58 @@ export function VideoReelCard({
     [external, video],
   );
   const [embedOpen, setEmbedOpen] = useState(false);
+
+  // The external player lives in a CROSS-ORIGIN iframe, so its DOM is out of
+  // reach — no stylesheet can cross that boundary. `postMessage` is the ONE way
+  // in, and it is exactly the API TikTok documents. The outer srcdoc IS
+  // same-origin (allow-same-origin), so we can read it to find the player frame
+  // and post into it.
+  const embedIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [embedPaused, setEmbedPaused] = useState(false);
+  const [embedMuted, setEmbedMuted] = useState(true);
+
+  const sendToPlayer = useCallback((type: PlayerCommand) => {
+    postToPlayer(embedIframeRef.current, type);
+  }, []);
+
+  const toggleEmbedPlay = useCallback(() => {
+    setEmbedPaused((prev) => {
+      const next = !prev;
+      sendToPlayer(next ? "pause" : "play");
+      return next;
+    });
+  }, [sendToPlayer]);
+
+  const toggleEmbedMute = useCallback(() => {
+    setEmbedMuted((prev) => {
+      const next = !prev;
+      sendToPlayer(next ? "mute" : "unMute");
+      return next;
+    });
+  }, [sendToPlayer]);
+
+  // Vertical TikTok posts play INLINE in the reel, the same way an uploaded
+  // video does: the player is mounted only while this slide is the visible one,
+  // so it loads and autoplays when it is on screen and is torn down (stopping
+  // playback) when it leaves. A horizontal YouTube post does not fit the 9:16
+  // reel, so it keeps the framed modal player instead.
+  const inlineEmbed =
+    INLINE_TIKTOK && external && video.provider === "tiktok" && embedHtml !== null;
+
+  // Opening status of THIS center, recomputed when the slide changes so a badge
+  // never shows the status of a video the visitor already left.
+  const openStatus = useMemo(
+    () => centerOpenStatus(video.centerHours, new Date()),
+    [video.centerHours],
+  );
+
+  // Straight-line distance, when BOTH ends are known. Null hides the label —
+  // a made-up number is worse than no number.
+  const distanceLabel = useMemo(() => {
+    if (!userCoords || !video.centerCoords) return null;
+    const km = distanceKm(userCoords, video.centerCoords);
+    return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+  }, [userCoords, video.centerCoords]);
 
   // The creator avatar shows the credited professional when the post is theirs,
   // otherwise the center, and links to the matching profile page.
@@ -229,6 +307,14 @@ export function VideoReelCard({
     }
   }, [isVisible, paused, video.id, onView, onRecordWatch]);
 
+  // External posts count a view exactly like an uploaded one: once, when the
+  // slide becomes visible. The effect above bails out first because external
+  // posts have no <video> to drive, so they were silently never counted.
+  useEffect(() => {
+    if (!external || !isVisible) return;
+    onView(video.id);
+  }, [external, isVisible, video.id, onView]);
+
   // On unmount, close any open watch window so a slide change still records.
   useEffect(
     () => () => {
@@ -262,10 +348,62 @@ export function VideoReelCard({
     void navigator.clipboard?.writeText(externalHref(video)).catch(() => undefined);
   }, [video]);
 
+  // Sound by default, as far as the browser allows: unnoted autoplay is refused
+  // until the visitor has interacted with the SITE, so the player starts muted
+  // (its own autoplay policy demands it) and we lift the mute at the first real
+  // gesture. On a normal visit that already happened when they clicked their way
+  // into the videos page, so playback starts with sound.
+  useEffect(() => {
+    if (!inlineEmbed || !isVisible) return;
+
+    const unmute = () => {
+      sendToPlayer("unMute");
+      setEmbedMuted(false);
+    };
+
+    // Ignore gestures on our OWN controls: the mute button must mute, not get
+    // pre-empted by this.
+    const onGesture = (event: Event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-embed-control]")) return;
+      unmute();
+    };
+
+    // Retried on a short schedule: a single attempt can land before the player
+    // frame exists, and the browser refuses an unmute until the visitor has
+    // interacted anyway — so a later try is what actually succeeds.
+    const timers = [600, 1500, 3000].map((delay) => window.setTimeout(unmute, delay));
+    window.addEventListener("pointerdown", onGesture);
+    window.addEventListener("keydown", onGesture);
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+    };
+  }, [inlineEmbed, isVisible, sendToPlayer]);
+
   return (
     <div className="relative h-full w-full snap-start overflow-hidden bg-black">
       {external ? (
-        embedHtml ? (
+        inlineEmbed ? (
+          isVisible ? (
+            <iframe
+              ref={embedIframeRef}
+              title={t("client.feed.external_embed_title", { provider: providerLabel })}
+              srcDoc={embedHtml}
+              className="absolute inset-0 h-full w-full border-0"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              referrerPolicy="no-referrer"
+              data-testid="external-embed"
+            />
+          ) : (
+            <div className="absolute inset-0">
+              <ExternalMediaThumb video={video} />
+            </div>
+          )
+        ) : embedHtml ? (
           <button
             type="button"
             onClick={() => setEmbedOpen(true)}
@@ -312,6 +450,83 @@ export function VideoReelCard({
       {/* Readability wash behind the controls. */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" aria-hidden="true" />
 
+      {/* WHERE the center is, and whether it is open / how far.
+          Mirrors the mobile slide: the address is PERMANENT (it answers the
+          question the visitor actually has), while the open status and the
+          distance breathe — shown, then out of the way, on a loop. */}
+      {video.centerAddress || openStatus || distanceLabel || !userCoords ? (
+        <div
+          className="absolute left-3 top-1/4 z-10 flex w-[72%] flex-col items-start gap-1"
+          data-testid={`feed-place-${video.id}`}
+        >
+          {video.centerAddress ? (
+            <Link
+              to={centerDetailPath(video.beautyCenterId)}
+              className="flex w-full items-center gap-1.5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              aria-label={video.centerAddress}
+              data-testid={`feed-location-${video.id}`}
+            >
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0 text-accent" fill="currentColor" aria-hidden="true">
+                <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
+              </svg>
+              <MarqueeText
+                text={video.centerAddress}
+                className="min-w-0 flex-1"
+                textClassName="text-xs font-bold text-accent [text-shadow:0_1px_4px_rgb(0_0_0/0.6)]"
+              />
+            </Link>
+          ) : null}
+
+          {/* Asked for only on a CLICK: the geolocation hook never prompts on
+              mount, so a visitor is never ambushed by a permission dialog. */}
+          {!userCoords && !distanceLabel ? (
+            <button
+              type="button"
+              onClick={onRequestLocation}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/85 [text-shadow:0_1px_4px_rgb(0_0_0/0.6)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              data-testid={`feed-request-location-${video.id}`}
+            >
+              <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                <circle cx="12" cy="12" r="4" />
+              </svg>
+              {t("client.feed.use_my_location")}
+            </button>
+          ) : null}
+
+          {openStatus || distanceLabel ? (
+            <div className="ytv-breathe flex flex-col items-start gap-1">
+              {openStatus ? (
+                <span
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-white [text-shadow:0_1px_4px_rgb(0_0_0/0.6)]"
+                  data-testid={`feed-open-${video.id}`}
+                >
+                  <span
+                    className={`h-2 w-2 rounded-full ${openStatus.open ? "bg-success" : "bg-danger"}`}
+                    aria-hidden="true"
+                  />
+                  {openStatus.open
+                    ? t("client.feed.open_now")
+                    : t("client.feed.closed_now")}
+                  {openStatus.open && openStatus.closesAt
+                    ? ` ${t("client.feed.closes_at", { time: openStatus.closesAt })}`
+                    : ""}
+                </span>
+              ) : null}
+
+              {distanceLabel ? (
+                <span
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-white [text-shadow:0_1px_4px_rgb(0_0_0/0.6)]"
+                  data-testid={`feed-distance-${video.id}`}
+                >
+                  {t("client.feed.distance_away", { distance: distanceLabel })}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {!external && paused ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/50 text-white">
@@ -325,11 +540,48 @@ export function VideoReelCard({
       {/* Top controls. */}
       <div className="absolute left-3 top-3 flex items-center gap-2">
         {external ? (
-          providerLabel ? (
-            <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
-              {providerLabel}
-            </span>
-          ) : null
+          <>
+            {providerLabel ? (
+              <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+                {providerLabel}
+              </span>
+            ) : null}
+
+            {/* Pause/mute for the official player, driven through its documented
+                postMessage API. TikTok's own like/comment/share rail cannot be
+                hidden here: it renders inside a CROSS-ORIGIN iframe, where no
+                stylesheet of ours can reach. */}
+            {inlineEmbed ? (
+              <div className="flex items-center gap-2" data-embed-control>
+                <button
+                  type="button"
+                  onClick={toggleEmbedPlay}
+                  aria-label={t(embedPaused ? "client.feed.play" : "client.feed.pause")}
+                  data-testid={`feed-embed-play-${video.id}`}
+                  className="rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  {embedPaused ? (
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+                      <path d="M7 4h4v16H7zM13 4h4v16h-4z" />
+                    </svg>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleEmbedMute}
+                  aria-label={t(embedMuted ? "client.feed.unmute" : "client.feed.mute")}
+                  data-testid={`feed-embed-mute-${video.id}`}
+                  className="rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  <VolumeIcon muted={embedMuted} className="h-5 w-5" />
+                </button>
+              </div>
+            ) : null}
+          </>
         ) : (
           <button
             type="button"
@@ -444,6 +696,19 @@ export function VideoReelCard({
 
         {(video.serviceName || serviceOffer || video.personnelName || video.externalAuthor) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/85">
+            {/* Only when there ARE reviews: "★ 0.0 · 0" erodes trust. */}
+            {video.centerReviewCount ? (
+              <span
+                className="font-bold text-accent"
+                data-testid={`feed-rating-${video.id}`}
+                aria-label={t("client.feed.rating_summary", {
+                  rating: (video.centerRating ?? 0).toFixed(1),
+                  count: video.centerReviewCount,
+                })}
+              >
+                ★ {(video.centerRating ?? 0).toFixed(1)} · {video.centerReviewCount}
+              </span>
+            ) : null}
             {video.serviceName ? <span className="font-semibold">{video.serviceName}</span> : null}
             {serviceOffer ? <span className="font-bold text-accent">{serviceOffer}</span> : null}
             {video.personnelName ? <span>✂ {video.personnelName}</span> : null}
@@ -469,7 +734,7 @@ export function VideoReelCard({
         </div>
       ) : null}
 
-      {external && embedHtml ? (
+      {external && embedHtml && !inlineEmbed ? (
         <ExternalEmbedModal
           open={embedOpen}
           onClose={() => setEmbedOpen(false)}

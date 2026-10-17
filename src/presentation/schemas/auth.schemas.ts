@@ -1,48 +1,63 @@
 import { z } from "zod";
 
-import type { AppRole, RegisterData } from "yotuvia-core";
+import {
+  isValid,
+  passwordMatch,
+  phone as corePhone,
+  required,
+  type AppRole,
+  type RegisterData,
+} from "yotuvia-core";
 
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validationKeys } from "./validation";
+import {
+  messageKeyFor,
+  validationKeys,
+  zEmailAddress,
+  zPassword,
+} from "./validation";
 
 /**
- * Validation rules mirror the `yotuvia-core` auth use-cases, which are the
- * single source of truth for both mobile and web:
+ * Auth form schemas.
  *
- * - Email must contain `@` (`LoginUserUseCase`, `RegisterUserUseCase`).
- * - Password is at least 8 characters (`LoginUserUseCase`, `RegisterUserUseCase`,
- *   `ResetPasswordUseCase`); the reset flow additionally caps it at 255.
- * - CLIENT registrations require first/last name and phone; BEAUTY_CENTER
- *   registrations require a business name and phone (`RegisterUserUseCase`).
+ * The RULES come from `yotuvia-core` (shared with mobile); what lives here is
+ * only how each failure is WORDED for the web. Bounds are no longer retyped:
+ * they come from the core's `LIMITS`, mirrored from the Go request DTOs.
  *
  * Messages are i18n keys rendered by `<FormError>` via `t(key, { defaultValue })`.
  */
 
 // The shared vocabulary lives in `./validation` so sibling schemas (services,
 // staff) reuse the same keys instead of chaining through this module.
-export { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validationKeys } from "./validation";
+export {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  validationKeys,
+} from "./validation";
 
 /** Supported self-serve registration roles (PERSONNEL joins via invitation). */
 export const registrationRoles = ["CLIENT", "BEAUTY_CENTER"] as const;
 
 export type RegistrationRole = (typeof registrationRoles)[number];
 
-/** Email: required first, then RFC-shaped format — never both at once. */
-const emailField = z
-  .string()
-  .trim()
-  .min(1, validationKeys.required)
-  .pipe(z.email(validationKeys.emailInvalid));
+/** The core decides emptiness, so "  " is missing here exactly as it is there. */
+const missing = (value?: string): boolean => !isValid(required(value ?? ""));
 
-/** Password: required first, then length bounds in a second stage. */
-const passwordField = z
-  .string()
-  .min(1, validationKeys.required)
-  .pipe(
-    z
-      .string()
-      .min(PASSWORD_MIN_LENGTH, validationKeys.passwordMin)
-      .max(PASSWORD_MAX_LENGTH, validationKeys.passwordMax),
-  );
+const emailField = zEmailAddress();
+
+const passwordField = zPassword();
+
+/** Confirmation is only ever checked for presence; the match is a form concern. */
+const confirmField = z.string().min(1, validationKeys.required);
+
+/** Compares two passwords through the shared rule, skipping the empty case. */
+function checkPasswordMatch(password: string, confirm: string, ctx: z.RefinementCtx): void {
+  // Empty already fails the field's own `required`; comparing it would report
+  // the same problem twice.
+  if (confirm.length === 0) return;
+  if (!isValid(passwordMatch(password, confirm))) {
+    ctx.addIssue({ code: "custom", path: ["confirmPassword"], message: validationKeys.passwordMismatch });
+  }
+}
 
 export const loginSchema = z.object({
   email: emailField,
@@ -62,17 +77,9 @@ export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 export const resetPasswordSchema = z
   .object({
     password: passwordField,
-    confirmPassword: z.string().min(1, validationKeys.required),
+    confirmPassword: confirmField,
   })
-  .superRefine((values, ctx) => {
-    if (values.password !== values.confirmPassword) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["confirmPassword"],
-        message: validationKeys.passwordMismatch,
-      });
-    }
-  });
+  .superRefine((values, ctx) => checkPasswordMatch(values.password, values.confirmPassword, ctx));
 
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
@@ -81,7 +88,7 @@ export const registerSchema = z
     role: z.enum(registrationRoles),
     email: emailField,
     password: passwordField,
-    confirmPassword: z.string().min(1, validationKeys.required),
+    confirmPassword: confirmField,
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     phone: z.string().optional(),
@@ -91,39 +98,35 @@ export const registerSchema = z
     }),
   })
   .superRefine((values, ctx) => {
-    if (values.password !== values.confirmPassword) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["confirmPassword"],
-        message: validationKeys.passwordMismatch,
-      });
+    checkPasswordMatch(values.password, values.confirmPassword, ctx);
+
+    // A phone is optional overall but required for every role; when it IS given
+    // it must still be a phone. Deliberately NO early return: a bad phone must
+    // not swallow the role checks below.
+    if (values.phone && !missing(values.phone)) {
+      const failure = corePhone(values.phone);
+      if (!failure.valid) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["phone"],
+          message: failure.valid ? validationKeys.required : messageKeyFor(failure.issue.code),
+        });
+      }
     }
 
     if (values.role === "CLIENT") {
-      if (!values.firstName?.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["firstName"],
-          message: validationKeys.required,
-        });
-      }
-      if (!values.lastName?.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["lastName"],
-          message: validationKeys.required,
-        });
-      }
-      if (!values.phone?.trim()) {
-        ctx.addIssue({ code: "custom", path: ["phone"], message: validationKeys.required });
+      for (const field of ["firstName", "lastName", "phone"] as const) {
+        if (missing(values[field])) {
+          ctx.addIssue({ code: "custom", path: [field], message: validationKeys.required });
+        }
       }
       return;
     }
 
-    if (!values.name?.trim()) {
+    if (missing(values.name)) {
       ctx.addIssue({ code: "custom", path: ["name"], message: validationKeys.required });
     }
-    if (!values.phone?.trim()) {
+    if (missing(values.phone)) {
       ctx.addIssue({ code: "custom", path: ["phone"], message: validationKeys.required });
     }
   });

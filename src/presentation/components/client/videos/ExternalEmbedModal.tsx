@@ -14,13 +14,18 @@ export interface ExternalEmbedModalProps {
 
 /**
  * Plays a linked external video through the platform's OFFICIAL embed
- * (a YouTube iframe or a TikTok blockquote + embed.js), rendered inside a
+ * (a YouTube iframe or TikTok's /player/v1 iframe), rendered inside a
  * sandboxed `<iframe srcdoc>`.
  *
  * Two deliberate choices: the iframe is mounted only while `open`, so the
- * third-party player and scripts never load until the user asks for them; and
- * the sandbox omits `allow-same-origin`, so the embedded third-party script
- * stays on an opaque origin and cannot reach this app's DOM or storage.
+ * third-party player never loads until the user asks for it; and the sandbox
+ * keeps `allow-same-origin` ALONGSIDE `allow-scripts`. That pairing looks
+ * dangerous, but it is required here: sandbox flags propagate to NESTED
+ * iframes, so without it the outer document's opaque origin would be forced
+ * onto the TikTok player and break its initialization. The srcdoc content is
+ * generated and HTML-escaped by `buildExternalEmbedHtml`, so no
+ * attacker-controlled script runs in this origin; the embedded player itself
+ * stays cross-origin and cannot reach this app's DOM.
  */
 export function ExternalEmbedModal({
   open,
@@ -50,7 +55,7 @@ export function ExternalEmbedModal({
             title={t("client.feed.external_embed_title", { provider: providerLabel })}
             srcDoc={embedHtml}
             className="h-full w-full border-0"
-            sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-presentation"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"
             allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
             referrerPolicy="no-referrer"
             data-testid="external-embed"
