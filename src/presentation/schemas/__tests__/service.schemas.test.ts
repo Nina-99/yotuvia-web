@@ -68,12 +68,21 @@ describe("createServiceSchema", () => {
     expect(createServiceSchema.safeParse({ ...VALID, duration: "600" }).success).toBe(true);
   });
 
-  it("requires a non-negative price with at most 2 decimals", () => {
-    for (const price of ["", "abc", "-1", "10.555"]) {
+  it("requires a non-negative price of at most 2 decimals", () => {
+    for (const price of ["", "abc", "-1", "10.5555"]) {
       expect(issuePaths(createServiceSchema.safeParse({ ...VALID, price }))).toContain("price");
     }
     expect(createServiceSchema.safeParse({ ...VALID, price: "0" }).success).toBe(true);
     expect(createServiceSchema.safeParse({ ...VALID, price: "10.55" }).success).toBe(true);
+  });
+
+  it("reads money the way the viewer typed it, in either locale", () => {
+    // `10.555` is NOT ten-ish with three decimals — three decimals are not money,
+    // so the only amount it can be is a thousands-grouped 10555. The old regex
+    // rejected it outright, and with it every legitimate locale amount.
+    expect(toCreateServiceData({ ...VALID, price: "10.555" }, 1).price).toBe(10555);
+    expect(toCreateServiceData({ ...VALID, price: "1.234,56" }, 1).price).toBe(1234.56);
+    expect(toCreateServiceData({ ...VALID, price: "1,234.56" }, 1).price).toBe(1234.56);
   });
 
   it("requires at least one description because the create DTO marks it required", () => {

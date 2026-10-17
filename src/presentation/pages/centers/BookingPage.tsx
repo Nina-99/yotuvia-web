@@ -29,10 +29,10 @@ import {
 } from "@/presentation/lib/format";
 import { ROUTES, centerDetailPath } from "@/presentation/lib/routes";
 import {
-  BOOKING_DATE_PATTERN,
   bookingDraftSchema,
   bookingServicesSchema,
   bookingSlotSchema,
+  isBookingDateKey,
 } from "@/presentation/schemas/booking.schemas";
 
 /** How long the success panel stays before the reservations list replaces it. */
@@ -480,7 +480,7 @@ export function BookingPage() {
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium text-text">{t("client.reservation.summary_time")}</p>
 
-              {!BOOKING_DATE_PATTERN.test(date) ? (
+              {!isBookingDateKey(date) ? (
                 <p className="text-sm text-text-muted">{t("web.centers.booking.select_date")}</p>
               ) : availabilityQuery.isPending ? (
                 <div

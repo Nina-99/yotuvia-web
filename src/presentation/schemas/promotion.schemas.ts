@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { AdminPromotion } from "yotuvia-core";
+import { LIMITS, integer, isoDate, parseAmount, type AdminPromotion } from "yotuvia-core";
 
 import { dateKeyFromApi } from "@/presentation/lib/dates";
 import type {
@@ -8,7 +8,7 @@ import type {
   PromotionType,
 } from "@/presentation/hooks/use-promotions";
 
-import { validationKeys } from "./validation";
+import { amountFromField, integerFromField, zText } from "./validation";
 
 /**
  * Promotion form schema.
@@ -51,7 +51,11 @@ export const PROMOTION_TARGET_CLIENTS = [
 /** Select sentinel for the nullable `service_id`. */
 export const ANY_SERVICE_VALUE = "";
 
-export const PROMOTION_NAME_MAX = 100;
+export const PROMOTION_NAME_MAX = LIMITS.promotionName.max;
+/**
+ * CLIENT-ONLY cap: the API declares only `min=0` on `discount_value`, so the
+ * 100% ceiling on a percentage is the form's own rule, kept deliberately.
+ */
 export const PROMOTION_DISCOUNT_MAX = 100;
 
 export const promotionValidationKeys = {
@@ -64,10 +68,35 @@ export const promotionValidationKeys = {
   maxRedemptions: "web.app.promotions.form.errors.max_redemptions",
 } as const;
 
-const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
-const INTEGER_PATTERN = /^\d+$/;
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+/**
+ * A percentage: canonical, at most two decimals.
+ *
+ * Deliberately NOT the money rule: a percentage is capped at 100, so locale
+ * grouping could only ever produce a value the API rejects.
+ */
+const PERCENT_PATTERN = /^\d+(\.\d{1,2})?$/;
+/** `HH:MM`; the core has no time rule (it validates dates only). */
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** True when the value is a day that EXISTS, not merely `YYYY-MM-DD`-shaped. */
+function isValidDateKey(value: string): boolean {
+  return isoDate(value).valid;
+}
+
+/** A fixed amount of money, read the way the viewer typed it, strictly positive. */
+function isPositiveAmount(value: string): boolean {
+  const parsed = parseAmount(value, { min: 0 });
+  return parsed.valid && parsed.value > 0;
+}
+
+/** A percentage: canonical, strictly positive, at most 100. */
+function isPercentage(value: string): boolean {
+  return (
+    PERCENT_PATTERN.test(value) &&
+    Number(value) > 0 &&
+    Number(value) <= PROMOTION_DISCOUNT_MAX
+  );
+}
 
 /** Parses the `applicable_hours` JSON string; `null` means malformed. */
 function parseApplicableHours(value: string): readonly { start: string; end: string }[] | null {
@@ -94,11 +123,9 @@ function parseApplicableHours(value: string): readonly { start: string; end: str
 
 export const promotionSchema = z
   .object({
-    name: z
-      .string()
-      .trim()
-      .min(1, validationKeys.required)
-      .max(PROMOTION_NAME_MAX, promotionValidationKeys.name),
+    name: zText(LIMITS.promotionName, {
+      overrides: { too_long: promotionValidationKeys.name },
+    }),
     description: z.string(),
     type: z.enum(PROMOTION_TYPES),
     discountValue: z.string().trim(),
@@ -114,10 +141,13 @@ export const promotionSchema = z
   .superRefine((values, ctx) => {
     const isDiscountType = values.type === "percentage" || values.type === "fixed_amount";
     if (isDiscountType) {
-      const amount = Number(values.discountValue);
-      const withinRange =
-        values.type === "percentage" ? amount <= PROMOTION_DISCOUNT_MAX : true;
-      if (!AMOUNT_PATTERN.test(values.discountValue) || amount <= 0 || !withinRange) {
+      // A percentage and a fixed amount are different KINDS: the first is capped
+      // at 100 and canonical, the second is money and reads locales.
+      const ok =
+        values.type === "percentage"
+          ? isPercentage(values.discountValue)
+          : isPositiveAmount(values.discountValue);
+      if (!ok) {
         ctx.addIssue({
           code: "custom",
           message: promotionValidationKeys.discount,
@@ -127,14 +157,14 @@ export const promotionSchema = z
     }
 
     if (values.type === "buy_x_get_y") {
-      if (!INTEGER_PATTERN.test(values.buyXCount) || Number(values.buyXCount) < 1) {
+      if (!integer(values.buyXCount, { min: 1 }).valid) {
         ctx.addIssue({
           code: "custom",
           message: promotionValidationKeys.buyCounts,
           path: ["buyXCount"],
         });
       }
-      if (!INTEGER_PATTERN.test(values.buyYCount) || Number(values.buyYCount) < 1) {
+      if (!integer(values.buyYCount, { min: 1 }).valid) {
         ctx.addIssue({
           code: "custom",
           message: promotionValidationKeys.buyCounts,
@@ -145,14 +175,15 @@ export const promotionSchema = z
 
     for (const key of ["validFrom", "validTo"] as const) {
       const value = values[key];
-      if (value !== "" && !DATE_PATTERN.test(value)) {
+      if (value !== "" && !isValidDateKey(value)) {
         ctx.addIssue({ code: "custom", message: promotionValidationKeys.dateInvalid, path: [key] });
       }
     }
 
+    // ISO date keys compare correctly as strings, so no Date round-trip.
     if (
-      DATE_PATTERN.test(values.validFrom) &&
-      DATE_PATTERN.test(values.validTo) &&
+      isValidDateKey(values.validFrom) &&
+      isValidDateKey(values.validTo) &&
       values.validTo < values.validFrom
     ) {
       ctx.addIssue({
@@ -170,7 +201,7 @@ export const promotionSchema = z
       });
     }
 
-    if (values.maxRedemptions !== "" && !INTEGER_PATTERN.test(values.maxRedemptions)) {
+    if (values.maxRedemptions !== "" && !integer(values.maxRedemptions, { min: 0 }).valid) {
       ctx.addIssue({
         code: "custom",
         message: promotionValidationKeys.maxRedemptions,
@@ -237,14 +268,18 @@ export function toPromotionInput(values: PromotionFormValues): PromotionInput {
     name: values.name.trim(),
     description: values.description.trim(),
     type: values.type,
-    discountValue: isDiscountType ? Number(values.discountValue) : 0,
-    buyXCount: isBuyXGetY ? Number(values.buyXCount) : 1,
-    buyYCount: isBuyXGetY ? Number(values.buyYCount) : 1,
+    discountValue: isDiscountType
+      ? values.type === "percentage"
+        ? Number(values.discountValue)
+        : amountFromField(values.discountValue, { min: 0 })
+      : 0,
+    buyXCount: isBuyXGetY ? integerFromField(values.buyXCount, { min: 1 }) : 1,
+    buyYCount: isBuyXGetY ? integerFromField(values.buyYCount, { min: 1 }) : 1,
     serviceId: values.serviceId === ANY_SERVICE_VALUE ? null : Number(values.serviceId),
     validFrom: toInstant(values.validFrom, "start"),
     validTo: toInstant(values.validTo, "end"),
     applicableHours: values.applicableHours.trim(),
     targetClients: values.targetClients,
-    maxRedemptions: values.maxRedemptions === "" ? 0 : Number(values.maxRedemptions),
+    maxRedemptions: values.maxRedemptions === "" ? 0 : integerFromField(values.maxRedemptions, { min: 0 }),
   };
 }

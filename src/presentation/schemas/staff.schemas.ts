@@ -1,49 +1,44 @@
 import { z } from "zod";
-import type { StaffProfile, UpdateStaffProfileData } from "yotuvia-core";
+import { LIMITS, type StaffProfile, type UpdateStaffProfileData } from "yotuvia-core";
 
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validationKeys } from "./validation";
+import { zOptionalPassword, zText } from "./validation";
 
 /**
  * Staff self-service profile schema.
  *
- * Rules mirror the API contract (`yotuvia-api` + `yotuvia-core`):
+ * The BOUNDS and RULES are no longer retyped here — they come from
+ * `yotuvia-core`, so mobile validates these fields identically.
+ *
+ * Contract kept from the API:
  * - `PATCH /personnel/me` accepts ONLY `first_name`, `last_name`, `phone`,
  *   `password` and `images` (the allow-listed `UpdateMePersonnelRequest`).
  *   Identity fields (`email`, `is_active`, `beauty_center_id`) are rejected
  *   server-side with a 403, so they are NOT part of this schema and the page
  *   renders them read-only.
- * - Lengths come from `models/personnel.model.go` (50/50/20); the password
- *   bounds mirror every account-creating DTO (8..255).
  *
  * Messages are i18n keys rendered by `<FormError>`/`<FormAlert>`, never literals.
  */
 
-export const STAFF_FIRST_NAME_MAX = 50;
-export const STAFF_LAST_NAME_MAX = 50;
-export const STAFF_PHONE_MAX = 20;
-
-/** Generic "too long" copy; the exact bound is enforced by the schema. */
-const maxLengthKey = "web.forms.validation.max_length";
+/** Kept as named exports: the form reads them for each input's `maxLength`. */
+export const STAFF_FIRST_NAME_MAX = LIMITS.personName.max;
+export const STAFF_LAST_NAME_MAX = LIMITS.personName.max;
+export const STAFF_PHONE_MAX = LIMITS.phone.max;
 
 export const staffProfileSchema = z.object({
-  firstName: z
-    .string()
-    .trim()
-    .min(1, validationKeys.required)
-    .max(STAFF_FIRST_NAME_MAX, maxLengthKey),
-  lastName: z
-    .string()
-    .trim()
-    .min(1, validationKeys.required)
-    .max(STAFF_LAST_NAME_MAX, maxLengthKey),
-  phone: z.string().trim().min(1, validationKeys.required).max(STAFF_PHONE_MAX, maxLengthKey),
+  firstName: zText(LIMITS.personName),
+  lastName: zText(LIMITS.personName),
+  /**
+   * Required and capped at the column width, but NOT checked as a phone SHAPE.
+   *
+   * The client form adopted the strict digit rule (7–15 digits); staff did not,
+   * and the two now differ by more than a message. Tightening this one would
+   * reject a stored number this screen has always accepted, so the behaviour is
+   * preserved until the stored values are checked — the shared rule is there to
+   * adopt the moment they are (`zPhone()`).
+   */
+  phone: zText(LIMITS.phone),
   /** Optional: empty keeps the current password (the API applies it only when set). */
-  password: z
-    .string()
-    .max(PASSWORD_MAX_LENGTH, validationKeys.passwordMax)
-    .refine((value) => value === "" || value.length >= PASSWORD_MIN_LENGTH, {
-      message: validationKeys.passwordMin,
-    }),
+  password: zOptionalPassword(),
 });
 
 export type StaffProfileFormValues = z.infer<typeof staffProfileSchema>;

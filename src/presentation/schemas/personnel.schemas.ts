@@ -1,18 +1,20 @@
 import { z } from "zod";
 
-import type {
-  AcceptInvitationData,
-  CreatePersonnelData,
-  Personnel,
-  UpdatePersonnelData,
+import {
+  LIMITS,
+  type AcceptInvitationData,
+  type CreatePersonnelData,
+  type Personnel,
+  type UpdatePersonnelData,
 } from "yotuvia-core";
 
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, validationKeys } from "./validation";
+import { validationKeys, zEmailAddress, zPassword, zText } from "./validation";
 
 /**
  * Staff form schemas.
  *
- * Rules mirror the API DTOs: `CreatePersonnelRequest` (used by
+ * The BOUNDS and RULES come from `yotuvia-core`; only the i18n KEYS live here,
+ * so mobile validates these fields identically. `CreatePersonnelRequest` (used by
  * `POST /auth/register-personnel`) requires first name, last name, email and
  * phone (`max=20`) plus a password of 8–255 characters; `UpdatePersonnelRequest`
  * marks every field optional and never requires a password.
@@ -32,35 +34,29 @@ export const personnelValidationKeys = {
 } as const;
 
 /** API limits (`CreatePersonnelRequest` / `UpdatePersonnelRequest`). */
-export const PERSONNEL_NAME_MAX = 50;
-export const PERSONNEL_EMAIL_MAX = 70;
-export const PERSONNEL_PHONE_MAX = 20;
+export const PERSONNEL_NAME_MAX = LIMITS.personName.max;
+export const PERSONNEL_EMAIL_MAX = LIMITS.email.max;
+export const PERSONNEL_PHONE_MAX = LIMITS.phone.max;
 
-const firstNameField = z
-  .string()
-  .trim()
-  .min(1, validationKeys.required)
-  .max(PERSONNEL_NAME_MAX, personnelValidationKeys.firstNameTooLong);
+const firstNameField = zText(LIMITS.personName, {
+  overrides: { too_long: personnelValidationKeys.firstNameTooLong },
+});
 
-const lastNameField = z
-  .string()
-  .trim()
-  .min(1, validationKeys.required)
-  .max(PERSONNEL_NAME_MAX, personnelValidationKeys.lastNameTooLong);
+const lastNameField = zText(LIMITS.personName, {
+  overrides: { too_long: personnelValidationKeys.lastNameTooLong },
+});
 
-/** Email: required first, then RFC-shaped format — never both errors at once. */
-const emailField = z
-  .string()
-  .trim()
-  .min(1, validationKeys.required)
-  .pipe(z.email(validationKeys.emailInvalid))
-  .pipe(z.string().max(PERSONNEL_EMAIL_MAX, personnelValidationKeys.emailTooLong));
+/**
+ * Email: required first, then the shape — the shared rule reports `required`
+ * before it ever looks at the shape, so the two never fire at once.
+ */
+const emailField = zEmailAddress({
+  overrides: { too_long: personnelValidationKeys.emailTooLong },
+});
 
-const phoneField = z
-  .string()
-  .trim()
-  .min(1, validationKeys.required)
-  .max(PERSONNEL_PHONE_MAX, personnelValidationKeys.phoneTooLong);
+const phoneField = zText(LIMITS.phone, {
+  overrides: { too_long: personnelValidationKeys.phoneTooLong },
+});
 
 const personnelFormShape = {
   firstName: firstNameField,
@@ -72,15 +68,7 @@ const personnelFormShape = {
 /** Create form: the API asks for a password of 8–255 characters. */
 export const createPersonnelSchema = z.object({
   ...personnelFormShape,
-  password: z
-    .string()
-    .min(1, validationKeys.required)
-    .pipe(
-      z
-        .string()
-        .min(PASSWORD_MIN_LENGTH, validationKeys.passwordMin)
-        .max(PASSWORD_MAX_LENGTH, validationKeys.passwordMax),
-    ),
+  password: zPassword(),
 });
 
 /**
@@ -115,19 +103,11 @@ export const acceptInvitationSchema = z
   .object({
     firstName: firstNameField,
     lastName: lastNameField,
-    phone: z
-      .string()
-      .trim()
-      .max(PERSONNEL_PHONE_MAX, personnelValidationKeys.phoneTooLong),
-    password: z
-      .string()
-      .min(1, validationKeys.required)
-      .pipe(
-        z
-          .string()
-          .min(PASSWORD_MIN_LENGTH, validationKeys.passwordMin)
-          .max(PASSWORD_MAX_LENGTH, validationKeys.passwordMax),
-      ),
+    phone: zText(LIMITS.phone, {
+      optional: true,
+      overrides: { too_long: personnelValidationKeys.phoneTooLong },
+    }),
+    password: zPassword(),
     confirmPassword: z.string().min(1, validationKeys.required),
   })
   .superRefine((values, ctx) => {

@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { isoDate } from "yotuvia-core";
 
-import { validationKeys } from "./validation";
+import { validationKeys, zIsoDate } from "./validation";
 
 /**
  * Booking-flow schemas.
@@ -14,11 +15,19 @@ import { validationKeys } from "./validation";
  * keys, never literals.
  */
 
-/** Local calendar day, as the API expects it. */
-export const BOOKING_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
 /** 24h `HH:MM` slot start, as the API expects it. */
 export const BOOKING_TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * True when the visitor has picked a day that EXISTS.
+ *
+ * Replaces the shape-only pattern the page used to test: that accepted
+ * `2026-02-30`, so the page queried availability for a day that never happens.
+ * The shared rule checks the calendar too.
+ */
+export function isBookingDateKey(value: string): boolean {
+  return isoDate(value).valid;
+}
 
 export const bookingDraftSchema = z.object({
   /** Center service ids; at least one is required to search or to book. */
@@ -28,7 +37,7 @@ export const bookingDraftSchema = z.object({
     .refine((ids) => new Set(ids).size === ids.length, {
       message: "web.centers.booking.required_services",
     }),
-  date: z.string().regex(BOOKING_DATE_PATTERN, validationKeys.required),
+  date: zIsoDate(),
   startTime: z.string().regex(BOOKING_TIME_PATTERN, validationKeys.required),
   /** `null` means "any professional": the server assigns one. */
   personnelId: z.number().int().positive().nullable(),

@@ -1,11 +1,18 @@
 import { z } from "zod";
 import {
   LIMITS,
+  decimal as coreDecimal,
   email as coreEmail,
+  integer as coreInteger,
+  isoDate as coreIsoDate,
+  parseAmount,
   password as corePassword,
   phone as corePhone,
   text as coreText,
+  type AmountBounds,
+  type DateBounds,
   type LengthBounds,
+  type NumberBounds,
   type ValidationCode,
   type ValidationResult,
 } from "yotuvia-core";
@@ -86,22 +93,24 @@ export function refineWithRule(
 }
 
 /**
- * A required text field bounded like the API bounds it.
+ * A text field bounded like the API bounds it.
  *
  * `.trim()` runs BEFORE the rule, so the value zod hands on is the same one the
  * rule measured — the server counts raw bytes and would otherwise reject a value
- * the form approved.
+ * the form approved. Required unless `options.optional` says otherwise.
  */
-export function zText(bounds: LengthBounds, overrides?: MessageOverrides) {
-  return z.string().trim().superRefine(refineWithRule((value) => coreText(value, bounds), overrides));
+export function zText(bounds: LengthBounds, options: FieldOptions = {}) {
+  return z.string().trim().superRefine(refineField((value) => coreText(value, bounds), options));
 }
 
 /** An email field: shape failure reads as "invalid email", not "invalid format". */
-export function zEmailAddress() {
-  return z
-    .string()
-    .trim()
-    .superRefine(refineWithRule((value) => coreEmail(value), { invalid_format: validationKeys.emailInvalid }));
+export function zEmailAddress(options: FieldOptions = {}) {
+  return z.string().trim().superRefine(
+    refineField((value) => coreEmail(value), {
+      ...options,
+      overrides: { invalid_format: validationKeys.emailInvalid, ...options.overrides },
+    }),
+  );
 }
 
 /**
@@ -125,4 +134,110 @@ export function zPassword() {
  */
 export function zPhone() {
   return z.string().trim().superRefine(refineWithRule((value) => corePhone(value)));
+}
+
+/**
+ * Options for the rules below, which — unlike `zText` — accept an empty value.
+ *
+ * `optional` exists because the API applies many fields only when they are
+ * present (`omitempty`): clearing one is a legitimate no-op, so the rule must not
+ * report `required` for a field the server would simply skip. Validation then
+ * applies to the typed value alone.
+ */
+export interface FieldOptions {
+  overrides?: MessageOverrides;
+  optional?: boolean;
+}
+
+/** Empty after trim — exactly the value a `required` rule would reject. */
+function isBlank(value: string): boolean {
+  return value.trim().length === 0;
+}
+
+/** Runs a rule and maps its code, honouring `optional` for a blank value. */
+function refineField(
+  rule: (value: string) => ValidationResult,
+  options: FieldOptions,
+) {
+  return (value: string, ctx: z.RefinementCtx): void => {
+    if (options.optional && isBlank(value)) return;
+    const result = rule(value);
+    if (!result.valid) {
+      ctx.addIssue({ code: "custom", message: messageKeyFor(result.issue.code, options.overrides) });
+    }
+  };
+}
+
+/** A whole number (minutes, steps, quantities), bounded like the API bounds it. */
+export function zInteger(bounds: NumberBounds = {}, options: FieldOptions = {}) {
+  return z.string().trim().superRefine(refineField((value) => coreInteger(value, bounds), options));
+}
+
+/**
+ * A decimal that is NOT money (coordinates, ratios).
+ *
+ * Canonical shape only: `1.234` here is one-point-two-three-four, never a
+ * thousands grouping. Formatted amounts go through `zAmount`.
+ */
+export function zDecimal(
+  bounds: NumberBounds & { maxDecimals?: number } = {},
+  options: FieldOptions = {},
+) {
+  return z.string().trim().superRefine(refineField((value) => coreDecimal(value, bounds), options));
+}
+
+/**
+ * A money field, read the way the viewer typed it.
+ *
+ * Build the payload with `amountFromField`, never `Number`/`parseFloat`: the rule
+ * understands `1.234,56` as 1234.56, and a second parser would read it as 1.234.
+ */
+export function zAmount(bounds: AmountBounds = {}, options: FieldOptions = {}) {
+  return z.string().trim().superRefine(refineField((value) => parseAmount(value, bounds), options));
+}
+
+/** The value a money field should send, read by the rule that validated it. */
+export function amountFromField(value: string, bounds: AmountBounds = {}): number {
+  return parseAmount(value, bounds).value ?? 0;
+}
+
+/** The value a whole-number field should send, read by the rule that validated it. */
+export function integerFromField(value: string, bounds: NumberBounds = {}): number {
+  return coreInteger(value, bounds).value ?? 0;
+}
+
+/** The value a decimal field should send, read by the rule that validated it. */
+export function decimalFromField(
+  value: string,
+  bounds: NumberBounds & { maxDecimals?: number } = {},
+): number {
+  return coreDecimal(value, bounds).value ?? 0;
+}
+
+/** A real calendar day (`YYYY-MM-DD`); a day that does not exist is rejected here. */
+export function zIsoDate(bounds: DateBounds = {}, options: FieldOptions = {}) {
+  return z.string().trim().superRefine(refineField((value) => coreIsoDate(value, bounds), options));
+}
+
+/**
+ * A password field the user may leave EMPTY to keep the current one.
+ *
+ * Emptiness is checked on the raw value, not the trimmed one: a password is
+ * taken literally, and `" "` is a one-character password the rule must judge, not
+ * an absent field. Deliberately not trimmed, for the same reason.
+ */
+export function zOptionalPassword(): z.ZodString {
+  return z.string().superRefine((value, ctx) => {
+    if (value.length === 0) return;
+    const result = corePassword(value);
+    if (!result.valid) {
+      ctx.addIssue({
+        code: "custom",
+        message: messageKeyFor(result.issue.code, {
+          too_short: validationKeys.passwordMin,
+          too_long: validationKeys.passwordMax,
+        }),
+      });
+    }
+  });
 }

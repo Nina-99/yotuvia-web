@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { isSupportedExternalUrl } from "yotuvia-core";
+import { LIMITS, isSupportedExternalUrl } from "yotuvia-core";
+
+import { zText } from "./validation";
 
 // Re-exported so the schema's callers keep a single import site; the matcher
 // itself lives in core so web and mobile reject the same hosts.
@@ -8,11 +10,10 @@ export { isSupportedExternalUrl };
 /**
  * Feed-post form schemas for the owner content section.
  *
- * Rules mirror the backend contract
- * (`yotuvia-api/service/feed_post.service.impl.go`):
+ * The caption BOUND comes from the shared `LIMITS`, which mirrors the Go DTO
+ * (`validate:"max=255"`), and the rules are the shared ones.
  * - Creation requires `caption || service_id || is_promo` — a bare video is
  *   rejected with "caption, service or promo flag required".
- * - `caption` is capped at 255 characters (`validate:"max=255"`).
  * - Creation uploads a video; the service accepts only `.mp4`, `.mov` or
  *   `.webm` and at most 100 MB (`validateMedia`).
  * - The update endpoint (`UpdateFeedPostRequest`) carries ONLY `caption` and
@@ -21,7 +22,7 @@ export { isSupportedExternalUrl };
  *   cleared once set — the edit form therefore requires a non-empty caption.
  */
 
-export const FEED_POST_CAPTION_MAX = 255;
+export const FEED_POST_CAPTION_MAX = LIMITS.feedCaption.max;
 
 /** Maximum video size accepted by the backend (100 MB). */
 export const FEED_POST_VIDEO_MAX_BYTES = 100 * 1024 * 1024;
@@ -60,7 +61,19 @@ export function isAcceptedVideoFile(file: File): boolean {
   return FEED_POST_VIDEO_EXTENSIONS.some((extension) => name.endsWith(extension));
 }
 
-const captionField = z.string().trim().max(FEED_POST_CAPTION_MAX, contentValidationKeys.caption);
+/** Optional caption: empty is allowed, the API simply stores nothing. */
+const captionField = zText(LIMITS.feedCaption, {
+  optional: true,
+  overrides: { too_long: contentValidationKeys.caption },
+});
+
+/** Edit caption: the API ignores an empty one, so clearing is not expressible. */
+const editCaptionField = zText(LIMITS.feedCaption, {
+  overrides: {
+    required: contentValidationKeys.captionRequired,
+    too_long: contentValidationKeys.caption,
+  },
+});
 
 /**
  * Create form.
@@ -75,7 +88,7 @@ export const feedPostCreateSchema = z
     isPromo: z.boolean(),
     serviceId: z.string(),
     personnelId: z.string(),
-    videoName: z.string().min(1, contentValidationKeys.videoRequired),
+    videoName: zText({}, { overrides: { required: contentValidationKeys.videoRequired } }),
   })
   .superRefine((values, ctx) => {
     if (values.caption === "" && values.serviceId === NO_SERVICE_VALUE && !values.isPromo) {
@@ -95,11 +108,9 @@ export type FeedPostCreateValues = z.infer<typeof feedPostCreateSchema>;
  */
 export const feedPostExternalSchema = z
   .object({
-    externalUrl: z
-      .string()
-      .trim()
-      .min(1, contentValidationKeys.externalUrlRequired)
-      .refine(isSupportedExternalUrl, contentValidationKeys.externalUrlInvalid),
+    externalUrl: zText({}, {
+      overrides: { required: contentValidationKeys.externalUrlRequired },
+    }).refine(isSupportedExternalUrl, contentValidationKeys.externalUrlInvalid),
     caption: captionField,
     isPromo: z.boolean(),
     serviceId: z.string(),
@@ -119,7 +130,7 @@ export type FeedPostExternalValues = z.infer<typeof feedPostExternalSchema>;
 
 /** Edit form: only the fields `UpdateFeedPostRequest` accepts. */
 export const feedPostEditSchema = z.object({
-  caption: captionField.min(1, contentValidationKeys.captionRequired),
+  caption: editCaptionField,
   isPromo: z.boolean(),
 });
 
@@ -127,7 +138,7 @@ export type FeedPostEditValues = z.infer<typeof feedPostEditSchema>;
 
 /** Suspension note; the backend reads an empty note as "re-enable". */
 export const suspendNoteSchema = z.object({
-  note: z.string().trim().min(1, contentValidationKeys.noteRequired),
+  note: zText({}, { overrides: { required: contentValidationKeys.noteRequired } }),
 });
 
 export type SuspendNoteValues = z.infer<typeof suspendNoteSchema>;

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   DEFAULT_LANGUAGE,
+  LIMITS,
   baseTranslation,
   compactTranslation,
   fullTranslation,
@@ -8,7 +9,18 @@ import {
 } from "yotuvia-core";
 import type { BeautyCenter, PaymentConfig, SocialMedia, WorkingHour } from "yotuvia-core";
 
-import { validationKeys } from "./validation";
+import {
+  amountFromField,
+  decimalFromField,
+  integerFromField,
+  validationKeys,
+  zAmount,
+  zDecimal,
+  zEmailAddress,
+  zInteger,
+  zOptionalPassword,
+  zText,
+} from "./validation";
 
 /**
  * Profile-section schemas: center details (with working hours), gallery images,
@@ -41,14 +53,20 @@ const URL_PATTERN = /^https?:\/\/\S+$/i;
  * `javascript:`, a bare fragment) is rejected before it reaches the server.
  */
 const IMAGE_URL_PATTERN = /^(https?:\/\/|\/)[^\s]*$/i;
-const INTEGER_PATTERN = /^\d+$/;
-const DECIMAL_PATTERN = /^\d+(\.\d{1,2})?$/;
 const CURRENCY_PATTERN = /^[A-Z]{3}$/;
+/**
+ * A percentage: canonical, at most two decimals.
+ *
+ * Deliberately NOT the money rule: a percentage is capped at 100, so locale
+ * grouping could only ever produce a value the API rejects.
+ */
+const PERCENT_PATTERN = /^\d+(\.\d{1,2})?$/;
 
+/** CLIENT-ONLY: the API declares no maximum on the center name. */
 export const CENTER_NAME_MAX = 120;
-export const CENTER_DESCRIPTION_MAX = 255;
-export const CENTER_EMAIL_MAX = 70;
-export const CENTER_PHONE_MAX = 20;
+export const CENTER_DESCRIPTION_MAX = LIMITS.centerDescription.max;
+export const CENTER_EMAIL_MAX = LIMITS.email.max;
+export const CENTER_PHONE_MAX = LIMITS.phone.max;
 
 export const profileValidationKeys = {
   required: validationKeys.required,
@@ -135,74 +153,86 @@ const optionalSocialUrl = z
   .trim()
   .refine((value) => value === "" || URL_PATTERN.test(value), profileValidationKeys.socialUrl);
 
-const optionalAmount = z
-  .string()
-  .trim()
-  .refine((value) => value === "" || DECIMAL_PATTERN.test(value), profileValidationKeys.number);
+/** Optional money: blank stays valid and the API keeps the stored amount. */
+const optionalAmount = zAmount({ min: 0 }, {
+  optional: true,
+  overrides: {
+    invalid_format: profileValidationKeys.number,
+    out_of_range: profileValidationKeys.number,
+    too_many_decimals: profileValidationKeys.number,
+  },
+});
 
-const optionalLatitude = z
-  .string()
-  .trim()
-  .refine((value) => {
-    if (value === "") return true;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) && parsed >= -90 && parsed <= 90;
-  }, profileValidationKeys.latitude);
+/**
+ * A coordinate. Canonical only — the API declares no range, so ±90/±180 is the
+ * form's own sanity bound, and reading a pasted `1e5` or `0x10` as a location
+ * would send the map somewhere real.
+ */
+const optionalLatitude = zDecimal({ min: -90, max: 90 }, {
+  optional: true,
+  overrides: {
+    not_a_number: profileValidationKeys.latitude,
+    out_of_range: profileValidationKeys.latitude,
+  },
+});
 
-const optionalLongitude = z
-  .string()
-  .trim()
-  .refine((value) => {
-    if (value === "") return true;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) && parsed >= -180 && parsed <= 180;
-  }, profileValidationKeys.longitude);
+const optionalLongitude = zDecimal({ min: -180, max: 180 }, {
+  optional: true,
+  overrides: {
+    not_a_number: profileValidationKeys.longitude,
+    out_of_range: profileValidationKeys.longitude,
+  },
+});
 
-const optionalInteger = z
-  .string()
-  .trim()
-  .refine((value) => value === "" || INTEGER_PATTERN.test(value), profileValidationKeys.number);
+/** A non-negative whole number (minutes, thresholds). */
+const optionalInteger = zInteger({ min: 0 }, {
+  optional: true,
+  overrides: {
+    not_a_number: profileValidationKeys.number,
+    out_of_range: profileValidationKeys.number,
+  },
+});
 
 export const centerProfileSchema = z
   .object({
     nameI18n: z.record(
       z.string(),
-      z.string().trim().max(CENTER_NAME_MAX, profileValidationKeys.max),
+      zText({ max: CENTER_NAME_MAX }, {
+        optional: true,
+        overrides: { too_long: profileValidationKeys.max },
+      }),
     ),
-    address: z
-      .string()
-      .trim()
-      .min(5, profileValidationKeys.addressMin)
-      .max(200, profileValidationKeys.max),
-    email: z
-      .string()
-      .trim()
-      .min(1, validationKeys.required)
-      .max(CENTER_EMAIL_MAX, profileValidationKeys.max)
-      .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, validationKeys.emailInvalid),
-    phone: z
-      .string()
-      .trim()
-      .min(1, validationKeys.required)
-      .max(CENTER_PHONE_MAX, profileValidationKeys.max),
+    address: zText({ min: 5, max: 200 }, {
+      overrides: {
+        // Blank would already read as `required`; the field's own copy is clearer.
+        required: profileValidationKeys.addressMin,
+        too_short: profileValidationKeys.addressMin,
+        too_long: profileValidationKeys.max,
+      },
+    }),
+    email: zEmailAddress({ overrides: { too_long: profileValidationKeys.max } }),
+    phone: zText(LIMITS.phone, {
+      overrides: { too_long: profileValidationKeys.max },
+    }),
     url: optionalUrl,
     descriptionI18n: z.record(
       z.string(),
-      z.string().trim().max(CENTER_DESCRIPTION_MAX, profileValidationKeys.max),
+      zText({ max: CENTER_DESCRIPTION_MAX }, {
+        optional: true,
+        overrides: { too_long: profileValidationKeys.max },
+      }),
     ),
     currency: z.string().regex(CURRENCY_PATTERN, profileValidationKeys.currency),
     latitude: optionalLatitude,
     longitude: optionalLongitude,
-    password: z
-      .string()
-      .refine((value) => value === "" || value.length >= 8, validationKeys.passwordMin),
+    password: zOptionalPassword(),
     depositRequired: z.boolean(),
     depositAmount: optionalAmount,
     depositPercent: z
       .string()
       .trim()
       .refine(
-        (value) => value === "" || (DECIMAL_PATTERN.test(value) && Number(value) <= 100),
+        (value) => value === "" || (PERCENT_PATTERN.test(value) && Number(value) <= 100),
         profileValidationKeys.percent,
       ),
     depositTrustThreshold: optionalInteger,
@@ -276,10 +306,18 @@ export function centerToFormValues(center: BeautyCenter): CenterProfileFormValue
   };
 }
 
-/** Parses an optional numeric field into a number, or `undefined` when blank. */
-function optionalNumber(value: string): number | undefined {
-  const trimmed = value.trim();
-  return trimmed === "" ? undefined : Number(trimmed);
+/**
+ * A blank optional field is OMITTED, so the Go service keeps the stored value.
+ *
+ * The non-blank value is read by the SAME rule that validated it: converting
+ * with `Number` after validating with a shared rule would read `1.234,56` as
+ * 1.234 — and a money field is exactly where that hurts.
+ */
+function optionalFromField(
+  value: string,
+  parse: (value: string) => number,
+): number | undefined {
+  return value.trim() === "" ? undefined : parse(value);
 }
 
 /**
@@ -309,20 +347,30 @@ export function toCenterUpdatePayload(
     })),
   };
 
-  const latitude = optionalNumber(values.latitude);
+  const latitude = optionalFromField(values.latitude, (value) =>
+    decimalFromField(value, { min: -90, max: 90 }),
+  );
   if (latitude !== undefined) payload.latitude = latitude;
-  const longitude = optionalNumber(values.longitude);
+  const longitude = optionalFromField(values.longitude, (value) =>
+    decimalFromField(value, { min: -180, max: 180 }),
+  );
   if (longitude !== undefined) payload.longitude = longitude;
 
   if (values.password !== "") payload.password = values.password;
 
-  const depositAmount = optionalNumber(values.depositAmount);
+  const depositAmount = optionalFromField(values.depositAmount, (value) =>
+    amountFromField(value, { min: 0 }),
+  );
   if (depositAmount !== undefined) payload.depositAmount = depositAmount;
-  const depositPercent = optionalNumber(values.depositPercent);
+  const depositPercent = optionalFromField(values.depositPercent, Number);
   if (depositPercent !== undefined) payload.depositPercent = depositPercent;
-  const depositTrustThreshold = optionalNumber(values.depositTrustThreshold);
+  const depositTrustThreshold = optionalFromField(values.depositTrustThreshold, (value) =>
+    integerFromField(value, { min: 0 }),
+  );
   if (depositTrustThreshold !== undefined) payload.depositTrustThreshold = depositTrustThreshold;
-  const depositHoldMinutes = optionalNumber(values.depositHoldMinutes);
+  const depositHoldMinutes = optionalFromField(values.depositHoldMinutes, (value) =>
+    integerFromField(value, { min: 0 }),
+  );
   if (depositHoldMinutes !== undefined) payload.depositHoldMinutes = depositHoldMinutes;
   if (values.depositQrUrl.trim() !== "") payload.depositQrUrl = values.depositQrUrl.trim();
 
@@ -390,18 +438,30 @@ export function toSocialUpsertPayload(
 
 export const paymentTierSchema = z.object({
   currency: z.string().trim().toUpperCase().regex(CURRENCY_PATTERN, profileValidationKeys.paymentCurrency),
-  min: z.string().trim().regex(DECIMAL_PATTERN, profileValidationKeys.paymentTierMin),
+  /** A tier minimum is MONEY, so it is read the way the viewer typed it. */
+  min: zAmount({ min: 0 }, {
+    overrides: {
+      invalid_format: profileValidationKeys.paymentTierMin,
+      out_of_range: profileValidationKeys.paymentTierMin,
+      too_many_decimals: profileValidationKeys.paymentTierMin,
+    },
+  }),
   bonusPct: z
     .string()
     .trim()
-    .regex(DECIMAL_PATTERN, profileValidationKeys.paymentTierBonus)
+    .regex(PERCENT_PATTERN, profileValidationKeys.paymentTierBonus)
     .refine((value) => Number(value) <= 100, profileValidationKeys.paymentTierBonus),
 });
 
 export type PaymentTierFormValues = z.infer<typeof paymentTierSchema>;
 
 export const paymentConfigSchema = z.object({
-  paymentPhone: z.string().trim().min(1, profileValidationKeys.paymentPhone).max(20, profileValidationKeys.max),
+  paymentPhone: zText(LIMITS.phone, {
+    overrides: {
+      required: profileValidationKeys.paymentPhone,
+      too_long: profileValidationKeys.max,
+    },
+  }),
   tiers: z.array(paymentTierSchema),
 });
 
@@ -423,7 +483,10 @@ export function paymentConfigToFormValues(config: PaymentConfig): PaymentConfigF
       });
     }
   }
-  rows.sort((a, b) => a.currency.localeCompare(b.currency) || Number(a.min) - Number(b.min));
+  rows.sort(
+    (a, b) =>
+      a.currency.localeCompare(b.currency) || amountFromField(a.min) - amountFromField(b.min),
+  );
   return { paymentPhone: config.payment_phone ?? "", tiers: rows };
 }
 
@@ -435,7 +498,7 @@ export function toPaymentTiersPayload(
   for (const row of rows) {
     const currency = row.currency.trim().toUpperCase();
     const bucket = tiers[currency] ?? [];
-    bucket.push({ min: Number(row.min), bonusPct: Number(row.bonusPct) });
+    bucket.push({ min: amountFromField(row.min, { min: 0 }), bonusPct: Number(row.bonusPct) });
     tiers[currency] = bucket;
   }
   return tiers;

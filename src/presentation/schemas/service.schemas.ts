@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   DEFAULT_LANGUAGE,
+  LIMITS,
   baseTranslation,
   compactTranslation,
   emptyTranslationMap,
@@ -14,7 +15,14 @@ import type {
   UpdateServiceData,
 } from "yotuvia-core";
 
-import { validationKeys } from "./validation";
+import {
+  amountFromField,
+  integerFromField,
+  validationKeys,
+  zAmount,
+  zInteger,
+  zText,
+} from "./validation";
 
 /**
  * Service and category form schemas (multi-language, DYNAMIC).
@@ -46,12 +54,21 @@ export const serviceValidationKeys = {
   categoryDescriptionTooLong: "web.app.services.category_form.errors.description_too_long",
 } as const;
 
-/** API limits (`CreateServiceRequest` / `CreateCategoryRequest`). */
-export const SERVICE_NAME_MIN = 2;
-export const SERVICE_NAME_MAX = 100;
+/** API limits (`CreateServiceRequest` / `CreateCategoryRequest`), from the shared contract. */
+export const SERVICE_NAME_MIN = LIMITS.serviceName.min;
+export const SERVICE_NAME_MAX = LIMITS.serviceName.max;
+export const CATEGORY_NAME_MIN = LIMITS.categoryName.min;
+
+/**
+ * CLIENT-ONLY caps: the API declares no maximum on these fields.
+ *
+ * `description` is only `required`, `duration` only `gt=0`, `category.name` only
+ * `min=3` — so these are the form's own guard against absurd input, deliberately
+ * stricter than the contract. They stay here rather than in the shared `LIMITS`,
+ * which mirrors the DTOs and must not claim a bound the API does not enforce.
+ */
 export const SERVICE_DESCRIPTION_MAX = 500;
 export const SERVICE_DURATION_MAX = 600;
-export const CATEGORY_NAME_MIN = 3;
 export const CATEGORY_NAME_MAX = 100;
 export const CATEGORY_DESCRIPTION_MAX = 255;
 const IMAGE_URL_MAX = 255;
@@ -62,35 +79,34 @@ const IMAGE_URL_MAX = 255;
  * the form-level refine requires at least ONE language to be filled.
  */
 function translationMapValue(min: number, tooShort: string, max: number, tooLong: string) {
-  return z
-    .string()
-    .trim()
-    .max(max, tooLong)
-    .refine((value) => value === "" || value.length >= min, { message: tooShort });
+  return zText({ min, max }, { optional: true, overrides: { too_short: tooShort, too_long: tooLong } });
 }
 
-const descriptionMapValue = z
-  .string()
-  .trim()
-  .max(SERVICE_DESCRIPTION_MAX, serviceValidationKeys.descriptionTooLong);
+const descriptionMapValue = zText(
+  { max: SERVICE_DESCRIPTION_MAX },
+  { optional: true, overrides: { too_long: serviceValidationKeys.descriptionTooLong } },
+);
 
-const durationField = z
-  .string()
-  .trim()
-  .min(1, validationKeys.required)
-  .refine(
-    (value) =>
-      /^\d+$/.test(value) && Number(value) > 0 && Number(value) <= SERVICE_DURATION_MAX,
-    { message: serviceValidationKeys.durationInvalid },
-  );
+const durationField = zInteger(
+  { min: LIMITS.serviceDurationMin, max: SERVICE_DURATION_MAX },
+  {
+    overrides: {
+      not_a_number: serviceValidationKeys.durationInvalid,
+      out_of_range: serviceValidationKeys.durationInvalid,
+    },
+  },
+);
 
-const priceField = z
-  .string()
-  .trim()
-  .min(1, validationKeys.required)
-  .refine((value) => /^\d+(\.\d{1,2})?$/.test(value), {
-    message: serviceValidationKeys.priceInvalid,
-  });
+const priceField = zAmount(
+  { min: LIMITS.servicePriceMin },
+  {
+    overrides: {
+      invalid_format: serviceValidationKeys.priceInvalid,
+      out_of_range: serviceValidationKeys.priceInvalid,
+      too_many_decimals: serviceValidationKeys.priceInvalid,
+    },
+  },
+);
 
 /**
  * Accepts an empty value, an absolute `http(s)` URL, or a root-relative path —
@@ -115,7 +131,9 @@ const serviceFormShape = {
     ),
   ),
   descriptionI18n: z.record(z.string(), descriptionMapValue),
-  categoryId: z.string().min(1, serviceValidationKeys.categoryRequired),
+  categoryId: zInteger({ min: 1 }, {
+    overrides: { not_a_number: serviceValidationKeys.categoryRequired },
+  }),
   duration: durationField,
   price: priceField,
   imageUrl: imageUrlField,
@@ -217,9 +235,12 @@ export function toCreateServiceData(
     name: baseTranslation(values.nameI18n),
     nameI18n: compactTranslation(values.nameI18n),
     beautyCenterId: centerId,
-    categoryId: Number(values.categoryId),
-    duration: Number(values.duration),
-    price: Number(values.price),
+    categoryId: integerFromField(values.categoryId, { min: 1 }),
+    duration: integerFromField(values.duration, {
+      min: LIMITS.serviceDurationMin,
+      max: SERVICE_DURATION_MAX,
+    }),
+    price: amountFromField(values.price, { min: LIMITS.servicePriceMin }),
     description: baseTranslation(values.descriptionI18n),
     descriptionI18n: compactTranslation(values.descriptionI18n),
     imageUrl: values.imageUrl.trim(),
@@ -237,9 +258,12 @@ export function toUpdateServiceData(values: ServiceFormValues): UpdateServiceDat
   return {
     name: baseTranslation(values.nameI18n),
     nameI18n: compactTranslation(values.nameI18n),
-    categoryId: Number(values.categoryId),
-    duration: Number(values.duration),
-    price: Number(values.price),
+    categoryId: integerFromField(values.categoryId, { min: 1 }),
+    duration: integerFromField(values.duration, {
+      min: LIMITS.serviceDurationMin,
+      max: SERVICE_DURATION_MAX,
+    }),
+    price: amountFromField(values.price, { min: LIMITS.servicePriceMin }),
     description: baseTranslation(values.descriptionI18n),
     descriptionI18n: compactTranslation(values.descriptionI18n),
     imageUrl: values.imageUrl.trim(),
