@@ -1368,6 +1368,13 @@
     "auth_resend_verification": "Could not resend the email. Please try again.",
     "auth_logout_all": "Could not sign out on all devices."
   },
+  "security": {
+    "section_title": "Security",
+    "logout_all": "Sign out on all devices",
+    "logout_all_title": "Sign out on all devices",
+    "logout_all_confirm": "You will have to sign in again on all your devices.",
+    "logout_all_error": "Could not sign out on all devices. Please try again."
+  },
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all as read",

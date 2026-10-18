@@ -4,6 +4,7 @@ import { imageUrl } from "yotuvia-core";
 
 import { ClientProfileForm } from "@/presentation/components/client";
 import { ClientLoyaltySection } from "@/presentation/components/client";
+import { SecuritySection } from "@/presentation/components/client";
 import { ProfileImageInput } from "@/presentation/components/profile";
 import {
   Badge,
@@ -216,6 +217,8 @@ export function ClientProfilePage() {
       </Card>
 
       {clientId > 0 ? <ClientLoyaltySection clientId={clientId} /> : null}
+
+      {clientId > 0 ? <SecuritySection /> : null}
     </div>
   );
 }

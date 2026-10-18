@@ -1368,6 +1368,13 @@
     "auth_resend_verification": "No se pudo reenviar el email. Intentá de nuevo.",
     "auth_logout_all": "No se pudo cerrar la sesión en todos los dispositivos."
   },
+  "security": {
+    "section_title": "Seguridad",
+    "logout_all": "Cerrar sesión en todos los dispositivos",
+    "logout_all_title": "Cerrar sesión en todos los dispositivos",
+    "logout_all_confirm": "Vas a tener que iniciar sesión de nuevo en todos tus dispositivos.",
+    "logout_all_error": "No se pudo cerrar la sesión en todos los dispositivos. Intentá de nuevo."
+  },
   "notifications": {
     "title": "Notificaciones",
     "markAllRead": "Marcar todo leído",

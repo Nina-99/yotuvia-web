@@ -1,5 +1,6 @@
 export { DepositDialog } from "./DepositDialog";
 export type { DepositDialogProps } from "./DepositDialog";
+export { SecuritySection } from "./SecuritySection";
 export { CancelReservationDialog } from "./CancelReservationDialog";
 export type { CancelReservationDialogProps } from "./CancelReservationDialog";
 export { CenterCard } from "./CenterCard";
