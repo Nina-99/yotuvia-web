@@ -9,14 +9,15 @@ import { queryKeys } from "@/presentation/lib/query-keys";
  *
  * REPOSITORY-DIRECT: `yotuvia-core` ships the `IVisitNoteRepository` port and
  * its API binding but no use-cases for it. Every call is claim-scoped — the API
- * derives the author from the session.
+ * derives the author AND its role from the session, so the same hook serves the
+ * staff and the owner surfaces.
  */
 
 /** The caller's notes on visits within `[from, to]` (`YYYY-MM-DD`). */
-export function useMyVisitNotes(from: string, to: string) {
+export function useVisitNotes(from: string, to: string) {
   return useQuery({
     queryKey: queryKeys.visitNotes.range(from, to),
-    queryFn: () => dependencies.visitNoteRepository.listMine(from, to),
+    queryFn: () => dependencies.visitNoteRepository.list(from, to),
   });
 }
 

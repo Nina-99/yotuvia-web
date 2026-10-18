@@ -3,8 +3,8 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { listMine, upsert, remove } = vi.hoisted(() => ({
-  listMine: vi.fn(),
+const { list, upsert, remove } = vi.hoisted(() => ({
+  list: vi.fn(),
   upsert: vi.fn(),
   remove: vi.fn(),
 }));
@@ -13,11 +13,11 @@ const { listMine, upsert, remove } = vi.hoisted(() => ({
 // with the smallest possible double for the hooks under test.
 vi.mock("@/di/container", () => ({
   dependencies: {
-    visitNoteRepository: { listMine, upsert, remove },
+    visitNoteRepository: { list, upsert, remove },
   },
 }));
 
-import { useMyVisitNotes, useUpsertVisitNote } from "../use-visit-notes";
+import { useVisitNotes, useUpsertVisitNote } from "../use-visit-notes";
 
 function createWrapper() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -28,21 +28,21 @@ function createWrapper() {
 
 describe("use-visit-notes", () => {
   beforeEach(() => {
-    listMine.mockReset();
+    list.mockReset();
     upsert.mockReset();
     remove.mockReset();
   });
 
   it("loads the caller's notes over the range", async () => {
-    listMine.mockResolvedValue([{ id: 1, reservationId: 7, body: "note" }]);
+    list.mockResolvedValue([{ id: 1, reservationId: 7, body: "note" }]);
 
-    const { result } = renderHook(() => useMyVisitNotes("2026-10-01", "2026-10-31"), {
+    const { result } = renderHook(() => useVisitNotes("2026-10-01", "2026-10-31"), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(listMine).toHaveBeenCalledWith("2026-10-01", "2026-10-31");
+    expect(list).toHaveBeenCalledWith("2026-10-01", "2026-10-31");
     expect(result.current.data).toEqual([{ id: 1, reservationId: 7, body: "note" }]);
   });
 

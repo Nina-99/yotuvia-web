@@ -13,6 +13,7 @@ import {
   Modal,
   Select,
   Skeleton,
+  Textarea,
   useToast,
 } from "@/presentation/components/ui";
 import type { BadgeVariant } from "@/presentation/components/ui";
@@ -20,6 +21,11 @@ import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useAuthSession } from "@/presentation/hooks/use-auth-session";
 import { QrCheckInPanel } from "@/presentation/components/staff";
 import { useCenterPersonnel } from "@/presentation/hooks/use-personnel";
+import {
+  useDeleteVisitNote,
+  useUpsertVisitNote,
+  useVisitNotes,
+} from "@/presentation/hooks/use-visit-notes";
 import {
   useAssignPersonnel,
   useCenterReservations,
@@ -97,6 +103,9 @@ interface ReservationRowProps {
   onStatusAction: (reservationId: number, status: string) => void;
   onReviewProof: (reservationId: number, approve: boolean) => void;
   onReassign: (reservation: Reservation) => void;
+  /** The owner's own note on this visit, if any. */
+  note?: string;
+  onEditNote: (reservation: Reservation) => void;
   busy: boolean;
 }
 
@@ -107,6 +116,8 @@ function ReservationRow({
   onStatusAction,
   onReviewProof,
   onReassign,
+  note,
+  onEditNote,
   busy,
 }: ReservationRowProps) {
   const { t } = useTranslation();
@@ -144,35 +155,44 @@ function ReservationRow({
         </span>
       </div>
 
+      {note ? (
+        <p className="whitespace-pre-wrap rounded-md bg-card2 p-2 text-xs text-text">{note}</p>
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-bold text-success">
           {formatCurrency(reservation.totalPrice, language, currency)}
         </span>
-        {actions.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {(reservation.status === "PENDING" || reservation.status === "CONFIRMED") ? (
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={busy}
-                onClick={() => onReassign(reservation)}
-              >
-                {t("web.app.agenda.actions.reassign")}
-              </Button>
-            ) : null}
-            {actions.map((action) => (
-              <Button
-                key={action.status}
-                size="sm"
-                variant={action.status === "CANCELLED" ? "danger" : "secondary"}
-                disabled={busy}
-                onClick={() => onStatusAction(reservation.id, action.status)}
-              >
-                {t(action.labelKey)}
-              </Button>
-            ))}
-          </div>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="ghost" onClick={() => onEditNote(reservation)}>
+            {note ? t("web.visit_notes.edit") : t("web.visit_notes.add")}
+          </Button>
+          {actions.length > 0 ? (
+            <>
+              {(reservation.status === "PENDING" || reservation.status === "CONFIRMED") ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => onReassign(reservation)}
+                >
+                  {t("web.app.agenda.actions.reassign")}
+                </Button>
+              ) : null}
+              {actions.map((action) => (
+                <Button
+                  key={action.status}
+                  size="sm"
+                  variant={action.status === "CANCELLED" ? "danger" : "secondary"}
+                  disabled={busy}
+                  onClick={() => onStatusAction(reservation.id, action.status)}
+                >
+                  {t(action.labelKey)}
+                </Button>
+              ))}
+            </>
+          ) : null}
+        </div>
       </div>
 
       {reservation.paymentStatus === "PENDING_PROOF" ? (
@@ -254,6 +274,9 @@ export function AgendaPage() {
   const [assignTarget, setAssignTarget] = useState<Reservation | null>(null);
   const [assignee, setAssignee] = useState("");
   const [scanOpen, setScanOpen] = useState(false);
+  // Owner visit notes (C3): the visit being annotated and its draft text.
+  const [noteTarget, setNoteTarget] = useState<Reservation | null>(null);
+  const [noteText, setNoteText] = useState("");
 
   const { toast } = useToast();
   const updateStatus = useUpdateReservationStatus();
@@ -268,6 +291,37 @@ export function AgendaPage() {
 
   const reservationsQuery = useCenterReservations(centerId, range.from, range.to);
   const personnelQuery = useCenterPersonnel(centerId);
+  // The owner's OWN notes over the visible range (claim-scoped by the API).
+  const notesQuery = useVisitNotes(range.from, range.to);
+  const upsertNote = useUpsertVisitNote();
+  const deleteNote = useDeleteVisitNote();
+
+  /** reservationId → the owner's note body, for the visible range. */
+  const notesByReservation = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const note of notesQuery.data ?? []) map.set(note.reservationId, note.body);
+    return map;
+  }, [notesQuery.data]);
+
+  const openNote = (reservation: Reservation) => {
+    setNoteTarget(reservation);
+    setNoteText(notesByReservation.get(reservation.id) ?? "");
+  };
+
+  const saveNote = () => {
+    if (noteTarget === null) return;
+    const body = noteText.trim();
+    if (body === "") return;
+    upsertNote.mutate(
+      { reservationId: noteTarget.id, body },
+      { onSuccess: () => setNoteTarget(null) },
+    );
+  };
+
+  const clearNote = () => {
+    if (noteTarget === null) return;
+    deleteNote.mutate(noteTarget.id, { onSuccess: () => setNoteTarget(null) });
+  };
   const errorMessage = useErrorMessage(reservationsQuery.error, "web.errors.agenda_fetch");
 
   const sections = useMemo<Section[]>(() => {
@@ -507,6 +561,8 @@ export function AgendaPage() {
                       onStatusAction={(id, status) => void handleStatusAction(id, status)}
                       onReviewProof={(id, approve) => void handleReviewProof(id, approve)}
                       onReassign={setAssignTarget}
+                      note={notesByReservation.get(reservation.id)}
+                      onEditNote={openNote}
                       busy={mutationBusy}
                     />
                   ))}
@@ -562,6 +618,49 @@ export function AgendaPage() {
         title={t("web.app.agenda.scan_title")}
       >
         <QrCheckInPanel />
+      </Modal>
+
+      <Modal
+        open={noteTarget !== null}
+        onClose={() => setNoteTarget(null)}
+        closeLabel={t("common.close")}
+        title={t("web.visit_notes.title")}
+        footer={
+          <>
+            {noteTarget !== null && notesByReservation.has(noteTarget.id) ? (
+              <Button variant="outline" loading={deleteNote.isPending} onClick={clearNote}>
+                {t("common.delete")}
+              </Button>
+            ) : null}
+            <Button variant="outline" onClick={() => setNoteTarget(null)}>
+              {t("common.cancel")}
+            </Button>
+            <Button loading={upsertNote.isPending} disabled={noteText.trim() === ""} onClick={saveNote}>
+              {t("common.save")}
+            </Button>
+          </>
+        }
+      >
+        {noteTarget !== null ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-text-muted">
+              {formatDate(dateKeyFromApi(noteTarget.date), language)} · {formatTime(noteTarget.startTime)}
+            </p>
+            <Textarea
+              label={t("web.visit_notes.label")}
+              value={noteText}
+              maxLength={2000}
+              rows={4}
+              onChange={(event) => setNoteText(event.target.value)}
+            />
+            {upsertNote.errorKey ? (
+              <p role="alert" className="text-sm text-danger">{t(upsertNote.errorKey)}</p>
+            ) : null}
+            {deleteNote.errorKey ? (
+              <p role="alert" className="text-sm text-danger">{t(deleteNote.errorKey)}</p>
+            ) : null}
+          </div>
+        ) : null}
       </Modal>
     </div>
   );

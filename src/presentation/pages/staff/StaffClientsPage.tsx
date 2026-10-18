@@ -17,7 +17,7 @@ import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useStaffAgenda } from "@/presentation/hooks/use-staff";
 import {
   useDeleteVisitNote,
-  useMyVisitNotes,
+  useVisitNotes,
   useUpsertVisitNote,
 } from "@/presentation/hooks/use-visit-notes";
 import { addDays, dateKeyFromApi, toDateKey } from "@/presentation/lib/dates";
@@ -51,7 +51,7 @@ export function StaffClientsPage() {
   const today = toDateKey(new Date());
   const from = addDays(today, -SERVED_WINDOW_DAYS);
   const agendaQuery = useStaffAgenda({ from, to: today });
-  const notesQuery = useMyVisitNotes(from, today);
+  const notesQuery = useVisitNotes(from, today);
   const upsertNote = useUpsertVisitNote();
   const deleteNote = useDeleteVisitNote();
 
