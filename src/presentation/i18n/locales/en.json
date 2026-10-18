@@ -1656,6 +1656,30 @@
       "centers": "Centers",
       "how_it_works": "How it works"
     },
+    "blocks": {
+      "meta_title": "Time off — Yotuvia",
+      "title": "Time off",
+      "form_title": "Block time",
+      "date": "Date",
+      "start": "From",
+      "end": "To",
+      "professional": "Professional",
+      "centre_wide": "Whole centre",
+      "professional_fallback": "Professional #{id}",
+      "reason": "Reason (optional)",
+      "reason_placeholder": "Break, holiday, training…",
+      "submit": "Block",
+      "staff_notice": "Blocks apply to your own schedule. A blocked window is hidden from clients and cannot be booked.",
+      "list_title": "Upcoming blocks",
+      "empty": "No blocks scheduled",
+      "empty_sub": "Blocks you create show up here and remove the window from availability.",
+      "delete_title": "Delete block?",
+      "delete_body": "The window becomes bookable again.",
+      "error_range": "The end time must be after the start time.",
+      "error_fetch": "We couldn't load your blocks. Please try again.",
+      "error_create": "We couldn't create the block. Please try again.",
+      "error_delete": "We couldn't delete the block. Please try again."
+    },
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Sign in",
@@ -1708,7 +1732,9 @@
         "staff_clients": "Clients",
         "staff_videos": "My videos",
         "staff_notifications": "Notifications",
-        "staff_profile": "Profile"
+        "staff_profile": "Profile",
+        "blocks": "Time off",
+        "staff_blocks": "Time off"
       },
       "platform": {
         "payments": {

@@ -14,6 +14,7 @@ const LABELS = { booking: "Booking", services: "Services" };
 function reservation(partial: Partial<Reservation> = {}): Reservation {
   return {
     id: 7,
+    clientId: 1,
     beautyCenterId: 1,
     date: "2026-10-18",
     startTime: "10:00",

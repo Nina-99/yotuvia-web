@@ -77,6 +77,12 @@ const ContentPage = lazy(() =>
   })),
 );
 
+const TimeBlocksPage = lazy(() =>
+  import("@/presentation/pages/TimeBlocksPage").then((module) => ({
+    default: module.TimeBlocksPage,
+  })),
+);
+
 const LoyaltyPage = lazy(() =>
   import("@/presentation/pages/LoyaltyPage").then((module) => ({
     default: module.LoyaltyPage,
@@ -303,6 +309,12 @@ const StaffClientsPage = lazy(() =>
 const StaffVideosPage = lazy(() =>
   import("@/presentation/pages/staff/StaffVideosPage").then((module) => ({
     default: module.StaffVideosPage,
+  })),
+);
+
+const StaffBlocksPage = lazy(() =>
+  import("@/presentation/pages/staff/StaffBlocksPage").then((module) => ({
+    default: module.StaffBlocksPage,
   })),
 );
 
@@ -537,6 +549,11 @@ export function AppRouter() {
                   <ContentPage />
                 </Suspense>
               } />
+            <Route path={ROUTES.app.blocks} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <TimeBlocksPage />
+                </Suspense>
+              } />
             <Route path={ROUTES.app.profile} element={
                 <Suspense fallback={<RouteFallback />}>
                   <ProfilePage />
@@ -652,6 +669,11 @@ export function AppRouter() {
             <Route path={ROUTES.staff.videos} element={
                 <Suspense fallback={<RouteFallback />}>
                   <StaffVideosPage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.staff.blocks} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <StaffBlocksPage />
                 </Suspense>
               } />
           </Route>

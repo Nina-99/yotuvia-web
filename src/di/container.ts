@@ -24,6 +24,7 @@ import type {
   IStaffProfileRepository,
   IStaffReservationRepository,
   IStorageRepository,
+  ITimeBlockRepository,
   ITreatmentRepository,
   IVideoRepository,
   IVideoWatchEventRepository,
@@ -57,6 +58,7 @@ import {
   ApiStaffNotificationRepository,
   ApiStaffProfileRepository,
   ApiStaffReservationRepository,
+  ApiTimeBlockRepository,
   ApiTreatmentRepository,
   ApiVideoRepository,
   ApiVideoWatchEventRepository,
@@ -200,6 +202,7 @@ const adminNotificationRepository: IAdminNotificationRepository = new ApiAdminNo
 const notificationRepository: INotificationRepository = new ApiNotificationRepository();
 const availabilityRepository: IAvailabilityRepository = new ApiAvailabilityRepository();
 const treatmentRepository: ITreatmentRepository = new ApiTreatmentRepository();
+const timeBlockRepository: ITimeBlockRepository = new ApiTimeBlockRepository();
 
 /* ════════════════════════════════════════════ */
 /*  USE CASES (wired via constructor DI)        */
@@ -365,6 +368,7 @@ adminReservationRepository,
   socialMediaRepository,
   availabilityRepository,
   treatmentRepository,
+  timeBlockRepository,
 
   /* use cases — auth */
   loginUserUseCase,

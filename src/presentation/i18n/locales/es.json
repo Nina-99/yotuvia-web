@@ -1656,6 +1656,30 @@
       "centers": "Centros",
       "how_it_works": "Cómo funciona"
     },
+    "blocks": {
+      "meta_title": "Bloqueos — Yotuvia",
+      "title": "Bloqueos",
+      "form_title": "Bloquear horario",
+      "date": "Fecha",
+      "start": "Desde",
+      "end": "Hasta",
+      "professional": "Profesional",
+      "centre_wide": "Todo el centro",
+      "professional_fallback": "Profesional #{id}",
+      "reason": "Motivo (opcional)",
+      "reason_placeholder": "Descanso, feriado, capacitación…",
+      "submit": "Bloquear",
+      "staff_notice": "Los bloqueos aplican a tu propia agenda. El horario bloqueado se oculta a los clientes y no se puede reservar.",
+      "list_title": "Próximos bloqueos",
+      "empty": "No hay bloqueos programados",
+      "empty_sub": "Los bloqueos que crees aparecen acá y quitan el horario de la disponibilidad.",
+      "delete_title": "¿Eliminar bloqueo?",
+      "delete_body": "El horario vuelve a estar disponible para reservar.",
+      "error_range": "La hora de fin debe ser posterior a la de inicio.",
+      "error_fetch": "No pudimos cargar tus bloqueos. Intenta de nuevo.",
+      "error_create": "No pudimos crear el bloqueo. Intenta de nuevo.",
+      "error_delete": "No pudimos eliminar el bloqueo. Intenta de nuevo."
+    },
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Iniciar sesión",
@@ -1708,7 +1732,9 @@
         "staff_clients": "Clientes",
         "staff_videos": "Mis videos",
         "staff_notifications": "Notificaciones",
-        "staff_profile": "Perfil"
+        "staff_profile": "Perfil",
+        "blocks": "Bloqueos",
+        "staff_blocks": "Bloqueos"
       },
       "platform": {
         "payments": {

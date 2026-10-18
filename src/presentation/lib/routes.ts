@@ -72,6 +72,8 @@ export const ROUTES = {
     analytics: "/app/analytics",
     content: "/app/content",
     profile: "/app/profile",
+    /** Unavailability blocks (breaks, holidays): centre-wide or per professional. */
+    blocks: "/app/blocks",
     /** Center-owner notifications. */
     notifications: "/app/notifications",
   },
@@ -121,6 +123,8 @@ export const ROUTES = {
     metrics: "/app/staff/metrics",
     clients: "/app/staff/clients",
     videos: "/app/staff/videos",
+    /** The professional's own unavailability blocks (breaks). */
+    blocks: "/app/staff/blocks",
     profile: "/app/staff/profile",
     /** The professional's notifications. */
     notifications: "/app/staff/notifications",

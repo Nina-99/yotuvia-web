@@ -28,6 +28,7 @@ const platform = ["platform"] as const;
 const availability = ["availability"] as const;
 const tiktok = ["tiktok"] as const;
 const waitlist = ["waitlist"] as const;
+const timeBlocks = ["time-blocks"] as const;
 const notifications = ["notifications"] as const;
 const adminNotifications = ["admin-notifications"] as const;
 const staffNotifications = ["staff-notifications"] as const;
@@ -163,6 +164,17 @@ export const queryKeys = {
     all: waitlist,
     /** Live entries by default; `history: true` is the full, any-status list. */
     mine: (history: boolean) => [...waitlist, "mine", { history }] as const,
+  },
+  /**
+   * Unavailability blocks (breaks/holidays), owner- and staff-scoped.
+   *
+   * Distinct root so the two roles' caches never collide, and `personnelId` is
+   * part of the key because the backend filters by it for an owner.
+   */
+  timeBlocks: {
+    all: timeBlocks,
+    range: (from: string, to: string, personnelId?: number) =>
+      [...timeBlocks, "range", { from, to, personnelId }] as const,
   },
   /** The signed-in client's notifications and their unread count. */
   notifications: {

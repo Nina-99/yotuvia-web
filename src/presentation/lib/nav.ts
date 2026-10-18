@@ -117,11 +117,16 @@ const ICONS = {
     "M7 21H5a2 2 0 0 1-2-2v-2",
     "M3 12h18",
   ],
+  blocks: [
+    "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
+    "M4.9 4.9l14.2 14.2",
+  ],
 } as const satisfies Record<string, readonly string[]>;
 
 export const APP_NAV_SECTIONS: readonly AppNavSection[] = [
   { id: "dashboard", path: ROUTES.appHome, labelKey: "web.app.nav.dashboard", icon: ICONS.dashboard },
   { id: "agenda", path: ROUTES.app.agenda, labelKey: "web.app.nav.agenda", icon: ICONS.agenda },
+  { id: "blocks", path: ROUTES.app.blocks, labelKey: "web.app.nav.blocks", icon: ICONS.blocks },
   { id: "clients", path: ROUTES.app.clients, labelKey: "web.app.nav.clients", icon: ICONS.clients },
   { id: "services", path: ROUTES.app.services, labelKey: "web.app.nav.services", icon: ICONS.services },
   {
@@ -274,6 +279,12 @@ export const STAFF_NAV_SECTIONS: readonly AppNavSection[] = [
     path: ROUTES.staff.videos,
     labelKey: "web.app.nav.staff_videos",
     icon: ICONS.content,
+  },
+  {
+    id: "staff-blocks",
+    path: ROUTES.staff.blocks,
+    labelKey: "web.app.nav.staff_blocks",
+    icon: ICONS.blocks,
   },
   {
     id: "staff-notifications",
