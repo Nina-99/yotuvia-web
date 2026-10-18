@@ -1,12 +1,11 @@
 import { useTranslation } from "react-i18next";
 import type { StaffProfile } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, PhoneInput, useZodForm } from "@/presentation/components/form";
 import { Button, Input } from "@/presentation/components/ui";
 import {
   STAFF_FIRST_NAME_MAX,
   STAFF_LAST_NAME_MAX,
-  STAFF_PHONE_MAX,
   staffProfileSchema,
   staffProfileToFormValues,
 } from "@/presentation/schemas/staff.schemas";
@@ -80,15 +79,7 @@ export function StaffProfileForm({ profile, saving, errorKey, onSubmit }: StaffP
 
         <FormField name="phone" label={t("staff.profile.phone")}>
           {({ field, invalid, describedBy, id }) => (
-            <Input
-              {...field}
-              id={id}
-              type="tel"
-              autoComplete="tel"
-              maxLength={STAFF_PHONE_MAX}
-              aria-invalid={invalid || undefined}
-              aria-describedby={describedBy}
-            />
+            <PhoneInput {...field} id={id} invalid={invalid} describedBy={describedBy} />
           )}
         </FormField>
 

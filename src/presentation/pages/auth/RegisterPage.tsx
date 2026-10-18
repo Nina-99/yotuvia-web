@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { AuthResult } from "yotuvia-core";
 
 import { SocialLoginButtons } from "@/presentation/components/auth/SocialLoginButtons";
-import { Form, FormAlert, FormField, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, PhoneInput, useZodForm } from "@/presentation/components/form";
 import {
   Button,
   CardContent,
@@ -150,14 +150,7 @@ export function RegisterPage() {
 
           <FormField name="phone" label={t("web.auth.fields.phone")}>
             {({ field, invalid, id, describedBy }) => (
-              <Input
-                {...field}
-                id={id}
-                type="tel"
-                autoComplete="tel"
-                aria-invalid={invalid || undefined}
-                aria-describedby={describedBy}
-              />
+              <PhoneInput {...field} id={id} invalid={invalid} describedBy={describedBy} />
             )}
           </FormField>
 

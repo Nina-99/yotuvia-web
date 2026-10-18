@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 
-import { Form, FormAlert, FormField } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, PhoneInput } from "@/presentation/components/form";
 import {
   Button,
   Card,
@@ -177,14 +177,12 @@ export function JoinInvitationPage() {
 
                 <FormField name="phone" label={t("web.join.form.phone")}>
                   {({ field, invalid, id, describedBy }) => (
-                    <Input
+                    <PhoneInput
                       {...field}
                       id={id}
-                      type="tel"
-                      autoComplete="tel"
+                      invalid={invalid}
+                      describedBy={describedBy}
                       placeholder={t("web.join.form.phone_placeholder")}
-                      aria-invalid={invalid || undefined}
-                      aria-describedby={describedBy}
                     />
                   )}
                 </FormField>

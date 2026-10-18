@@ -94,7 +94,7 @@ describe("JoinInvitationPage", () => {
       token: "tok-123",
       firstName: "Ana",
       lastName: "Gómez",
-      phone: "111",
+      phone: "+591 111",
       password: "supersecret",
     });
     expect(await screen.findByText("sign in screen")).toBeInTheDocument();

@@ -216,7 +216,7 @@ describe("ProfilePage", () => {
 
     await waitFor(() =>
       expect(mocks.updatePaymentConfig).toHaveBeenCalledWith({
-        payment_phone: "0414999999",
+        payment_phone: "+591 0414999999",
         tiers: { USD: [{ min: 10, bonusPct: 5 }] },
       }),
     );

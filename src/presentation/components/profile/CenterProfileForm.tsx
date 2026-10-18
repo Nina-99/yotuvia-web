@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useFieldArray } from "react-hook-form";
 import type { BeautyCenter } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, ImageUploadField, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, ImageUploadField, PhoneInput, useZodForm } from "@/presentation/components/form";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, Textarea } from "@/presentation/components/ui";
 import type { CenterCoords } from "@/presentation/components/centers/CenterLocationPicker";
 import { LANGUAGES } from "yotuvia-core";
@@ -13,7 +13,6 @@ import {
   CENTER_DESCRIPTION_MAX,
   CENTER_EMAIL_MAX,
   CENTER_NAME_MAX,
-  CENTER_PHONE_MAX,
   WEEKDAYS,
   centerProfileSchema,
   centerToFormValues,
@@ -165,14 +164,7 @@ export function CenterProfileForm({ center, saving, errorKey, onSubmit }: Center
 
             <FormField name="phone" label={t("web.app.profile.details.phone")}>
               {({ field, invalid, describedBy, id }) => (
-                <Input
-                  {...field}
-                  id={id}
-                  type="tel"
-                  maxLength={CENTER_PHONE_MAX}
-                  aria-invalid={invalid || undefined}
-                  aria-describedby={describedBy}
-                />
+                <PhoneInput {...field} id={id} invalid={invalid} describedBy={describedBy} />
               )}
             </FormField>
           </div>

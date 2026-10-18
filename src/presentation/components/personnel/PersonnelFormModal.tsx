@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { Form, FormAlert, FormField, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, PhoneInput, useZodForm } from "@/presentation/components/form";
 import { Button, Input, Modal } from "@/presentation/components/ui";
 import {
   createPersonnelSchema,
@@ -118,14 +118,12 @@ export function PersonnelFormModal({
 
         <FormField name="phone" label={t("web.app.personnel.form.phone")}>
           {({ field, invalid, describedBy, id }) => (
-            <Input
+            <PhoneInput
               {...field}
               id={id}
-              type="tel"
-              autoComplete="off"
+              invalid={invalid}
+              describedBy={describedBy}
               placeholder={t("web.app.personnel.form.phone_placeholder")}
-              aria-invalid={invalid || undefined}
-              aria-describedby={describedBy}
             />
           )}
         </FormField>

@@ -127,7 +127,7 @@ describe("PlatformCentersPage", () => {
 
     await waitFor(() =>
       expect(mocks.updatePlatformPaymentConfig).toHaveBeenCalledWith(3, {
-        payment_phone: "5559999",
+        payment_phone: "+591 5559999",
         tiers: { USD: [{ min: 10, bonusPct: 5 }] },
       }),
     );

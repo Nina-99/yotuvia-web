@@ -135,7 +135,7 @@ describe("PersonnelPage", () => {
       firstName: "Ana",
       lastName: "Gómez",
       email: "ana@example.com",
-      phone: "111",
+      phone: "+591 111",
       password: "supersecret",
       beautyCenterId: 7,
     });

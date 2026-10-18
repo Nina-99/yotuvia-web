@@ -100,7 +100,7 @@ describe("ClientProfilePage", () => {
     expect(screen.getByLabelText("Last name")).toHaveValue("Díaz");
     expect(screen.getByLabelText("Username")).toHaveValue("anadiaz");
     expect(screen.getByLabelText("Email")).toHaveValue("ana@example.com");
-    expect(screen.getByLabelText("Phone")).toHaveValue("+54 11 5555 5555");
+    expect(screen.getByLabelText("Phone")).toHaveValue("11 5555 5555");
     expect(screen.getByText("Client")).toBeInTheDocument();
     expect(screen.getByText("Active")).toBeInTheDocument();
     // The header carries the avatar picker (choose/change + preview), not a

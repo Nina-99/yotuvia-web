@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useFieldArray } from "react-hook-form";
 import type { PaymentConfig } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, PhoneInput, useZodForm } from "@/presentation/components/form";
 import { Button, Input } from "@/presentation/components/ui";
 import {
   paymentConfigSchema,
@@ -62,14 +62,7 @@ export function PaymentTiersFields({
 
       <FormField name="paymentPhone" label={t("web.app.profile.payments.phone")}>
         {({ field, invalid, describedBy, id }) => (
-          <Input
-            {...field}
-            id={id}
-            type="tel"
-            maxLength={20}
-            aria-invalid={invalid || undefined}
-            aria-describedby={describedBy}
-          />
+          <PhoneInput {...field} id={id} invalid={invalid} describedBy={describedBy} />
         )}
       </FormField>
 

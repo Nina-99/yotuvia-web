@@ -1,13 +1,12 @@
 import { useTranslation } from "react-i18next";
 import type { ClientProfile } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, PhoneInput, useZodForm } from "@/presentation/components/form";
 import { Button, Input } from "@/presentation/components/ui";
 import {
   CLIENT_EMAIL_MAX,
   CLIENT_FIRST_NAME_MAX,
   CLIENT_LAST_NAME_MAX,
-  CLIENT_PHONE_MAX,
   CLIENT_USERNAME_MAX,
   clientProfileSchema,
   clientProfileToFormValues,
@@ -103,15 +102,7 @@ export function ClientProfileForm({
 
         <FormField name="phone" label={t("client.profile.phone")}>
           {({ field, invalid, describedBy, id }) => (
-            <Input
-              {...field}
-              id={id}
-              type="tel"
-              autoComplete="tel"
-              maxLength={CLIENT_PHONE_MAX}
-              aria-invalid={invalid || undefined}
-              aria-describedby={describedBy}
-            />
+            <PhoneInput {...field} id={id} invalid={invalid} describedBy={describedBy} />
           )}
         </FormField>
       </div>
