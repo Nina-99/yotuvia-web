@@ -54,6 +54,14 @@ export function canEditReservation(status: ReservationStatus): boolean {
   return status === "PENDING" || status === "CONFIRMED";
 }
 
+/**
+ * True while the appointment is still upcoming, so exporting it to a calendar
+ * makes sense: a cancelled or already-completed booking has nothing to attend.
+ */
+export function canAddToCalendar(status: ReservationStatus): boolean {
+  return status === "PENDING" || status === "CONFIRMED";
+}
+
 /** i18n key for a deposit payment status, or `null` when the flow is off. */
 export function paymentStatusLabelKey(paymentStatus: string | undefined): string | null {
   if (paymentStatus === undefined || paymentStatus === "NONE") return null;

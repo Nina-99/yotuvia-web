@@ -2,10 +2,12 @@ import { useTranslation } from "react-i18next";
 import type { Reservation } from "yotuvia-core";
 
 import { Badge, Button, Card, CardContent } from "@/presentation/components/ui";
+import { googleCalendarUrl } from "@/presentation/lib/calendar-link";
 import { dateKeyFromApi } from "@/presentation/lib/dates";
 import { formatCurrency, formatDate, formatTime } from "@/presentation/lib/format";
 
 import {
+  canAddToCalendar,
   canCancelReservation,
   canEditReservation,
   canShowQr,
@@ -50,6 +52,17 @@ export function ClientReservationCard({
     ? reservation.beautyCenterName
     : t("client.reservations.center_prefix", { id: reservation.beautyCenterId });
   const serviceNames = reservation.services.map((service) => service.serviceName).join(", ");
+
+  // The web has no native calendar API, so "add to calendar" is a Google
+  // Calendar link the client opens (the mobile app uses `expo-calendar`).
+  const calendarUrl = canAddToCalendar(reservation.status)
+    ? googleCalendarUrl(reservation, {
+        booking: t("client.reservations.calendar_label_booking"),
+        services: t("client.reservations.calendar_label_services"),
+      })
+    : "";
+  const calendarLinkClasses =
+    "rounded text-sm font-medium text-link hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
 
   return (
     <Card>
@@ -109,6 +122,19 @@ export function ClientReservationCard({
             </Button>
           ) : null}
         </div>
+
+        {calendarUrl !== "" ? (
+          <div className="flex flex-wrap items-center gap-4">
+            <a
+              href={calendarUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={calendarLinkClasses}
+            >
+              {t("client.reservations.add_to_calendar")}
+            </a>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
