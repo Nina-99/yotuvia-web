@@ -3023,7 +3023,7 @@
         "submit": "Sign in",
         "submitting": "Signing in...",
         "success": "Signed in successfully",
-        "sessions_evicted": "Signed in. Your account keeps up to 2 active sessions, so another device was signed out.",
+        "sessions_evicted": "Signed in. Your account keeps a limited number of active sessions, so another device was signed out.",
         "forgot_link": "Forgot your password?",
         "register_prompt": "Don't have an account?",
         "register_link": "Create one"
@@ -3037,7 +3037,7 @@
         "submit": "Create account",
         "submitting": "Creating account...",
         "success": "Account created successfully",
-        "sessions_evicted": "Account created. Your account keeps up to 2 active sessions, so another device was signed out.",
+        "sessions_evicted": "Account created. Your account keeps a limited number of active sessions, so another device was signed out.",
         "login_prompt": "Already have an account?",
         "login_link": "Sign in",
         "terms_prefix": "I accept the",

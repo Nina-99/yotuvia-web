@@ -3023,7 +3023,7 @@
         "submit": "Iniciar sesión",
         "submitting": "Iniciando sesión...",
         "success": "Sesión iniciada correctamente",
-        "sessions_evicted": "Sesión iniciada. Tu cuenta mantiene hasta 2 sesiones activas, así que se cerró la sesión en otro dispositivo.",
+        "sessions_evicted": "Sesión iniciada. Tu cuenta mantiene un número limitado de sesiones activas, así que se cerró la sesión en otro dispositivo.",
         "forgot_link": "¿Olvidaste tu contraseña?",
         "register_prompt": "¿No tienes una cuenta?",
         "register_link": "Crea una"
@@ -3037,7 +3037,7 @@
         "submit": "Crear cuenta",
         "submitting": "Creando cuenta...",
         "success": "Cuenta creada correctamente",
-        "sessions_evicted": "Cuenta creada. Tu cuenta mantiene hasta 2 sesiones activas, así que se cerró la sesión en otro dispositivo.",
+        "sessions_evicted": "Cuenta creada. Tu cuenta mantiene un número limitado de sesiones activas, así que se cerró la sesión en otro dispositivo.",
         "login_prompt": "¿Ya tienes una cuenta?",
         "login_link": "Inicia sesión",
         "terms_prefix": "Acepto los",
