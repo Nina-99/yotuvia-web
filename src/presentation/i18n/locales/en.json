@@ -87,7 +87,8 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "close": "Close",
-    "load_more": "Load more"
+    "load_more": "Load more",
+    "save": "Save"
   },
   "splash": {
     "subtitle": "Professional management of aesthetics and beauty"
@@ -1679,6 +1680,14 @@
       "error_fetch": "We couldn't load your blocks. Please try again.",
       "error_create": "We couldn't create the block. Please try again.",
       "error_delete": "We couldn't delete the block. Please try again."
+    },
+    "visit_notes": {
+      "title": "Visit note",
+      "label": "Note",
+      "add": "Add note",
+      "edit": "Edit note",
+      "error_save": "We couldn't save the note. Please try again.",
+      "error_delete": "We couldn't delete the note. Please try again."
     },
     "layout": {
       "brand_name": "Yotuvia",

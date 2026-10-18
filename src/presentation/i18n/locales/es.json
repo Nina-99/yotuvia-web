@@ -87,7 +87,8 @@
     "saving": "Guardando...",
     "cancel": "Cancelar",
     "close": "Cerrar",
-    "load_more": "Cargar más"
+    "load_more": "Cargar más",
+    "save": "Guardar"
   },
   "splash": {
     "subtitle": "Gestión profesional de la estética y la belleza"
@@ -1679,6 +1680,14 @@
       "error_fetch": "No pudimos cargar tus bloqueos. Intenta de nuevo.",
       "error_create": "No pudimos crear el bloqueo. Intenta de nuevo.",
       "error_delete": "No pudimos eliminar el bloqueo. Intenta de nuevo."
+    },
+    "visit_notes": {
+      "title": "Nota de la visita",
+      "label": "Nota",
+      "add": "Agregar nota",
+      "edit": "Editar nota",
+      "error_save": "No pudimos guardar la nota. Intenta de nuevo.",
+      "error_delete": "No pudimos eliminar la nota. Intenta de nuevo."
     },
     "layout": {
       "brand_name": "Yotuvia",

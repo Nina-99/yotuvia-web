@@ -33,6 +33,7 @@ const notifications = ["notifications"] as const;
 const adminNotifications = ["admin-notifications"] as const;
 const staffNotifications = ["staff-notifications"] as const;
 const staffMetrics = ["staff-metrics"] as const;
+const visitNotes = ["visit-notes"] as const;
 
 export interface CenterSearchParams {
   term: string;
@@ -203,6 +204,14 @@ export const queryKeys = {
   staffMetrics: {
     all: staffMetrics,
     range: (from: string, to: string) => [...staffMetrics, "range", { from, to }] as const,
+  },
+  /**
+   * The professional's internal per-visit notes (C3). Claim-scoped: the API
+   * derives the author, so the key carries only the range.
+   */
+  visitNotes: {
+    all: visitNotes,
+    range: (from: string, to: string) => [...visitNotes, "range", { from, to }] as const,
   },
   /**
    * Client-area domain: the signed-in client's favorites and profile.

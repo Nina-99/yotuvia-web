@@ -26,6 +26,7 @@ import type {
   IStorageRepository,
   ITimeBlockRepository,
   ITreatmentRepository,
+  IVisitNoteRepository,
   IVideoRepository,
   IVideoWatchEventRepository,
 } from "yotuvia-core";
@@ -60,6 +61,7 @@ import {
   ApiStaffReservationRepository,
   ApiTimeBlockRepository,
   ApiTreatmentRepository,
+  ApiVisitNoteRepository,
   ApiVideoRepository,
   ApiVideoWatchEventRepository,
   ApiWaitlistRepository,
@@ -203,6 +205,7 @@ const notificationRepository: INotificationRepository = new ApiNotificationRepos
 const availabilityRepository: IAvailabilityRepository = new ApiAvailabilityRepository();
 const treatmentRepository: ITreatmentRepository = new ApiTreatmentRepository();
 const timeBlockRepository: ITimeBlockRepository = new ApiTimeBlockRepository();
+const visitNoteRepository: IVisitNoteRepository = new ApiVisitNoteRepository();
 
 /* ════════════════════════════════════════════ */
 /*  USE CASES (wired via constructor DI)        */
@@ -369,6 +372,7 @@ adminReservationRepository,
   availabilityRepository,
   treatmentRepository,
   timeBlockRepository,
+  visitNoteRepository,
 
   /* use cases — auth */
   loginUserUseCase,
