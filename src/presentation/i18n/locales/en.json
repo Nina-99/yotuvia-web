@@ -2498,6 +2498,10 @@
             "active": "Boost active",
             "paused": "Boost paused",
             "exhausted": "Boost finished"
+          },
+          "errors": {
+            "amount": "Enter an amount greater than zero",
+            "ends_at": "Choose a valid date"
           }
         },
         "list": {

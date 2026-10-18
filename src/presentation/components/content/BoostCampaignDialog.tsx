@@ -1,9 +1,21 @@
-import { useId, useState } from "react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
-import { FormAlert, NumberInput } from "@/presentation/components/form";
+import {
+  Form,
+  FormAlert,
+  FormField,
+  NumberInput,
+  useZodForm,
+} from "@/presentation/components/form";
 import { Button, Input, Modal } from "@/presentation/components/ui";
 import { toDateKey } from "@/presentation/lib/dates";
+import {
+  DEFAULT_BOOST_CAMPAIGN,
+  boostCampaignSchema,
+  boostCampaignToPayload,
+  type BoostCampaignFormValues,
+} from "@/presentation/schemas/content.schemas";
 
 export interface BoostCampaignValues {
   budget: number;
@@ -32,6 +44,10 @@ function defaultEndsAt(): string {
 /**
  * Create-a-CPM-campaign dialog for one feed post. Values are in tokens; the
  * budget is held up front by the backend when the campaign is created.
+ *
+ * Validated by the shared `boostCampaignSchema`: the API binds `budget` and
+ * `bid_cpm` as `required,gt=0`, so a zero (or a non-number) is rejected here
+ * instead of bouncing off the server.
  */
 export function BoostCampaignDialog({
   open,
@@ -42,17 +58,12 @@ export function BoostCampaignDialog({
   onSubmit,
 }: BoostCampaignDialogProps) {
   const { t } = useTranslation();
-  const budgetId = useId();
-  const bidId = useId();
-  const endsId = useId();
+  const formId = useId();
 
-  const [budget, setBudget] = useState("50");
-  const [bidCpm, setBidCpm] = useState("10");
-  const [endsAt, setEndsAt] = useState(defaultEndsAt);
-
-  const budgetValue = Number(budget);
-  const bidValue = Number(bidCpm);
-  const valid = budgetValue > 0 && bidValue > 0 && endsAt !== "";
+  const form = useZodForm<BoostCampaignFormValues>({
+    schema: boostCampaignSchema,
+    defaultValues: { ...DEFAULT_BOOST_CAMPAIGN, endsAt: defaultEndsAt() },
+  });
 
   return (
     <Modal
@@ -66,62 +77,65 @@ export function BoostCampaignDialog({
           <Button variant="outline" disabled={saving} onClick={onClose}>
             {t("common.cancel")}
           </Button>
-          <Button
-            loading={saving}
-            disabled={!valid}
-            onClick={() =>
-              onSubmit({
-                budget: budgetValue,
-                bidCpm: bidValue,
-                // End of the chosen day, in the local timezone.
-                endsAt: new Date(`${endsAt}T23:59:59`).toISOString(),
-              })
-            }
-          >
+          <Button type="submit" form={formId} loading={saving}>
             {t("web.app.content.boost.submit")}
           </Button>
         </>
       }
     >
-      <FormAlert message={errorKey} variant="error" />
-      <div className="mt-3 flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <label htmlFor={budgetId} className="text-sm font-medium text-text">
-            {t("web.app.content.boost.budget_label")}
-          </label>
-          <NumberInput
-            id={budgetId}
-            variant="decimal"
-            value={budget}
-            onChange={setBudget}
-          />
-          <span className="text-xs text-text-muted">{t("web.app.content.boost.budget_hint")}</span>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor={bidId} className="text-sm font-medium text-text">
-            {t("web.app.content.boost.bid_label")}
-          </label>
-          <NumberInput
-            id={bidId}
-            variant="decimal"
-            value={bidCpm}
-            onChange={setBidCpm}
-          />
-          <span className="text-xs text-text-muted">{t("web.app.content.boost.bid_hint")}</span>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor={endsId} className="text-sm font-medium text-text">
-            {t("web.app.content.boost.ends_label")}
-          </label>
-          <Input
-            id={endsId}
-            type="date"
-            value={endsAt}
-            min={toDateKey(new Date())}
-            onChange={(event) => setEndsAt(event.target.value)}
-          />
-        </div>
-      </div>
+      <Form
+        form={form}
+        id={formId}
+        className="mt-3 flex flex-col gap-3"
+        onSubmit={(values) => onSubmit(boostCampaignToPayload(values))}
+      >
+        <FormAlert message={errorKey} variant="error" />
+
+        <FormField
+          name="budget"
+          label={t("web.app.content.boost.budget_label")}
+          helperText={t("web.app.content.boost.budget_hint")}
+        >
+          {({ field, invalid, describedBy, id }) => (
+            <NumberInput
+              {...field}
+              id={id}
+              variant="decimal"
+              invalid={invalid}
+              describedBy={describedBy}
+            />
+          )}
+        </FormField>
+
+        <FormField
+          name="bidCpm"
+          label={t("web.app.content.boost.bid_label")}
+          helperText={t("web.app.content.boost.bid_hint")}
+        >
+          {({ field, invalid, describedBy, id }) => (
+            <NumberInput
+              {...field}
+              id={id}
+              variant="decimal"
+              invalid={invalid}
+              describedBy={describedBy}
+            />
+          )}
+        </FormField>
+
+        <FormField name="endsAt" label={t("web.app.content.boost.ends_label")}>
+          {({ field, invalid, describedBy, id }) => (
+            <Input
+              {...field}
+              id={id}
+              type="date"
+              min={toDateKey(new Date())}
+              aria-invalid={invalid || undefined}
+              aria-describedby={describedBy}
+            />
+          )}
+        </FormField>
+      </Form>
     </Modal>
   );
 }

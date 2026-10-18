@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { LIMITS, isSupportedExternalUrl } from "yotuvia-core";
+import { LIMITS, decimal, isSupportedExternalUrl } from "yotuvia-core";
 
-import { zText } from "./validation";
+import { decimalFromField, zIsoDate, zText } from "./validation";
 
 // Re-exported so the schema's callers keep a single import site; the matcher
 // itself lives in core so web and mobile reject the same hosts.
@@ -162,4 +162,53 @@ export const EMPTY_FEED_POST_EXTERNAL: FeedPostExternalValues = {
 /** Pre-fills the edit form from an existing post. */
 export function feedPostToEditValues(post: { caption?: string; is_promo: boolean }): FeedPostEditValues {
   return { caption: post.caption ?? "", isPromo: post.is_promo };
+}
+
+/* ── Boost (CPM) campaign form ─────────────── */
+
+export const boostValidationKeys = {
+  amount: "web.app.content.boost.errors.amount",
+  endsAt: "web.app.content.boost.errors.ends_at",
+} as const;
+
+/**
+ * A token amount: canonical decimal, STRICTLY positive.
+ *
+ * The API binds `budget`/`bid_cpm` as `required,gt=0` (float64 tokens), so zero
+ * is rejected here too — unlike the shared money rule, whose `min` is inclusive.
+ */
+function isPositiveDecimal(value: string): boolean {
+  const parsed = decimal(value, { min: 0 });
+  return parsed.valid && parsed.value > 0;
+}
+
+const amountField = z.string().superRefine((value, ctx) => {
+  if (!isPositiveDecimal(value)) {
+    ctx.addIssue({ code: "custom", message: boostValidationKeys.amount });
+  }
+});
+
+export const boostCampaignSchema = z.object({
+  budget: amountField,
+  bidCpm: amountField,
+  endsAt: zIsoDate({}, { overrides: { required: boostValidationKeys.endsAt } }),
+});
+
+export type BoostCampaignFormValues = z.infer<typeof boostCampaignSchema>;
+
+/** Defaults the dialog opens with (the ends-at date is set by the caller). */
+export const DEFAULT_BOOST_CAMPAIGN: BoostCampaignFormValues = {
+  budget: "50",
+  bidCpm: "10",
+  endsAt: "",
+};
+
+/** Builds the submit payload, reading the amounts through the rule that judged them. */
+export function boostCampaignToPayload(values: BoostCampaignFormValues) {
+  return {
+    budget: decimalFromField(values.budget),
+    bidCpm: decimalFromField(values.bidCpm),
+    // End of the chosen day, in the local timezone.
+    endsAt: new Date(`${values.endsAt}T23:59:59`).toISOString(),
+  };
 }
