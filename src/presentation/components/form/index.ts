@@ -8,6 +8,8 @@ export { FormField } from "./FormField";
 export type { FormFieldProps, FormFieldRenderArgs } from "./FormField";
 export { ImageUploadField } from "./ImageUploadField";
 export type { ImageUploadFieldProps } from "./ImageUploadField";
+export { NumberInput } from "./NumberInput";
+export type { NumberInputProps, NumberVariant } from "./NumberInput";
 export { PhoneInput } from "./PhoneInput";
 export type { PhoneInputProps } from "./PhoneInput";
 export { useZodForm } from "./use-zod-form";
