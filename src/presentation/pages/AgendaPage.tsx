@@ -18,6 +18,7 @@ import {
 import type { BadgeVariant } from "@/presentation/components/ui";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useAuthSession } from "@/presentation/hooks/use-auth-session";
+import { QrCheckInPanel } from "@/presentation/components/staff";
 import { useCenterPersonnel } from "@/presentation/hooks/use-personnel";
 import {
   useAssignPersonnel,
@@ -252,6 +253,7 @@ export function AgendaPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [assignTarget, setAssignTarget] = useState<Reservation | null>(null);
   const [assignee, setAssignee] = useState("");
+  const [scanOpen, setScanOpen] = useState(false);
 
   const { toast } = useToast();
   const updateStatus = useUpdateReservationStatus();
@@ -412,6 +414,9 @@ export function AgendaPage() {
               {t(`web.app.agenda.mode_${value}`)}
             </Button>
           ))}
+          <Button size="sm" variant="secondary" onClick={() => setScanOpen(true)}>
+            {t("web.app.agenda.scan_checkin")}
+          </Button>
         </div>
       </div>
 
@@ -548,6 +553,15 @@ export function AgendaPage() {
             ))}
           </Select>
         )}
+      </Modal>
+
+      <Modal
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        closeLabel={t("common.close")}
+        title={t("web.app.agenda.scan_title")}
+      >
+        <QrCheckInPanel />
       </Modal>
     </div>
   );

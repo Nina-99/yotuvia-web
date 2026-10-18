@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Reservation, User } from "yotuvia-core";
@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   updateStatusExecute: vi.fn(),
   reviewProofExecute: vi.fn(),
   assignExecute: vi.fn(),
+  verifyQrExecute: vi.fn(),
   authRepository: {
     getCurrentUser: vi.fn(),
     isAuthenticated: vi.fn(),
@@ -25,6 +26,7 @@ vi.mock("@/di/container", () => ({
   updateReservationStatusUseCase: { execute: mocks.updateStatusExecute },
   reviewProofUseCase: { execute: mocks.reviewProofExecute },
   assignPersonnelUseCase: { execute: mocks.assignExecute },
+  verifyQrUseCase: { execute: mocks.verifyQrExecute },
 }));
 
 import i18n from "@/presentation/i18n";
@@ -123,5 +125,17 @@ describe("AgendaPage", () => {
     await user.click(screen.getByRole("button", { name: "Retry" }));
 
     expect(await screen.findByText("Ana Gómez")).toBeInTheDocument();
+  });
+
+  it("opens the QR check-in panel from the agenda", async () => {
+    const user = userEvent.setup();
+    mocks.reservationsExecute.mockResolvedValue([TODAY_RESERVATION]);
+
+    renderWithProviders(<AgendaPage />, { route: ROUTES.app.agenda });
+
+    await user.click(await screen.findByRole("button", { name: "Scan check-in" }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("QR check-in")).toBeInTheDocument();
   });
 });

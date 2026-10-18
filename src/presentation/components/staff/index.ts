@@ -1,5 +1,6 @@
 export { QrScanner } from "./QrScanner";
 export type { QrScannerProps, QrScannerStatus } from "./QrScanner";
+export { QrCheckInPanel } from "./QrCheckInPanel";
 export { StaffAppointmentCard } from "./StaffAppointmentCard";
 export type { StaffAppointmentCardProps } from "./StaffAppointmentCard";
 export {

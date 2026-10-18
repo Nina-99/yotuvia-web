@@ -1907,6 +1907,8 @@
           "title": "Agenda — Yotuvia"
         },
         "title": "Agenda",
+        "scan_checkin": "Escanear ingreso",
+        "scan_title": "Check-in por QR",
         "total": "{count} reservas",
         "no_center": "No encontramos el centro vinculado a tu cuenta.",
         "mode_label": "Vista de la agenda",
