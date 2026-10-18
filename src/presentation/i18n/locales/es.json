@@ -2991,6 +2991,9 @@
         "unsupported_type": "El tipo de archivo no es válido",
         "too_large": "El archivo es demasiado grande"
       },
+      "phone": {
+        "country_label": "Código de país"
+      },
       "submit_error": "No pudimos completar la solicitud. Intentá de nuevo."
     },
     "auth": {

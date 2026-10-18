@@ -2991,6 +2991,9 @@
         "unsupported_type": "That file type isn't allowed",
         "too_large": "The file is too large"
       },
+      "phone": {
+        "country_label": "Country code"
+      },
       "submit_error": "We couldn't complete the request. Please try again."
     },
     "auth": {
