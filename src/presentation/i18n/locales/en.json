@@ -1646,6 +1646,7 @@
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Sign in",
+    "go_to_app": "Go to app",
       "open_menu": "Open menu",
       "close_menu": "Close menu",
       "language_label": "Language",

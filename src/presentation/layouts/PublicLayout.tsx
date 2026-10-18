@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { BrandLink } from "@/presentation/components/brand-link";
 import { LanguageSwitcher } from "@/presentation/components/language-switcher";
 import { buttonClasses } from "@/presentation/components/ui";
+import { useAuthSession } from "@/presentation/hooks/use-auth-session";
 import { ROUTES } from "@/presentation/lib/routes";
 
 interface NavItem {
@@ -61,8 +62,23 @@ const FOOTER_GROUPS: readonly FooterGroup[] = [
 
 function Header() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuthSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
+
+  // The public header renders on ALL public pages (landing, search, center
+  // detail), which an authenticated visitor also uses. Showing "Sign in" to a
+  // signed-in user reads as "you are logged out", so the CTA reflects the
+  // session: the account's app home instead of the login link.
+  const accountCta = isAuthenticated ? (
+    <Link to={ROUTES.appHome} className={buttonClasses({ size: "sm" })}>
+      {t("web.layout.go_to_app")}
+    </Link>
+  ) : (
+    <Link to={ROUTES.login} className={buttonClasses({ size: "sm" })}>
+      {t("web.layout.sign_in")}
+    </Link>
+  );
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
@@ -86,9 +102,7 @@ function Header() {
 
         <div className="hidden items-center gap-3 md:flex">
           <LanguageSwitcher />
-          <Link to="/login" className={buttonClasses({ size: "sm" })}>
-            {t("web.layout.sign_in")}
-          </Link>
+          {accountCta}
         </div>
 
         <button
@@ -137,13 +151,9 @@ function Header() {
             <div className="flex flex-wrap items-center gap-3">
               <LanguageSwitcher />
             </div>
-            <Link
-              to="/login"
-              onClick={closeMenu}
-              className={buttonClasses({ size: "sm", className: "self-start" })}
-            >
-              {t("web.layout.sign_in")}
-            </Link>
+            <div onClick={closeMenu} className="self-start">
+              {accountCta}
+            </div>
           </div>
         </div>
       ) : null}
