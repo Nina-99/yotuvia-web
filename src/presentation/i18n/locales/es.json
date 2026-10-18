@@ -765,6 +765,7 @@
       "next": "Siguiente",
       "submitting": "Reservando...",
       "confirm": "Confirmar reserva",
+      "save_changes": "Guardar cambios",
       "today": "Hoy",
       "tomorrow": "Mañana",
       "min_unit": " min",
@@ -2974,6 +2975,7 @@
       "client_favorite_add": "No pudimos guardar el favorito. Intentá de nuevo.",
       "client_availability_fetch": "No pudimos cargar los horarios disponibles. Intentá de nuevo.",
       "client_booking_create": "No pudimos crear la reserva. Intentá de nuevo.",
+      "client_booking_update": "No pudimos actualizar la reserva. Intentá de nuevo.",
       "staff_agenda_fetch": "No pudimos cargar tu agenda. Intentá de nuevo.",
       "staff_agenda_status": "No pudimos actualizar el turno. Intentá de nuevo.",
       "staff_scan": "No pudimos verificar el código. Intentá de nuevo.",
@@ -3261,7 +3263,9 @@
       },
       "booking": {
         "meta_title": "Reservar un turno — Yotuvia",
+        "edit_meta_title": "Reprogramar turno — Yotuvia",
         "title": "Reservar en {center}",
+        "edit_title": "Reprogramar en {center}",
         "back_to_center": "Volver al centro",
         "no_center": "No pudimos identificar el centro de esta reserva.",
         "services_hint": "Elegí uno o más servicios. La duración y el precio son los del centro.",
@@ -3272,6 +3276,8 @@
         "steps_label": "Pasos de la reserva",
         "modal_title": "¿Confirmás esta reserva?",
         "modal_note": "Sin pago online: la reserva se solicita al instante y el centro la confirma. Si el centro pide una seña, la retención aparece en tus reservas.",
+        "edit_modal_title": "¿Confirmás estos cambios?",
+        "edit_modal_note": "La reserva se actualiza con el nuevo día y horario. El centro la vuelve a confirmar si hace falta.",
         "success_deposit_note": "Si el centro pide una seña, la retención aparece en tus reservas."
       }
     },

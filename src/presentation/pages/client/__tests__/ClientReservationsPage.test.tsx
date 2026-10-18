@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Reservation, User } from "yotuvia-core";
 
@@ -218,6 +219,33 @@ describe("ClientReservationsPage", () => {
 
     await screen.findByText("Spa Sur");
     expect(screen.queryByRole("button", { name: "Pay deposit" })).toBeNull();
+  });
+
+  it("offers reschedule only for live reservations and links to the edit flow", async () => {
+    const actor = userEvent.setup();
+
+    function EditProbe() {
+      const location = useLocation();
+      return <div>{`edit ${location.pathname}${location.search}`}</div>;
+    }
+
+    renderWithProviders(
+      <Routes>
+        <Route path={ROUTES.client.reservations} element={<ClientReservationsPage />} />
+        <Route path={ROUTES.centers.book} element={<EditProbe />} />
+      </Routes>,
+      { route: ROUTES.client.reservations },
+    );
+
+    await screen.findByText("Studio Yotuvia");
+    // CONFIRMED is editable; COMPLETED is not.
+    expect(screen.getAllByRole("button", { name: "Edit" })).toHaveLength(1);
+
+    await actor.click(screen.getByRole("button", { name: "Edit" }));
+
+    const probe = await screen.findByText(/^edit /);
+    expect(probe.textContent).toContain("/centers/3/book");
+    expect(probe.textContent).toContain("editId=11");
   });
 
   it("cancels with confirmation, forwards the reason and refreshes the list", async () => {

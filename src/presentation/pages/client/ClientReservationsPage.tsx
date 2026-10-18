@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import type { Reservation, ReservationStatus } from "yotuvia-core";
 
 import {
@@ -18,7 +19,9 @@ import {
 } from "@/presentation/hooks/use-client";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useSubmitDeposit } from "@/presentation/hooks/use-submit-deposit";
+import { dateKeyFromApi } from "@/presentation/lib/dates";
 import { useErrorMessage } from "@/presentation/lib/errors";
+import { centerBookingPath } from "@/presentation/lib/routes";
 /** Filter sentinel for "every status". */
 const ALL = "ALL";
 
@@ -62,6 +65,7 @@ export function ClientReservationsPage() {
   const clientId = Number(user?.id ?? 0);
   const language = i18n.resolvedLanguage ?? i18n.language;
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [statusFilter, setStatusFilter] = useState<ReservationStatus | typeof ALL>(ALL);
   const [selected, setSelected] = useState<Reservation | null>(null);
@@ -137,6 +141,24 @@ export function ClientReservationsPage() {
   const handleRequestDeposit = (reservation: Reservation) => {
     setSelected(null);
     setDepositing(reservation);
+  };
+
+  /**
+   * Reschedule: reopen the booking flow in edit mode, prefilled with this
+   * reservation's current services, professional, day and slot. The flow PUTs
+   * the changes instead of creating a new booking.
+   */
+  const handleEdit = (reservation: Reservation) => {
+    setSelected(null);
+    navigate(
+      centerBookingPath(reservation.beautyCenterId, {
+        editId: reservation.id,
+        date: dateKeyFromApi(reservation.date),
+        startTime: reservation.startTime.slice(0, 5),
+        serviceIds: reservation.services.map((service) => service.serviceId),
+        ...(reservation.personnelId ? { personnelId: reservation.personnelId } : {}),
+      }),
+    );
   };
 
   const handleSubmitDeposit = async (file: File) => {
@@ -248,6 +270,7 @@ export function ClientReservationsPage() {
                 onShowQr={handleShowQr}
                 onCancel={handleRequestCancel}
                 onPayDeposit={handleRequestDeposit}
+                onEdit={handleEdit}
               />
             </li>
           ))}

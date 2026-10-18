@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AvailabilitySlot, CreateReservationData } from "yotuvia-core";
 
-import { createReservationUseCase, searchAvailabilityUseCase } from "@/di/container";
+import { createReservationUseCase, searchAvailabilityUseCase, updateReservationUseCase } from "@/di/container";
 import { attachErrorKey } from "@/presentation/lib/errors";
 import { queryKeys } from "@/presentation/lib/query-keys";
 
@@ -75,6 +75,12 @@ export function useAvailability(params: AvailabilityQueryParams | null) {
 /** Payload of the booking write, minus the fields the server derives. */
 export type CreateClientReservationVariables = CreateReservationData;
 
+/** Variables of the reschedule write: which reservation, and its new state. */
+export interface UpdateClientReservationVariables {
+  reservationId: number;
+  data: CreateReservationData;
+}
+
 /**
  * Creates the client's reservation.
  *
@@ -94,5 +100,26 @@ export function useCreateClientReservation() {
         ),
     }),
     "web.errors.client_booking_create",
+  );
+}
+
+/**
+ * Reschedules one of the client's reservations (`PUT /reservation/:id`).
+ *
+ * Same invalidation as create: the list, the "next appointment" card and the
+ * status filter all refetch with the new date/time.
+ */
+export function useUpdateClientReservation() {
+  const queryClient = useQueryClient();
+  return attachErrorKey(
+    useMutation<void, Error, UpdateClientReservationVariables>({
+      mutationFn: ({ reservationId, data }) =>
+        updateReservationUseCase.execute(reservationId, data),
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: queryKeys.reservations.all }).then(() =>
+          queryClient.invalidateQueries({ queryKey: queryKeys.client.all }),
+        ),
+    }),
+    "web.errors.client_booking_update",
   );
 }

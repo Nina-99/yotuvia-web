@@ -16,6 +16,7 @@ export { ReservationQrDialog } from "./ReservationQrDialog";
 export type { ReservationQrDialogProps } from "./ReservationQrDialog";
 export {
   canCancelReservation,
+  canEditReservation,
   canShowQr,
   needsDeposit,
   paymentStatusLabelKey,

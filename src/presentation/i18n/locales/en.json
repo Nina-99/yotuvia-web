@@ -765,6 +765,7 @@
       "next": "Next",
       "submitting": "Booking...",
       "confirm": "Confirm reservation",
+      "save_changes": "Save changes",
       "today": "Today",
       "tomorrow": "Tomorrow",
       "min_unit": " min",
@@ -2974,6 +2975,7 @@
       "client_favorite_add": "We couldn't save the favorite. Please try again.",
       "client_availability_fetch": "We couldn't load the available times. Please try again.",
       "client_booking_create": "We couldn't create the reservation. Please try again.",
+      "client_booking_update": "We couldn't update the reservation. Please try again.",
       "staff_agenda_fetch": "We couldn't load your agenda. Please try again.",
       "staff_agenda_status": "We couldn't update the appointment. Please try again.",
       "staff_scan": "We couldn't verify that code. Please try again.",
@@ -3261,7 +3263,9 @@
       },
       "booking": {
         "meta_title": "Book an appointment — Yotuvia",
+        "edit_meta_title": "Reschedule — Yotuvia",
         "title": "Book at {center}",
+        "edit_title": "Reschedule at {center}",
         "back_to_center": "Back to the center",
         "no_center": "We couldn't identify the center for this booking.",
         "services_hint": "Pick one or more services. Duration and price are the center's own.",
@@ -3272,6 +3276,8 @@
         "steps_label": "Booking steps",
         "modal_title": "Confirm this reservation?",
         "modal_note": "No online payment: the reservation is requested right away and the center confirms it. If the center requires a deposit, the hold shows up in your reservations.",
+        "edit_modal_title": "Confirm these changes?",
+        "edit_modal_note": "The reservation is updated with the new day and time. The center confirms again if it needs to.",
         "success_deposit_note": "If the center requires a deposit, the hold appears in your reservations."
       }
     },

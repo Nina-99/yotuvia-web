@@ -7,6 +7,7 @@ import { formatCurrency, formatDate, formatTime } from "@/presentation/lib/forma
 
 import {
   canCancelReservation,
+  canEditReservation,
   canShowQr,
   needsDeposit,
   RESERVATION_STATUS_VARIANT,
@@ -22,6 +23,8 @@ export interface ClientReservationCardProps {
   onCancel: (reservation: Reservation) => void;
   /** Opens the deposit-payment dialog. */
   onPayDeposit: (reservation: Reservation) => void;
+  /** Opens the reschedule (edit) flow. */
+  onEdit: (reservation: Reservation) => void;
 }
 
 /**
@@ -39,6 +42,7 @@ export function ClientReservationCard({
   onShowQr,
   onCancel,
   onPayDeposit,
+  onEdit,
 }: ClientReservationCardProps) {
   const { t } = useTranslation();
 
@@ -84,6 +88,11 @@ export function ClientReservationCard({
           <Button size="sm" variant="outline" onClick={() => onOpenDetail(reservation)}>
             {t("client.reservations.details")}
           </Button>
+          {canEditReservation(reservation.status) ? (
+            <Button size="sm" variant="secondary" onClick={() => onEdit(reservation)}>
+              {t("client.reservations.edit")}
+            </Button>
+          ) : null}
           {needsDeposit(reservation) ? (
             <Button size="sm" onClick={() => onPayDeposit(reservation)}>
               {t("client.reservations.pay_deposit")}

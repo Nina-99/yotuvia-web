@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import type { CreateReservationData } from "yotuvia-core";
 
 import { FormAlert } from "@/presentation/components/form";
 import {
@@ -14,7 +15,7 @@ import {
   buttonClasses,
 } from "@/presentation/components/ui";
 import { useBeautyCenter } from "@/presentation/hooks/use-beauty-centers";
-import { useAvailability, useCreateClientReservation } from "@/presentation/hooks/use-booking";
+import { useAvailability, useCreateClientReservation, useUpdateClientReservation } from "@/presentation/hooks/use-booking";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useCenterPersonnel } from "@/presentation/hooks/use-personnel";
 import { useClientServices } from "@/presentation/hooks/use-services";
@@ -102,6 +103,12 @@ export function BookingPage() {
   const language = i18n.resolvedLanguage ?? i18n.language;
   const navigate = useNavigate();
 
+  // RESCHEDULE MODE: `editId` turns this same flow into an UPDATE of an
+  // existing reservation. The reservations list builds the link with the
+  // reservation's current services/professional/day/slot as prefill.
+  const editId = parsePositiveId(searchParams.get("editId"));
+  const isEditing = editId !== null;
+
   const centerQuery = useBeautyCenter(centerId, language);
   const servicesQuery = useClientServices(centerId);
   const personnelQuery = useCenterPersonnel(centerId);
@@ -119,8 +126,14 @@ export function BookingPage() {
     () => parsePositiveId(searchParams.get("sourcePostId")) ?? undefined,
     [searchParams],
   );
-  const [date, setDate] = useState(() => toDateKey(new Date()));
-  const [startTime, setStartTime] = useState<string | null>(null);
+  const [date, setDate] = useState(() => {
+    const raw = searchParams.get("date");
+    return isEditing && raw !== null && isBookingDateKey(raw) ? raw : toDateKey(new Date());
+  });
+  const [startTime, setStartTime] = useState<string | null>(() => {
+    const raw = searchParams.get("startTime");
+    return isEditing && raw ? raw : null;
+  });
   const [stepErrorKey, setStepErrorKey] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -129,6 +142,10 @@ export function BookingPage() {
   const [applyLoyalty, setApplyLoyalty] = useState(true);
 
   const createReservation = useCreateClientReservation();
+  const updateReservation = useUpdateClientReservation();
+  /** The write in flight for the CURRENT mode (create or reschedule). */
+  const bookingPending = isEditing ? updateReservation.isPending : createReservation.isPending;
+  const bookingErrorKey = (isEditing ? updateReservation.errorKey : createReservation.errorKey) ?? null;
 
   const availabilityQuery = useAvailability(
     step === "services"
@@ -143,7 +160,7 @@ export function BookingPage() {
 
   const center = centerQuery.data;
   const centerName = center?.name.trim() ? center.name : t("web.home.search.unknown_center");
-  useDocumentTitle(t("web.centers.booking.meta_title"));
+  useDocumentTitle(t(isEditing ? "web.centers.booking.edit_meta_title" : "web.centers.booking.meta_title"));
 
   const services = useMemo(() => servicesQuery.data ?? [], [servicesQuery.data]);
   const selectedServices = useMemo(
@@ -261,23 +278,27 @@ export function BookingPage() {
       const validServiceIds = parsed.data.serviceIds.filter((serviceId) =>
         services.some((service) => service.id === serviceId),
       );
-      await createReservation.mutateAsync({
+      const payload: CreateReservationData = {
         beautyCenterId: centerId,
         services: validServiceIds.map((serviceId) => ({ serviceId })),
         date: parsed.data.date,
         startTime: parsed.data.startTime,
         // Omitted (never `null`) when "Any": the server then picks a professional.
         personnelId: parsed.data.personnelId ?? undefined,
-        // Video→booking funnel attribution; omitted when no feed post led here.
-        ...(sourcePostId !== undefined ? { sourcePostId } : {}),
-        // Loyalty choice: omitted when earning so legacy payloads stay
-        // byte-identical — absent means auto-apply server-side.
-        ...(applyLoyalty ? {} : { applyLoyalty: false as const }),
-      });
+        // Video→booking attribution and the loyalty choice belong to a NEW
+        // booking; the update contract ignores both, so they are omitted there.
+        ...(!isEditing && sourcePostId !== undefined ? { sourcePostId } : {}),
+        ...(!isEditing && !applyLoyalty ? { applyLoyalty: false as const } : {}),
+      };
+      if (editId !== null) {
+        await updateReservation.mutateAsync({ reservationId: editId, data: payload });
+      } else {
+        await createReservation.mutateAsync(payload);
+      }
       setConfirmOpen(false);
       setConfirmed(true);
     } catch {
-      // `createReservation.errorKey` keeps the dialog open with the message.
+      // The mode's `errorKey` keeps the dialog open with the message.
     }
   };
 
@@ -356,7 +377,9 @@ export function BookingPage() {
           {t("web.centers.booking.back_to_center")}
         </Link>
         <h2 className="text-2xl font-bold text-text">
-          {t("web.centers.booking.title", { center: centerName })}
+          {isEditing
+            ? t("web.centers.booking.edit_title", { center: centerName })
+            : t("web.centers.booking.title", { center: centerName })}
         </h2>
       </div>
 
@@ -643,45 +666,55 @@ export function BookingPage() {
       <Modal
         open={confirmOpen}
         onClose={() => {
-          if (createReservation.isPending) return;
+          if (bookingPending) return;
           setConfirmOpen(false);
         }}
         closeLabel={t("common.close")}
-        title={t("web.centers.booking.modal_title")}
-        description={t("web.centers.booking.modal_note")}
+        title={t(
+          isEditing ? "web.centers.booking.edit_modal_title" : "web.centers.booking.modal_title",
+        )}
+        description={t(
+          isEditing ? "web.centers.booking.edit_modal_note" : "web.centers.booking.modal_note",
+        )}
         footer={
           <>
             <Button
               variant="outline"
-              disabled={createReservation.isPending}
+              disabled={bookingPending}
               onClick={() => setConfirmOpen(false)}
             >
               {t("common.cancel")}
             </Button>
-            <Button loading={createReservation.isPending} onClick={() => void submitBooking()}>
-              {createReservation.isPending
+            <Button loading={bookingPending} onClick={() => void submitBooking()}>
+              {bookingPending
                 ? t("client.reservation.submitting")
-                : t("client.reservation.confirm")}
+                : t(
+                    isEditing
+                      ? "client.reservation.save_changes"
+                      : "client.reservation.confirm",
+                  )}
             </Button>
           </>
         }
       >
-        <FormAlert message={createReservation.errorKey ?? stepErrorKey} variant="error" />
-        <label className="mt-3 flex cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            checked={applyLoyalty}
-            onChange={(event) => setApplyLoyalty(event.target.checked)}
-            data-testid="loyalty-apply-toggle"
-            className="h-4 w-4 accent-current"
-          />
-          <span className="flex flex-col">
-            <span className="text-sm font-medium text-text">
-              {t("client.loyalty.apply_title")}
+        <FormAlert message={bookingErrorKey ?? stepErrorKey} variant="error" />
+        {isEditing ? null : (
+          <label className="mt-3 flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={applyLoyalty}
+              onChange={(event) => setApplyLoyalty(event.target.checked)}
+              data-testid="loyalty-apply-toggle"
+              className="h-4 w-4 accent-current"
+            />
+            <span className="flex flex-col">
+              <span className="text-sm font-medium text-text">
+                {t("client.loyalty.apply_title")}
+              </span>
+              <span className="text-xs text-text-muted">{t("client.loyalty.apply_hint")}</span>
             </span>
-            <span className="text-xs text-text-muted">{t("client.loyalty.apply_hint")}</span>
-          </span>
-        </label>
+          </label>
+        )}
         <p className="mt-3">
           {t("client.reservation.summary_date")}: {formatDate(date, language)}
           {" · "}

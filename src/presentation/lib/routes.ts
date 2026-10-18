@@ -156,6 +156,12 @@ export interface BookingPrefill {
   serviceIds?: readonly number[];
   personnelId?: number;
   sourcePostId?: number;
+  /** Reschedule mode: the reservation being edited. */
+  editId?: number;
+  /** Reschedule mode: the reservation's current day, `YYYY-MM-DD`. */
+  date?: string;
+  /** Reschedule mode: the reservation's current start time, `HH:MM`. */
+  startTime?: string;
 }
 
 export function centerBookingPath(centerId: number, prefill: BookingPrefill = {}): string {
@@ -165,6 +171,9 @@ export function centerBookingPath(centerId: number, prefill: BookingPrefill = {}
   }
   if (prefill.personnelId) params.set("personnelId", String(prefill.personnelId));
   if (prefill.sourcePostId) params.set("sourcePostId", String(prefill.sourcePostId));
+  if (prefill.editId) params.set("editId", String(prefill.editId));
+  if (prefill.date) params.set("date", prefill.date);
+  if (prefill.startTime) params.set("startTime", prefill.startTime);
   const query = params.toString();
   return `${centerDetailPath(centerId)}/book${query ? `?${query}` : ""}`;
 }

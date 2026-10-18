@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   getPersonnelUseCase: { execute: vi.fn() },
   searchAvailabilityUseCase: { execute: vi.fn() },
   createReservationUseCase: { execute: vi.fn() },
+  updateReservationUseCase: { execute: vi.fn() },
   getClientReservationsUseCase: { execute: vi.fn() },
   authRepository: {
     getCurrentUser: vi.fn(),
@@ -27,6 +28,7 @@ vi.mock("@/di/container", () => ({
   getPersonnelUseCase: mocks.getPersonnelUseCase,
   searchAvailabilityUseCase: mocks.searchAvailabilityUseCase,
   createReservationUseCase: mocks.createReservationUseCase,
+  updateReservationUseCase: mocks.updateReservationUseCase,
   getClientReservationsUseCase: mocks.getClientReservationsUseCase,
 }));
 
@@ -245,8 +247,42 @@ describe("BookingPage (client-only)", () => {
     });
   });
 
-  it("blocks the first step until a service is selected", async () => {
+  it("reschedules an existing reservation in edit mode (PUT, prefilled)", async () => {
     const actor = userEvent.setup();
+    mocks.updateReservationUseCase.execute.mockResolvedValue(undefined);
+
+    renderWithProviders(<BookingTree />, {
+      route: `/centers/7/book?editId=11&date=${TODAY}&startTime=09:00&serviceIds=3`,
+    });
+
+    // Prefilled from the query: the service is already ticked and the title
+    // announces the reschedule.
+    expect(await screen.findByRole("heading", { name: "Reschedule at Studio Yotuvia" })).toBeInTheDocument();
+    expect(await screen.findByRole("checkbox", { name: /Corte/ })).toBeChecked();
+
+    await actor.click(screen.getByRole("button", { name: "Next" }));
+    // The slot is prefilled too, so the schedule step validates immediately.
+    await actor.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(await screen.findByRole("heading", { name: "Confirm reservation" })).toBeInTheDocument();
+    await actor.click(screen.getByRole("button", { name: "Confirm reservation" }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Confirm these changes?")).toBeInTheDocument();
+    await actor.click(within(dialog).getByRole("button", { name: "Save changes" }));
+
+    expect(mocks.updateReservationUseCase.execute).toHaveBeenCalledWith(11, {
+      beautyCenterId: 7,
+      services: [{ serviceId: 3 }],
+      date: TODAY,
+      startTime: "09:00",
+      personnelId: undefined,
+    });
+    // A reschedule never creates a second booking.
+    expect(mocks.createReservationUseCase.execute).not.toHaveBeenCalled();
+  });
+
+  it("blocks the first step until a service is selected", async () => {    const actor = userEvent.setup();
 
     renderBooking();
 

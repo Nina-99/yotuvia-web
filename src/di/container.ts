@@ -64,6 +64,7 @@ import {
   AssignPersonnelUseCase,
   CancelReservationUseCase,
   UploadReservationProofUseCase,
+  UpdateReservationUseCase,
   Config,
   CountAdminUnreadUseCase,
   CountStaffUnreadUseCase,
@@ -237,6 +238,7 @@ export const getClientReservationsUseCase = new GetClientReservationsUseCase(res
 export const generateQRUseCase = new GenerateQRUseCase(reservationRepository);
 export const cancelReservationUseCase = new CancelReservationUseCase(reservationRepository);
 export const uploadReservationProofUseCase = new UploadReservationProofUseCase(reservationRepository);
+export const updateReservationUseCase = new UpdateReservationUseCase(reservationRepository);
 export const getCenterReservationsUseCase = new GetCenterReservationsUseCase(adminReservationRepository);
 export const updateReservationStatusUseCase = new UpdateReservationStatusUseCase(adminReservationRepository);
 export const reviewProofUseCase = new ReviewProofUseCase(adminReservationRepository);
@@ -404,6 +406,7 @@ adminReservationRepository,
   generateQRUseCase,
   cancelReservationUseCase,
   uploadReservationProofUseCase,
+  updateReservationUseCase,
   getCenterReservationsUseCase,
   updateReservationStatusUseCase,
   reviewProofUseCase,

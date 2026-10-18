@@ -44,6 +44,16 @@ export function canShowQr(status: ReservationStatus): boolean {
   return status !== "COMPLETED" && status !== "CANCELLED";
 }
 
+/**
+ * True when the API allows editing (rescheduling) in this state.
+ *
+ * Mirrors `canCancelReservation`: the update endpoint only accepts a live
+ * reservation (PENDING/CONFIRMED); terminal states answer 409.
+ */
+export function canEditReservation(status: ReservationStatus): boolean {
+  return status === "PENDING" || status === "CONFIRMED";
+}
+
 /** i18n key for a deposit payment status, or `null` when the flow is off. */
 export function paymentStatusLabelKey(paymentStatus: string | undefined): string | null {
   if (paymentStatus === undefined || paymentStatus === "NONE") return null;
