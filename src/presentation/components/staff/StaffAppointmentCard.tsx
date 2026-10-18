@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { telHref, whatsappHref } from "yotuvia-core";
 import type { Reservation } from "yotuvia-core";
 
 import { Badge, Button } from "@/presentation/components/ui";
@@ -38,6 +39,13 @@ export function StaffAppointmentCard({
     t("staff.agenda.client_fallback", { id: reservation.clientId });
   const actions = STAFF_STATUS_ACTIONS[reservation.status] ?? [];
   const currency = reservation.currency ?? "USD";
+  // The stored phone is `"<code> <number>"`; an unusable one hides the actions
+  // entirely (never a dead `tel:`/`wa.me`).
+  const phone = reservation.client?.phone ?? "";
+  const tel = telHref(phone);
+  const whatsapp = whatsappHref(phone);
+  const contactLinkClasses =
+    "rounded text-sm font-medium text-link hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
 
   return (
     <li className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
@@ -60,6 +68,31 @@ export function StaffAppointmentCard({
           {reservation.services.map((service) => service.serviceName).join(", ")}
         </span>
       </div>
+
+      {tel !== "" || whatsapp !== "" ? (
+        <div className="flex flex-wrap items-center gap-4">
+          {tel !== "" ? (
+            <a
+              href={tel}
+              className={contactLinkClasses}
+              aria-label={t("staff.agenda.call_aria", { name: clientName })}
+            >
+              {t("staff.agenda.call")}
+            </a>
+          ) : null}
+          {whatsapp !== "" ? (
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={contactLinkClasses}
+              aria-label={t("staff.agenda.whatsapp_aria", { name: clientName })}
+            >
+              {t("staff.agenda.whatsapp")}
+            </a>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-bold text-success">

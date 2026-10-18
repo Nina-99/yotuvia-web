@@ -50,6 +50,7 @@ const PENDING: Reservation = {
   beautyCenterName: "Studio Yotuvia",
   clientId: 3,
   clientName: "Ana Díaz",
+  client: { firstName: "Ana", lastName: "Díaz", phone: "+591 71234567" },
   currency: "ARS",
   date: `${TODAY}T00:00:00Z`,
   startTime: "10:00",
@@ -63,6 +64,8 @@ const CONFIRMED: Reservation = {
   ...PENDING,
   id: 22,
   clientName: "Beto Sosa",
+  // No nested client on legacy rows: the card must not inherit PENDING's phone.
+  client: undefined,
   startTime: "15:00",
   endTime: "16:00",
   status: "CONFIRMED",
@@ -104,6 +107,22 @@ describe("StaffAgendaPage", () => {
 
     // Claim-scoped day range: from === to === today.
     expect(mocks.getStaffAgendaUseCase.execute).toHaveBeenCalledWith(TODAY, TODAY);
+  });
+
+  it("offers call and WhatsApp for a client with a phone, and none without it", async () => {
+    mocks.getStaffAgendaUseCase.execute.mockResolvedValue([PENDING, CONFIRMED]);
+
+    renderWithProviders(<StaffAgendaPage />, { route: ROUTES.staff.agenda });
+
+    const call = await screen.findByRole("link", { name: "Call Ana Díaz" });
+    expect(call).toHaveAttribute("href", "tel:+59171234567");
+    expect(screen.getByRole("link", { name: "Message Ana Díaz on WhatsApp" })).toHaveAttribute(
+      "href",
+      "https://wa.me/59171234567",
+    );
+    // Beto's payload carries no phone, so no contact action is rendered for him.
+    expect(screen.queryByRole("link", { name: "Call Beto Sosa" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Message Beto Sosa on WhatsApp" })).toBeNull();
   });
 
   it("changes the day through the date navigation", async () => {
