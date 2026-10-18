@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 
 import { NavIcon } from "@/presentation/components/nav-icon";
 import { cn } from "@/presentation/lib/cn";
+import { formatNumber } from "@/presentation/lib/format";
 import { APP_NAV_SECTIONS, isExactMatchSection } from "@/presentation/lib/nav";
 import type { AppNavSection } from "@/presentation/lib/nav";
 import { ROUTES } from "@/presentation/lib/routes";
@@ -18,6 +19,11 @@ export interface AppSidebarProps {
    * standalone use.
    */
   sections?: readonly AppNavSection[];
+  /**
+   * Unread counts by section id (e.g. `{ notifications: 3 }`). A section with a
+   * positive count renders a badge; absent/zero renders none.
+   */
+  badges?: Readonly<Record<string, number>>;
   /** Called after a nav link activates, so the drawer can close itself. */
   onNavigate?: () => void;
   onToggleCollapse?: () => void;
@@ -33,10 +39,12 @@ export function AppSidebar({
   collapsed = false,
   variant = "desktop",
   sections = APP_NAV_SECTIONS,
+  badges = {},
   onNavigate,
   onToggleCollapse,
 }: AppSidebarProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
   const isCollapsed = variant === "desktop" && collapsed;
 
   return (
@@ -87,6 +95,7 @@ export function AppSidebar({
         <ul className="flex flex-col gap-1">
           {sections.map((section) => {
             const label = t(section.labelKey);
+            const unread = badges[section.id] ?? 0;
             return (
               <li key={section.id}>
                 <NavLink
@@ -97,7 +106,7 @@ export function AppSidebar({
                   aria-label={isCollapsed ? label : undefined}
                   className={({ isActive }) =>
                     cn(
-                      "flex items-center gap-3 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+                      "relative flex items-center gap-3 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
                       isCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5",
                       isActive
                         ? "bg-accent text-on-accent"
@@ -107,6 +116,20 @@ export function AppSidebar({
                 >
                   <NavIcon paths={section.icon} />
                   {!isCollapsed ? <span className="truncate">{label}</span> : null}
+                  {unread > 0 ? (
+                    <span
+                      data-testid={`nav-badge-${section.id}`}
+                      aria-label={t("web.app.nav.unread_badge", { count: unread })}
+                      className={cn(
+                        "rounded-full bg-danger font-semibold text-on-accent",
+                        isCollapsed
+                          ? "absolute right-1.5 top-1.5 h-2.5 w-2.5"
+                          : "ml-auto px-2 py-0.5 text-xs",
+                      )}
+                    >
+                      {isCollapsed ? null : formatNumber(unread, language)}
+                    </span>
+                  ) : null}
                 </NavLink>
               </li>
             );

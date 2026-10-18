@@ -13,6 +13,7 @@ import { findNavSection, navSectionsForRole } from "@/presentation/lib/nav";
 import { ROUTES } from "@/presentation/lib/routes";
 import { APP_ALLOWED_ROLES } from "@/presentation/lib/roles";
 import { useAuthSession } from "@/presentation/hooks/use-auth-session";
+import { useShellUnread } from "@/presentation/hooks/use-shell-unread";
 import { useSessionPhotoSync } from "@/presentation/hooks/use-session-photo";
 import { RouteFallback } from "@/presentation/routes/route-fallback";
 
@@ -63,6 +64,11 @@ export function AppLayout() {
   const sections = navSectionsForRole(role);
   const activeSection = findNavSection(location.pathname, sections);
   const title = t(activeSection?.labelKey ?? sections[0]?.labelKey ?? "web.app.nav.dashboard");
+
+  // Unread badge for the current role's notifications section (the section list
+  // is per role, so the matching id comes from the hook).
+  const unread = useShellUnread(role, Number(user?.id ?? 0));
+  const badges = unread !== null && unread.count > 0 ? { [unread.sectionId]: unread.count } : {};
 
   const handleLogout = async () => {
     setLogoutError(false);
@@ -153,6 +159,7 @@ export function AppLayout() {
           <AppSidebar
             variant="desktop"
             sections={sections}
+            badges={badges}
             collapsed={collapsed}
             onToggleCollapse={() => setCollapsed((value) => !value)}
           />
@@ -179,6 +186,7 @@ export function AppLayout() {
               <AppSidebar
                 variant="drawer"
                 sections={sections}
+                badges={badges}
                 onNavigate={() => setDrawerOpen(false)}
               />
               <div className="flex flex-wrap items-center gap-2 border-t border-border p-3">

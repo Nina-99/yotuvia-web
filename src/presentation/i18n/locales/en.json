@@ -1688,6 +1688,7 @@
         "client_reservations": "My reservations",
         "client_waitlist": "Waitlist",
         "client_notifications": "Notifications",
+        "unread_badge": "{count} unread",
         "client_favorites": "Favorites",
         "client_videos": "Videos",
         "client_profile": "Profile",

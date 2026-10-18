@@ -24,10 +24,11 @@ export function useAdminNotifications() {
 }
 
 /** The center's unread count, for the header summary. */
-export function useAdminUnreadCount() {
+export function useAdminUnreadCount(enabled = true) {
   return useQuery({
     queryKey: queryKeys.adminNotifications.unreadCount(),
     queryFn: () => countAdminUnreadUseCase.execute(),
+    enabled,
   });
 }
 

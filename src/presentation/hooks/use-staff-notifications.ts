@@ -24,10 +24,11 @@ export function useStaffNotifications() {
 }
 
 /** The professional's unread count, for the header summary. */
-export function useStaffUnreadCount() {
+export function useStaffUnreadCount(enabled = true) {
   return useQuery({
     queryKey: queryKeys.staffNotifications.unreadCount(),
     queryFn: () => countStaffUnreadUseCase.execute(),
+    enabled,
   });
 }
 
