@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { NotificationsPanel } from "@/presentation/components/notifications";
+import { NotificationsPanel, WebPushCard } from "@/presentation/components/notifications";
 import {
   useAdminNotifications,
   useAdminUnreadCount,
@@ -32,8 +32,10 @@ export function AdminNotificationsPage() {
   const errorMessage = useErrorMessage(listQuery.error, "web.errors.notification_load");
 
   return (
-    <NotificationsPanel
-      title={t("admin.notifications.title")}
+    <div className="flex flex-col gap-6">
+      <WebPushCard />
+      <NotificationsPanel
+        title={t("admin.notifications.title")}
       notifications={listQuery.data ?? []}
       unreadCount={unreadCount}
       unreadText={t("admin.notifications.unread", { count: unreadCount })}
@@ -48,6 +50,7 @@ export function AdminNotificationsPage() {
         if (!item.isRead) markRead.mutate(item.id);
       }}
       actionErrorKey={markRead.errorKey}
-    />
+      />
+    </div>
   );
 }

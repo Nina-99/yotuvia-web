@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { NotificationsPanel } from "@/presentation/components/notifications";
+import { NotificationsPanel, WebPushCard } from "@/presentation/components/notifications";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useNowTick } from "@/presentation/hooks/use-now-tick";
 import {
@@ -32,8 +32,10 @@ export function StaffNotificationsPage() {
   const errorMessage = useErrorMessage(listQuery.error, "web.errors.notification_load");
 
   return (
-    <NotificationsPanel
-      title={t("staff.notifications.title")}
+    <div className="flex flex-col gap-6">
+      <WebPushCard />
+      <NotificationsPanel
+        title={t("staff.notifications.title")}
       notifications={listQuery.data ?? []}
       unreadCount={unreadCount}
       unreadText={t("staff.notifications.unread", { count: unreadCount })}
@@ -48,6 +50,7 @@ export function StaffNotificationsPage() {
         if (!item.isRead) markRead.mutate(item.id);
       }}
       actionErrorKey={markRead.errorKey}
-    />
+      />
+    </div>
   );
 }
