@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import type { ServiceCategory } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, ImageUploadField, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, ImageUploadField, NumberInput, useZodForm } from "@/presentation/components/form";
 import { Button, Input, Modal, Select, Textarea } from "@/presentation/components/ui";
-import { LANGUAGES } from "yotuvia-core";
+import { LANGUAGES, parseAmount } from "yotuvia-core";
 import { formatCurrency } from "@/presentation/lib/format";
 import { useUploadServiceImage } from "@/presentation/hooks/use-profile";
 import {
@@ -59,7 +59,11 @@ export function ServiceFormModal({
     defaultValues,
   });
 
-  const priceValue = Number(form.watch("price"));
+  // Read the amount the way the viewer typed it: `parseAmount` understands the
+  // locale separators the field now accepts, where `Number` would read
+  // `1.234,56` as NaN (or the wrong value).
+  const pricePreview = parseAmount(form.watch("price"), { min: 0 });
+  const priceValue = pricePreview.value;
   const hasCategories = categories.length > 0;
   const imageUpload = useUploadServiceImage();
   const imageValue = form.watch("imageUrl");
@@ -141,14 +145,12 @@ export function ServiceFormModal({
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField name="duration" label={t("web.app.services.form.duration")}>
             {({ field, invalid, describedBy, id }) => (
-              <Input
+              <NumberInput
                 {...field}
                 id={id}
-                type="number"
-                min={1}
-                inputMode="numeric"
-                aria-invalid={invalid || undefined}
-                aria-describedby={describedBy}
+                variant="integer"
+                invalid={invalid}
+                describedBy={describedBy}
               />
             )}
           </FormField>
@@ -157,21 +159,18 @@ export function ServiceFormModal({
             name="price"
             label={t("web.app.services.form.price")}
             helperText={
-              Number.isFinite(priceValue)
+              priceValue != null
                 ? formatCurrency(priceValue, language, currency)
                 : undefined
             }
           >
             {({ field, invalid, describedBy, id }) => (
-              <Input
+              <NumberInput
                 {...field}
                 id={id}
-                type="number"
-                min={0}
-                step="0.01"
-                inputMode="decimal"
-                aria-invalid={invalid || undefined}
-                aria-describedby={describedBy}
+                variant="money"
+                invalid={invalid}
+                describedBy={describedBy}
               />
             )}
           </FormField>

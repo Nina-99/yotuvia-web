@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { FormAlert } from "@/presentation/components/form";
+import { FormAlert, NumberInput } from "@/presentation/components/form";
 import { Button, Input, Modal } from "@/presentation/components/ui";
 import { toDateKey } from "@/presentation/lib/dates";
 
@@ -89,12 +89,11 @@ export function BoostCampaignDialog({
           <label htmlFor={budgetId} className="text-sm font-medium text-text">
             {t("web.app.content.boost.budget_label")}
           </label>
-          <Input
+          <NumberInput
             id={budgetId}
-            type="number"
-            min={1}
+            variant="decimal"
             value={budget}
-            onChange={(event) => setBudget(event.target.value)}
+            onChange={setBudget}
           />
           <span className="text-xs text-text-muted">{t("web.app.content.boost.budget_hint")}</span>
         </div>
@@ -102,12 +101,11 @@ export function BoostCampaignDialog({
           <label htmlFor={bidId} className="text-sm font-medium text-text">
             {t("web.app.content.boost.bid_label")}
           </label>
-          <Input
+          <NumberInput
             id={bidId}
-            type="number"
-            min={1}
+            variant="decimal"
             value={bidCpm}
-            onChange={(event) => setBidCpm(event.target.value)}
+            onChange={setBidCpm}
           />
           <span className="text-xs text-text-muted">{t("web.app.content.boost.bid_hint")}</span>
         </div>

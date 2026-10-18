@@ -1,14 +1,10 @@
 import { useTranslation } from "react-i18next";
 import type { Service } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, useZodForm } from "@/presentation/components/form";
-import { Button, Input, Modal, Select } from "@/presentation/components/ui";
+import { Form, FormAlert, FormField, NumberInput, useZodForm } from "@/presentation/components/form";
+import { Button, Modal, Select } from "@/presentation/components/ui";
 import {
   ANY_SERVICE_VALUE,
-  DURATION_MAX,
-  DURATION_MIN,
-  REQUIRED_STEPS_MAX,
-  REQUIRED_STEPS_MIN,
   REWARD_TYPES,
   loyaltyProgramSchema,
 } from "@/presentation/schemas/loyalty.schemas";
@@ -126,15 +122,12 @@ export function LoyaltyProgramFormModal({
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField name="requiredSteps" label={t("web.app.loyalty.form.steps")}>
             {({ field, invalid, describedBy, id }) => (
-              <Input
+              <NumberInput
                 {...field}
                 id={id}
-                type="number"
-                min={REQUIRED_STEPS_MIN}
-                max={REQUIRED_STEPS_MAX}
-                inputMode="numeric"
-                aria-invalid={invalid || undefined}
-                aria-describedby={describedBy}
+                variant="integer"
+                invalid={invalid}
+                describedBy={describedBy}
               />
             )}
           </FormField>
@@ -165,17 +158,13 @@ export function LoyaltyProgramFormModal({
           helperText={isPercentage ? undefined : t("web.app.loyalty.form.discount_hint")}
         >
           {({ field, invalid, describedBy, id }) => (
-            <Input
+            <NumberInput
               {...field}
               id={id}
-              type="number"
-              min={0}
-              max={100}
-              step="0.01"
-              inputMode="decimal"
+              variant="decimal"
               disabled={!isPercentage}
-              aria-invalid={invalid || undefined}
-              aria-describedby={describedBy}
+              invalid={invalid}
+              describedBy={describedBy}
             />
           )}
         </FormField>
@@ -186,16 +175,13 @@ export function LoyaltyProgramFormModal({
           helperText={t("web.app.loyalty.form.duration_hint")}
         >
           {({ field, invalid, describedBy, id }) => (
-            <Input
+            <NumberInput
               {...field}
               id={id}
-              type="number"
-              min={DURATION_MIN}
-              max={DURATION_MAX}
-              inputMode="numeric"
+              variant="integer"
+              invalid={invalid}
+              describedBy={describedBy}
               placeholder={t("web.app.loyalty.form.duration_placeholder")}
-              aria-invalid={invalid || undefined}
-              aria-describedby={describedBy}
             />
           )}
         </FormField>

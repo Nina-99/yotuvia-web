@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useFieldArray } from "react-hook-form";
 import type { BeautyCenter } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, ImageUploadField, PhoneInput, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, ImageUploadField, NumberInput, PhoneInput, useZodForm } from "@/presentation/components/form";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, Textarea } from "@/presentation/components/ui";
 import type { CenterCoords } from "@/presentation/components/centers/CenterLocationPicker";
 import { LANGUAGES } from "yotuvia-core";
@@ -390,31 +390,24 @@ export function CenterProfileForm({ center, saving, errorKey, onSubmit }: Center
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField name="depositAmount" label={t("web.app.profile.details.deposit_amount")}>
               {({ field, invalid, describedBy, id }) => (
-                <Input
+                <NumberInput
                   {...field}
                   id={id}
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  inputMode="decimal"
-                  aria-invalid={invalid || undefined}
-                  aria-describedby={describedBy}
+                  variant="money"
+                  invalid={invalid}
+                  describedBy={describedBy}
                 />
               )}
             </FormField>
 
             <FormField name="depositPercent" label={t("web.app.profile.details.deposit_percent")}>
               {({ field, invalid, describedBy, id }) => (
-                <Input
+                <NumberInput
                   {...field}
                   id={id}
-                  type="number"
-                  min={0}
-                  max={100}
-                  step="0.01"
-                  inputMode="decimal"
-                  aria-invalid={invalid || undefined}
-                  aria-describedby={describedBy}
+                  variant="decimal"
+                  invalid={invalid}
+                  describedBy={describedBy}
                 />
               )}
             </FormField>
@@ -424,30 +417,24 @@ export function CenterProfileForm({ center, saving, errorKey, onSubmit }: Center
               label={t("web.app.profile.details.deposit_trust_threshold")}
             >
               {({ field, invalid, describedBy, id }) => (
-                <Input
+                <NumberInput
                   {...field}
                   id={id}
-                  type="number"
-                  min={0}
-                  step="1"
-                  inputMode="numeric"
-                  aria-invalid={invalid || undefined}
-                  aria-describedby={describedBy}
+                  variant="integer"
+                  invalid={invalid}
+                  describedBy={describedBy}
                 />
               )}
             </FormField>
 
             <FormField name="depositHoldMinutes" label={t("web.app.profile.details.deposit_hold_minutes")}>
               {({ field, invalid, describedBy, id }) => (
-                <Input
+                <NumberInput
                   {...field}
                   id={id}
-                  type="number"
-                  min={0}
-                  step="1"
-                  inputMode="numeric"
-                  aria-invalid={invalid || undefined}
-                  aria-describedby={describedBy}
+                  variant="integer"
+                  invalid={invalid}
+                  describedBy={describedBy}
                 />
               )}
             </FormField>

@@ -205,7 +205,7 @@ describe("ProfilePage", () => {
 
     const phone = await screen.findByLabelText("Payment phone");
     expect(phone).toHaveValue("0412000000");
-    expect(screen.getByLabelText("Minimum amount")).toHaveValue(10);
+    expect(screen.getByLabelText("Minimum amount")).toHaveValue("10");
 
     // The public read is centre-scoped: the form passes the signed-in centre.
     expect(mocks.getPaymentConfig).toHaveBeenCalledWith(7);

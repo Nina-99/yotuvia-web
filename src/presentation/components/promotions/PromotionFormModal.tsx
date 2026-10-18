@@ -1,12 +1,11 @@
 import { useTranslation } from "react-i18next";
 import type { Service } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, NumberInput, useZodForm } from "@/presentation/components/form";
 import { Button, Input, Modal, Select, Textarea } from "@/presentation/components/ui";
 import {
   ANY_SERVICE_VALUE,
   EMPTY_PROMOTION_FORM,
-  PROMOTION_DISCOUNT_MAX,
   PROMOTION_NAME_MAX,
   PROMOTION_TARGET_CLIENTS,
   PROMOTION_TYPES,
@@ -171,32 +170,25 @@ export function PromotionFormModal({
             helperText={discountHelper}
           >
             {({ field, invalid, describedBy, id }) => (
-              <Input
+              <NumberInput
                 {...field}
                 id={id}
-                type="number"
-                min={0}
-                max={PROMOTION_DISCOUNT_MAX}
-                step="0.01"
-                inputMode="decimal"
+                variant={type === "fixed_amount" ? "money" : "decimal"}
                 disabled={!isDiscountType}
-                aria-invalid={invalid || undefined}
-                aria-describedby={describedBy}
+                invalid={invalid}
+                describedBy={describedBy}
               />
             )}
           </FormField>
 
           <FormField name="maxRedemptions" label={t("web.app.promotions.form.max_redemptions")}>
             {({ field, invalid, describedBy, id }) => (
-              <Input
+              <NumberInput
                 {...field}
                 id={id}
-                type="number"
-                min={0}
-                step="1"
-                inputMode="numeric"
-                aria-invalid={invalid || undefined}
-                aria-describedby={describedBy}
+                variant="integer"
+                invalid={invalid}
+                describedBy={describedBy}
               />
             )}
           </FormField>
@@ -206,30 +198,24 @@ export function PromotionFormModal({
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField name="buyXCount" label={t("web.app.promotions.form.buy_x")}>
               {({ field, invalid, describedBy, id }) => (
-                <Input
+                <NumberInput
                   {...field}
                   id={id}
-                  type="number"
-                  min={1}
-                  step="1"
-                  inputMode="numeric"
-                  aria-invalid={invalid || undefined}
-                  aria-describedby={describedBy}
+                  variant="integer"
+                  invalid={invalid}
+                  describedBy={describedBy}
                 />
               )}
             </FormField>
 
             <FormField name="buyYCount" label={t("web.app.promotions.form.buy_y")}>
               {({ field, invalid, describedBy, id }) => (
-                <Input
+                <NumberInput
                   {...field}
                   id={id}
-                  type="number"
-                  min={1}
-                  step="1"
-                  inputMode="numeric"
-                  aria-invalid={invalid || undefined}
-                  aria-describedby={describedBy}
+                  variant="integer"
+                  invalid={invalid}
+                  describedBy={describedBy}
                 />
               )}
             </FormField>

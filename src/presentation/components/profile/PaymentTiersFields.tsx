@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useFieldArray } from "react-hook-form";
 import type { PaymentConfig } from "yotuvia-core";
 
-import { Form, FormAlert, FormField, PhoneInput, useZodForm } from "@/presentation/components/form";
+import { Form, FormAlert, FormField, NumberInput, PhoneInput, useZodForm } from "@/presentation/components/form";
 import { Button, Input } from "@/presentation/components/ui";
 import {
   paymentConfigSchema,
@@ -100,15 +100,12 @@ export function PaymentTiersFields({
                   className="w-32"
                 >
                   {({ field, invalid, describedBy, id }) => (
-                    <Input
+                    <NumberInput
                       {...field}
                       id={id}
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      inputMode="decimal"
-                      aria-invalid={invalid || undefined}
-                      aria-describedby={describedBy}
+                      variant="money"
+                      invalid={invalid}
+                      describedBy={describedBy}
                     />
                   )}
                 </FormField>
@@ -119,16 +116,12 @@ export function PaymentTiersFields({
                   className="w-32"
                 >
                   {({ field, invalid, describedBy, id }) => (
-                    <Input
+                    <NumberInput
                       {...field}
                       id={id}
-                      type="number"
-                      min={0}
-                      max={100}
-                      step="0.01"
-                      inputMode="decimal"
-                      aria-invalid={invalid || undefined}
-                      aria-describedby={describedBy}
+                      variant="decimal"
+                      invalid={invalid}
+                      describedBy={describedBy}
                     />
                   )}
                 </FormField>
