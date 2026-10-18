@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import type { CreateReservationData } from "yotuvia-core";
 
 import { FormAlert } from "@/presentation/components/form";
+import { WaitlistJoinPrompt } from "@/presentation/components/centers";
 import {
   Button,
   Card,
@@ -526,7 +527,17 @@ export function BookingPage() {
                   </Button>
                 </div>
               ) : slots.length === 0 ? (
-                <p className="text-sm text-text-muted">{t("client.center.availability_none")}</p>
+                <div className="flex flex-col items-start gap-3">
+                  <p className="text-sm text-text-muted">{t("client.center.availability_none")}</p>
+                  {/* No free slot: offer the waitlist for the SAME day, with the
+                      professional already chosen on this step. */}
+                  <WaitlistJoinPrompt
+                    centerId={centerId}
+                    date={date}
+                    personnelId={personnelId}
+                    serviceIds={selectedServiceIds}
+                  />
+                </div>
               ) : (
                 <>
                   <p className="text-xs text-text-muted">

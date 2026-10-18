@@ -12,3 +12,5 @@ export { ServiceCategoryDialog } from "./ServiceCategoryDialog";
 export type { ServiceCategoryDialogProps } from "./ServiceCategoryDialog";
 export { SelectedCenterSheet } from "./SelectedCenterSheet";
 export type { SelectedCenterSheetProps, SelectedCenterBooking } from "./SelectedCenterSheet";
+export { WaitlistJoinPrompt } from "./WaitlistJoinPrompt";
+export type { WaitlistJoinPromptProps } from "./WaitlistJoinPrompt";

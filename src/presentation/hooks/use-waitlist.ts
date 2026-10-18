@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { JoinWaitlistData } from "yotuvia-core";
 
 import { dependencies } from "@/di/container";
 import { attachErrorKey } from "@/presentation/lib/errors";
@@ -27,9 +28,25 @@ export function useMyWaitlist(
   });
 }
 
-/** Leaves one entry. */
-export function useLeaveWaitlist() {
+/**
+ * Joins the waitlist for ONE concrete slot.
+ *
+ * A join is a REQUEST, not a booking: it only creates a live waitlist entry, so
+ * the reservations domain is not invalidated here.
+ */
+export function useJoinWaitlist() {
   const queryClient = useQueryClient();
+  return attachErrorKey(
+    useMutation<void, Error, JoinWaitlistData>({
+      mutationFn: (data) => dependencies.waitlistRepository.join(data),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.waitlist.all }),
+    }),
+    "web.errors.waitlist_join",
+  );
+}
+
+/** Leaves one entry. */
+export function useLeaveWaitlist() {  const queryClient = useQueryClient();
   return attachErrorKey(
     useMutation<void, Error, number>({
       mutationFn: (entryId) => dependencies.waitlistRepository.leave(entryId),

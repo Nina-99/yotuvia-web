@@ -1700,6 +1700,14 @@
       "error_enable": "No pudimos activar las notificaciones. Intenta de nuevo.",
       "error_disable": "No pudimos desactivar las notificaciones. Intenta de nuevo."
     },
+    "waitlist": {
+      "join_title": "¿No quedan horarios?",
+      "join_body": "Anotate en la lista de espera de este día y te ofrecemos el horario si se libera.",
+      "join_time": "Horario preferido",
+      "join_action": "Anotarme en la lista de espera",
+      "join_success": "Quedaste en la lista de espera. Vas a ver la oferta en tu página de lista de espera.",
+      "join_pick_professional": "Elegí un profesional para anotarte en la lista de espera de su agenda."
+    },
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Iniciar sesión",
@@ -3046,6 +3054,7 @@
       "client_reservations_fetch": "No pudimos cargar tus reservas. Intentá de nuevo.",
       "waitlist_fetch": "No pudimos cargar tu lista de espera. Intentá de nuevo.",
       "waitlist_leave": "No se pudo salir de la lista de espera. Intentá de nuevo.",
+      "waitlist_join": "No pudimos anotarte en la lista de espera. Intentá de nuevo.",
       "waitlist_claim": "No se pudo tomar el turno. Intentá de nuevo.",
       "notification_load": "No pudimos cargar tus notificaciones. Intentá de nuevo.",
       "notification_mark_read": "No se pudo marcar la notificación como leída.",

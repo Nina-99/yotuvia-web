@@ -1700,6 +1700,14 @@
       "error_enable": "We couldn't enable notifications. Please try again.",
       "error_disable": "We couldn't turn off notifications. Please try again."
     },
+    "waitlist": {
+      "join_title": "No slots left?",
+      "join_body": "Join the waitlist for this day and we'll offer you the slot if it frees up.",
+      "join_time": "Preferred time",
+      "join_action": "Join the waitlist",
+      "join_success": "You're on the waitlist. You'll see the offer in your waitlist page.",
+      "join_pick_professional": "Pick a professional to join the waitlist for their schedule."
+    },
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Sign in",
@@ -3046,6 +3054,7 @@
       "client_reservations_fetch": "We couldn't load your reservations. Please try again.",
       "waitlist_fetch": "We couldn't load your waitlist. Please try again.",
       "waitlist_leave": "Could not leave the waitlist. Please try again.",
+      "waitlist_join": "Could not join the waitlist. Please try again.",
       "waitlist_claim": "Could not claim the slot. Please try again.",
       "notification_load": "We couldn't load your notifications. Please try again.",
       "notification_mark_read": "Could not mark the notification as read.",
