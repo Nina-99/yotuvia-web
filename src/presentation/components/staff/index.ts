@@ -1,6 +1,8 @@
 export { QrScanner } from "./QrScanner";
 export type { QrScannerProps, QrScannerStatus } from "./QrScanner";
 export { QrCheckInPanel } from "./QrCheckInPanel";
+export { StaffRescheduleDialog } from "./StaffRescheduleDialog";
+export type { StaffRescheduleDialogProps } from "./StaffRescheduleDialog";
 export { StaffAppointmentCard } from "./StaffAppointmentCard";
 export type { StaffAppointmentCardProps } from "./StaffAppointmentCard";
 export {

@@ -1440,6 +1440,12 @@
       "prev_day": "Día anterior",
       "next_day": "Día siguiente",
       "next_line": "Próximo: {time} · {name}",
+      "reschedule": "Reprogramar",
+      "reschedule_title": "Reprogramar turno",
+      "reschedule_date": "Fecha",
+      "reschedule_time": "Hora",
+      "reschedule_submit": "Guardar",
+      "reschedule_success": "Turno reprogramado",
       "go_today": "Hoy"
     },
     "scan": {
@@ -3001,6 +3007,7 @@
       "staff_metrics_fetch": "No pudimos cargar tus métricas. Intentá de nuevo.",
       "staff_clients_fetch": "No pudimos cargar tus clientes. Intentá de nuevo.",
       "staff_videos_fetch": "No pudimos cargar tus videos. Intentá de nuevo.",
+      "staff_reschedule": "No pudimos reprogramar el turno. Intentá de nuevo.",
       "client_reservation_cancel": "No pudimos cancelar la reserva. Intentá de nuevo.",
       "client_deposit_submit": "No pudimos enviar el comprobante. Intentá de nuevo.",
       "client_reservation_qr": "No pudimos generar tu código de check-in. Intentá de nuevo.",

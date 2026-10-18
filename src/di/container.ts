@@ -151,6 +151,7 @@ import {
   UpdateServiceUseCase,
   UpdateStaffProfileUseCase,
   UpdateStaffReservationStatusUseCase,
+  UpdateStaffReservationUseCase,
   UpsertSocialMediaUseCase,
   VerifyEmailUseCase,
   VerifyQrUseCase,
@@ -319,6 +320,7 @@ export const upsertSocialMediaUseCase = new UpsertSocialMediaUseCase(socialMedia
 export const getStaffAgendaUseCase = new GetStaffAgendaUseCase(staffReservationRepository);
 export const getStaffMetricsUseCase = new GetStaffMetricsUseCase(staffMetricsRepository);
 export const updateStaffReservationStatusUseCase = new UpdateStaffReservationStatusUseCase(staffReservationRepository);
+export const updateStaffReservationUseCase = new UpdateStaffReservationUseCase(staffReservationRepository);
 export const verifyQrUseCase = new VerifyQrUseCase(staffReservationRepository);
 export const getStaffProfileUseCase = new GetStaffProfileUseCase(staffProfileRepository);
 export const updateStaffProfileUseCase = new UpdateStaffProfileUseCase(staffProfileRepository);
@@ -475,6 +477,7 @@ adminReservationRepository,
 
   /* use cases — staff (feat-staff-module PR3) */
   getStaffAgendaUseCase,
+  updateStaffReservationUseCase,
   getStaffMetricsUseCase,
   updateStaffReservationStatusUseCase,
   verifyQrUseCase,

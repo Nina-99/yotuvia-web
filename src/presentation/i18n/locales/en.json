@@ -1440,6 +1440,12 @@
       "prev_day": "Previous day",
       "next_day": "Next day",
       "next_line": "Next: {time} · {name}",
+      "reschedule": "Reschedule",
+      "reschedule_title": "Reschedule appointment",
+      "reschedule_date": "Date",
+      "reschedule_time": "Time",
+      "reschedule_submit": "Save",
+      "reschedule_success": "Appointment rescheduled",
       "go_today": "Today"
     },
     "scan": {
@@ -3001,6 +3007,7 @@
       "staff_metrics_fetch": "We couldn't load your metrics. Please try again.",
       "staff_clients_fetch": "We couldn't load your clients. Please try again.",
       "staff_videos_fetch": "We couldn't load your videos. Please try again.",
+      "staff_reschedule": "We couldn't reschedule the appointment. Please try again.",
       "client_reservation_cancel": "We couldn't cancel the reservation. Please try again.",
       "client_deposit_submit": "We couldn't send the receipt. Please try again.",
       "client_reservation_qr": "We couldn't generate your check-in code. Please try again.",

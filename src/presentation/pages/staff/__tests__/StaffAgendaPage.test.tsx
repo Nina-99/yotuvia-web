@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getStaffProfileUseCase: { execute: vi.fn() },
   updateStaffProfileUseCase: { execute: vi.fn() },
   updateStaffReservationStatusUseCase: { execute: vi.fn() },
+  updateStaffReservationUseCase: { execute: vi.fn() },
   verifyQrUseCase: { execute: vi.fn() },
   authRepository: {
     getCurrentUser: vi.fn(),
@@ -24,6 +25,7 @@ vi.mock("@/di/container", () => ({
   getStaffProfileUseCase: mocks.getStaffProfileUseCase,
   updateStaffProfileUseCase: mocks.updateStaffProfileUseCase,
   updateStaffReservationStatusUseCase: mocks.updateStaffReservationStatusUseCase,
+  updateStaffReservationUseCase: mocks.updateStaffReservationUseCase,
   verifyQrUseCase: mocks.verifyQrUseCase,
 }));
 
@@ -51,6 +53,7 @@ const PENDING: Reservation = {
   clientId: 3,
   clientName: "Ana Díaz",
   client: { firstName: "Ana", lastName: "Díaz", phone: "+591 71234567" },
+  personnelId: 5,
   currency: "ARS",
   date: `${TODAY}T00:00:00Z`,
   startTime: "10:00",
@@ -173,6 +176,29 @@ describe("StaffAgendaPage", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("reschedules an own appointment keeping the same professional", async () => {
+    const actor = userEvent.setup();
+    mocks.getStaffAgendaUseCase.execute.mockResolvedValue([PENDING]);
+    mocks.updateStaffReservationUseCase.execute.mockResolvedValue(undefined);
+
+    renderWithProviders(<StaffAgendaPage />, { route: ROUTES.staff.agenda });
+
+    await actor.click(await screen.findByRole("button", { name: "Reschedule" }));
+    const dialog = await screen.findByRole("dialog");
+    await actor.click(within(dialog).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(mocks.updateStaffReservationUseCase.execute).toHaveBeenCalledWith(
+        21,
+        expect.objectContaining({
+          beautyCenterId: 3,
+          services: [{ serviceId: 1 }],
+          personnelId: 5, // the lead must not move
+        }),
+      ),
+    );
   });
 
   it("offers only the transitions the backend accepts", async () => {

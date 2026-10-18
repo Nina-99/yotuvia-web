@@ -14,6 +14,8 @@ export interface StaffAppointmentCardProps {
   /** Blocks every action while a transition is in flight. */
   busy: boolean;
   onStatusAction: (reservationId: number, status: Reservation["status"]) => void;
+  /** Opens the reschedule dialog. Only offered for live appointments. */
+  onReschedule: (reservation: Reservation) => void;
 }
 
 /**
@@ -29,6 +31,7 @@ export function StaffAppointmentCard({
   language,
   busy,
   onStatusAction,
+  onReschedule,
 }: StaffAppointmentCardProps) {
   const { t } = useTranslation();
 
@@ -114,8 +117,18 @@ export function StaffAppointmentCard({
         <span className="text-sm font-bold text-success">
           {formatCurrency(reservation.totalPrice, language, currency)}
         </span>
-        {actions.length > 0 ? (
+        {actions.length > 0 || reservation.status === "PENDING" || reservation.status === "CONFIRMED" ? (
           <div className="flex flex-wrap gap-2">
+            {reservation.status === "PENDING" || reservation.status === "CONFIRMED" ? (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => onReschedule(reservation)}
+              >
+                {t("staff.agenda.reschedule")}
+              </Button>
+            ) : null}
             {actions.map((action) => (
               <Button
                 key={action.status}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { assertValidPersonnelImageFile } from "yotuvia-core";
 import type {
+  CreateReservationData,
   Reservation,
   ReservationStatus,
   StaffProfile,
@@ -15,6 +16,7 @@ import {
   getStaffProfileUseCase,
   updateStaffProfileUseCase,
   updateStaffReservationStatusUseCase,
+  updateStaffReservationUseCase,
   uploadStaffImageUseCase,
   verifyQrUseCase,
 } from "@/di/container";
@@ -84,8 +86,30 @@ export function useUpdateStaffReservationStatus() {
   );
 }
 
-/* ── QR verification ────────────────────────────────────────────── */
+export interface StaffRescheduleVariables {
+  reservationId: number;
+  data: CreateReservationData;
+}
 
+/**
+ * Reschedules ONE of the professional's own reservations
+ * (`PUT /reservation/me/:id`). The backend authorizes by centre + membership and
+ * refuses to move the lead, so the caller must keep the same professional.
+ * Invalidates the whole `staff` domain so the agenda (and metrics) refetch.
+ */
+export function useUpdateStaffReservation() {
+  const queryClient = useQueryClient();
+  return attachErrorKey(
+    useMutation<void, Error, StaffRescheduleVariables>({
+      mutationFn: ({ reservationId, data }) =>
+        updateStaffReservationUseCase.execute(reservationId, data),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.staff.all }),
+    }),
+    "web.errors.staff_reschedule",
+  );
+}
+
+/* ── QR verification ────────────────────────────────────────────── */
 /**
  * Verifies a client's check-in credential (`GET /reservation/verify-qr`).
  *

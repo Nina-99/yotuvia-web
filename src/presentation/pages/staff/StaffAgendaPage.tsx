@@ -1,12 +1,16 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ReservationStatus } from "yotuvia-core";
+import type { Reservation, ReservationStatus } from "yotuvia-core";
 
-import { StaffAppointmentCard } from "@/presentation/components/staff";
+import { StaffAppointmentCard, StaffRescheduleDialog } from "@/presentation/components/staff";
 import { Button, Card, CardContent, CardHeader, CardTitle, Skeleton, useToast } from "@/presentation/components/ui";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useNowTick } from "@/presentation/hooks/use-now-tick";
-import { useStaffAgenda, useUpdateStaffReservationStatus } from "@/presentation/hooks/use-staff";
+import {
+  useStaffAgenda,
+  useUpdateStaffReservation,
+  useUpdateStaffReservationStatus,
+} from "@/presentation/hooks/use-staff";
 import { addDays, isToday, timeSection, toDateKey } from "@/presentation/lib/dates";
 import type { TimeSection } from "@/presentation/lib/dates";
 import { toErrorKey, useErrorMessage } from "@/presentation/lib/errors";
@@ -37,10 +41,12 @@ export function StaffAgendaPage() {
 
   const language = i18n.resolvedLanguage ?? i18n.language;
   const [selectedDate, setSelectedDate] = useState<string>(() => toDateKey(new Date()));
+  const [rescheduleTarget, setRescheduleTarget] = useState<Reservation | null>(null);
   const { toast } = useToast();
 
   const agendaQuery = useStaffAgenda({ from: selectedDate, to: selectedDate });
   const updateStatus = useUpdateStaffReservationStatus();
+  const reschedule = useUpdateStaffReservation();
   const errorMessage = useErrorMessage(agendaQuery.error, "web.errors.staff_agenda_fetch");
   // One shared tick keeps the "next appointment" strip fresh while the day runs.
   const now = useNowTick();
@@ -88,6 +94,31 @@ export function StaffAgendaPage() {
   };
 
   const total = agendaQuery.data?.length ?? 0;
+
+  /**
+   * Moves the appointment to a new day/slot. The payload keeps the SAME services
+   * and professional: the backend refuses to move the lead, so a staff member
+   * reschedules without reassigning.
+   */
+  const handleReschedule = async (date: string, startTime: string) => {
+    if (rescheduleTarget === null) return;
+    try {
+      await reschedule.mutateAsync({
+        reservationId: rescheduleTarget.id,
+        data: {
+          beautyCenterId: rescheduleTarget.beautyCenterId,
+          services: rescheduleTarget.services.map((service) => ({ serviceId: service.serviceId })),
+          date,
+          startTime,
+          ...(rescheduleTarget.personnelId ? { personnelId: rescheduleTarget.personnelId } : {}),
+        },
+      });
+      setRescheduleTarget(null);
+      toast(t("staff.agenda.reschedule_success"), { variant: "success" });
+    } catch {
+      // `reschedule.errorKey` keeps the dialog open with the message.
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -186,6 +217,7 @@ export function StaffAgendaPage() {
                       language={language}
                       busy={updateStatus.isPending}
                       onStatusAction={(id, status) => void handleStatusAction(id, status)}
+                      onReschedule={setRescheduleTarget}
                     />
                   ))}
                 </ul>
@@ -194,6 +226,17 @@ export function StaffAgendaPage() {
           })}
         </div>
       )}
+
+      {rescheduleTarget !== null ? (
+        <StaffRescheduleDialog
+          key={rescheduleTarget.id}
+          reservation={rescheduleTarget}
+          saving={reschedule.isPending}
+          errorKey={reschedule.errorKey}
+          onSubmit={(date, startTime) => void handleReschedule(date, startTime)}
+          onClose={() => setRescheduleTarget(null)}
+        />
+      ) : null}
     </div>
   );
 }
