@@ -31,6 +31,7 @@ const waitlist = ["waitlist"] as const;
 const notifications = ["notifications"] as const;
 const adminNotifications = ["admin-notifications"] as const;
 const staffNotifications = ["staff-notifications"] as const;
+const staffMetrics = ["staff-metrics"] as const;
 
 export interface CenterSearchParams {
   term: string;
@@ -185,6 +186,11 @@ export const queryKeys = {
     all: staffNotifications,
     list: () => [...staffNotifications, "list"] as const,
     unreadCount: () => [...staffNotifications, "unread-count"] as const,
+  },
+  /** The professional's own metrics for a resolved [from, to] window. */
+  staffMetrics: {
+    all: staffMetrics,
+    range: (from: string, to: string) => [...staffMetrics, "range", { from, to }] as const,
   },
   /**
    * Client-area domain: the signed-in client's favorites and profile.

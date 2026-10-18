@@ -1694,6 +1694,7 @@
         "client_search": "Buscar centro",
         "staff_agenda": "Agenda",
         "staff_scan": "Escanear QR",
+        "staff_metrics": "Métricas",
         "staff_notifications": "Notificaciones",
         "staff_profile": "Perfil"
       },
@@ -2991,6 +2992,7 @@
       "notification_load": "No pudimos cargar tus notificaciones. Intentá de nuevo.",
       "notification_mark_read": "No se pudo marcar la notificación como leída.",
       "notification_mark_all_read": "No se pudieron marcar las notificaciones como leídas.",
+      "staff_metrics_fetch": "No pudimos cargar tus métricas. Intentá de nuevo.",
       "client_reservation_cancel": "No pudimos cancelar la reserva. Intentá de nuevo.",
       "client_deposit_submit": "No pudimos enviar el comprobante. Intentá de nuevo.",
       "client_reservation_qr": "No pudimos generar tu código de check-in. Intentá de nuevo.",

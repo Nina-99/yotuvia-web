@@ -118,6 +118,7 @@ export const ROUTES = {
     home: "/app/staff",
     agenda: "/app/staff/agenda",
     scan: "/app/staff/scan",
+    metrics: "/app/staff/metrics",
     profile: "/app/staff/profile",
     /** The professional's notifications. */
     notifications: "/app/staff/notifications",
