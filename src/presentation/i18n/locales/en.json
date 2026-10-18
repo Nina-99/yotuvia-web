@@ -2959,6 +2959,7 @@
       "video_fetch": "We couldn't load the videos. Please try again.",
       "client_reservations_fetch": "We couldn't load your reservations. Please try again.",
       "client_reservation_cancel": "We couldn't cancel the reservation. Please try again.",
+      "client_deposit_submit": "We couldn't send the receipt. Please try again.",
       "client_reservation_qr": "We couldn't generate your check-in code. Please try again.",
       "client_favorites_fetch": "We couldn't load your favorites. Please try again.",
       "client_favorite_remove": "We couldn't remove the favorite. Please try again.",

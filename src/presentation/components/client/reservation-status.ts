@@ -49,3 +49,19 @@ export function paymentStatusLabelKey(paymentStatus: string | undefined): string
   if (paymentStatus === undefined || paymentStatus === "NONE") return null;
   return `client.reservations.payment_${paymentStatus.toLowerCase()}`;
 }
+
+/**
+ * True when the client still owes the deposit for this reservation.
+ *
+ * Mirrors the mobile `ReservasScreen`: the hold awaits (or was rejected for) a
+ * receipt while the booking is still live. A terminal booking has nothing to
+ * pay for, so the action is hidden there.
+ */
+export function needsDeposit(reservation: {
+  paymentStatus?: string;
+  status: ReservationStatus;
+}): boolean {
+  const awaiting =
+    reservation.paymentStatus === "PENDING_PROOF" || reservation.paymentStatus === "REJECTED";
+  return awaiting && (reservation.status === "PENDING" || reservation.status === "CONFIRMED");
+}

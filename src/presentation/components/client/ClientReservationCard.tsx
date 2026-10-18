@@ -8,6 +8,7 @@ import { formatCurrency, formatDate, formatTime } from "@/presentation/lib/forma
 import {
   canCancelReservation,
   canShowQr,
+  needsDeposit,
   RESERVATION_STATUS_VARIANT,
   reservationStatusLabelKey,
 } from "./reservation-status";
@@ -19,6 +20,8 @@ export interface ClientReservationCardProps {
   /** Opens the detail view with the QR request already in flight. */
   onShowQr: (reservation: Reservation) => void;
   onCancel: (reservation: Reservation) => void;
+  /** Opens the deposit-payment dialog. */
+  onPayDeposit: (reservation: Reservation) => void;
 }
 
 /**
@@ -35,6 +38,7 @@ export function ClientReservationCard({
   onOpenDetail,
   onShowQr,
   onCancel,
+  onPayDeposit,
 }: ClientReservationCardProps) {
   const { t } = useTranslation();
 
@@ -80,6 +84,11 @@ export function ClientReservationCard({
           <Button size="sm" variant="outline" onClick={() => onOpenDetail(reservation)}>
             {t("client.reservations.details")}
           </Button>
+          {needsDeposit(reservation) ? (
+            <Button size="sm" onClick={() => onPayDeposit(reservation)}>
+              {t("client.reservations.pay_deposit")}
+            </Button>
+          ) : null}
           {canShowQr(reservation.status) ? (
             <Button size="sm" variant="secondary" onClick={() => onShowQr(reservation)}>
               {t("client.reservations.show_qr")}

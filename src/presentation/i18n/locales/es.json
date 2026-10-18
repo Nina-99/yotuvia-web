@@ -2959,6 +2959,7 @@
       "video_fetch": "No pudimos cargar los videos. Intentá de nuevo.",
       "client_reservations_fetch": "No pudimos cargar tus reservas. Intentá de nuevo.",
       "client_reservation_cancel": "No pudimos cancelar la reserva. Intentá de nuevo.",
+      "client_deposit_submit": "No pudimos enviar el comprobante. Intentá de nuevo.",
       "client_reservation_qr": "No pudimos generar tu código de check-in. Intentá de nuevo.",
       "client_favorites_fetch": "No pudimos cargar tus favoritos. Intentá de nuevo.",
       "client_favorite_remove": "No pudimos quitar el favorito. Intentá de nuevo.",

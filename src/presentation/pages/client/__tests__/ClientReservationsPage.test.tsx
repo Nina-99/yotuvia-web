@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   getClientReservationsUseCase: { execute: vi.fn() },
   cancelReservationUseCase: { execute: vi.fn() },
   generateQRUseCase: { execute: vi.fn() },
+  uploadReservationProofUseCase: { execute: vi.fn() },
   authRepository: {
     getCurrentUser: vi.fn(),
     isAuthenticated: vi.fn(),
@@ -21,7 +22,17 @@ vi.mock("@/di/container", () => ({
   cancelReservationUseCase: mocks.cancelReservationUseCase,
   generateQRUseCase: mocks.generateQRUseCase,
   getClientReservationsUseCase: mocks.getClientReservationsUseCase,
+  uploadReservationProofUseCase: mocks.uploadReservationProofUseCase,
 }));
+
+// The receipt UPLOAD step is source-direct in the hook (`uploadReceipt` from
+// core); keep the real core and stub only that binding.
+vi.mock("yotuvia-core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("yotuvia-core")>();
+  return { ...actual, uploadReceipt: vi.fn() };
+});
+
+import { uploadReceipt } from "yotuvia-core";
 
 import i18n from "@/presentation/i18n";
 import { dateKeyFromApi } from "@/presentation/lib/dates";
@@ -102,6 +113,9 @@ function cardOf(centerName: string): HTMLElement {
 describe("ClientReservationsPage", () => {
   beforeAll(async () => {
     await i18n.changeLanguage("en");
+    // jsdom has no object-URL support; the deposit preview uses it.
+    URL.createObjectURL = (() => "blob:mock-preview") as typeof URL.createObjectURL;
+    URL.revokeObjectURL = (() => undefined) as unknown as typeof URL.revokeObjectURL;
   });
 
   beforeEach(() => {
@@ -169,6 +183,41 @@ describe("ClientReservationsPage", () => {
     expect(
       within(dialog).getAllByText(shown(formatCurrency(PENDING_WITH_DEPOSIT.totalPrice, "en", "ARS"))),
     ).toHaveLength(2);
+  });
+
+  it("lets the client pay a pending deposit by uploading a receipt", async () => {
+    const actor = userEvent.setup();
+    mocks.getClientReservationsUseCase.execute.mockResolvedValue([PENDING_WITH_DEPOSIT]);
+    vi.mocked(uploadReceipt).mockResolvedValue("/uploads/receipts/r.jpg");
+    mocks.uploadReservationProofUseCase.execute.mockResolvedValue(undefined);
+
+    renderWithProviders(<ClientReservationsPage />, { route: ROUTES.client.reservations });
+
+    await actor.click(await screen.findByRole("button", { name: "Pay deposit" }));
+
+    const dialog = await screen.findByRole("dialog");
+    const receipt = new File(["pixels"], "receipt.png", { type: "image/png" });
+    await actor.upload(within(dialog).getByLabelText("Choose receipt"), receipt);
+    await actor.click(within(dialog).getByRole("button", { name: "Send receipt" }));
+
+    await waitFor(() => expect(uploadReceipt).toHaveBeenCalledWith(receipt));
+    await waitFor(() =>
+      expect(mocks.uploadReservationProofUseCase.execute).toHaveBeenCalledWith(
+        13,
+        "/uploads/receipts/r.jpg",
+      ),
+    );
+  });
+
+  it("hides the deposit action once the deposit is approved", async () => {
+    mocks.getClientReservationsUseCase.execute.mockResolvedValue([
+      { ...PENDING_WITH_DEPOSIT, paymentStatus: "APPROVED" },
+    ]);
+
+    renderWithProviders(<ClientReservationsPage />, { route: ROUTES.client.reservations });
+
+    await screen.findByText("Spa Sur");
+    expect(screen.queryByRole("button", { name: "Pay deposit" })).toBeNull();
   });
 
   it("cancels with confirmation, forwards the reason and refreshes the list", async () => {

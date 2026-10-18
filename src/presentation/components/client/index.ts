@@ -1,3 +1,5 @@
+export { DepositDialog } from "./DepositDialog";
+export type { DepositDialogProps } from "./DepositDialog";
 export { CancelReservationDialog } from "./CancelReservationDialog";
 export type { CancelReservationDialogProps } from "./CancelReservationDialog";
 export { CenterCard } from "./CenterCard";
@@ -15,6 +17,7 @@ export type { ReservationQrDialogProps } from "./ReservationQrDialog";
 export {
   canCancelReservation,
   canShowQr,
+  needsDeposit,
   paymentStatusLabelKey,
   reservationStatusLabelKey,
   RESERVATION_STATUS_VARIANT,

@@ -6,6 +6,7 @@ import {
   CancelReservationDialog,
   ClientReservationCard,
   ClientReservationDetail,
+  DepositDialog,
   ReservationQrDialog,
 } from "@/presentation/components/client";
 import { Button, Card, CardContent, CardHeader, CardTitle, EmptyState, Select, Skeleton, useToast } from "@/presentation/components/ui";
@@ -16,6 +17,7 @@ import {
   useGenerateReservationQr,
 } from "@/presentation/hooks/use-client";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
+import { useSubmitDeposit } from "@/presentation/hooks/use-submit-deposit";
 import { useErrorMessage } from "@/presentation/lib/errors";
 /** Filter sentinel for "every status". */
 const ALL = "ALL";
@@ -66,10 +68,12 @@ export function ClientReservationsPage() {
   const [cancelling, setCancelling] = useState<Reservation | null>(null);
   const [qrReservation, setQrReservation] = useState<Reservation | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
+  const [depositing, setDepositing] = useState<Reservation | null>(null);
 
   const reservationsQuery = useClientReservations(clientId);
   const cancelMutation = useCancelClientReservation();
   const qrMutation = useGenerateReservationQr();
+  const depositMutation = useSubmitDeposit();
 
   const errorMessage = useErrorMessage(
     reservationsQuery.error,
@@ -127,6 +131,22 @@ export function ClientReservationsPage() {
       toast(t("client.reservations.cancel_success"), { variant: "success" });
     } catch {
       // `cancelMutation.errorKey` keeps the dialog open with the message.
+    }
+  };
+
+  const handleRequestDeposit = (reservation: Reservation) => {
+    setSelected(null);
+    setDepositing(reservation);
+  };
+
+  const handleSubmitDeposit = async (file: File) => {
+    if (depositing === null) return;
+    try {
+      await depositMutation.mutateAsync({ reservationId: depositing.id, file });
+      setDepositing(null);
+      toast(t("client.deposit.submit"), { variant: "success" });
+    } catch {
+      // `depositMutation.errorKey` keeps the dialog open with the message.
     }
   };
 
@@ -227,6 +247,7 @@ export function ClientReservationsPage() {
                 onOpenDetail={handleOpenDetail}
                 onShowQr={handleShowQr}
                 onCancel={handleRequestCancel}
+                onPayDeposit={handleRequestDeposit}
               />
             </li>
           ))}
@@ -268,6 +289,16 @@ export function ClientReservationsPage() {
         errorKey={cancelMutation.errorKey}
         onConfirm={(reason) => void handleConfirmCancel(reason)}
         onCancel={() => setCancelling(null)}
+      />
+
+      <DepositDialog
+        open={depositing !== null}
+        reservation={depositing}
+        language={language}
+        loading={depositMutation.isPending}
+        errorKey={depositMutation.errorKey}
+        onSubmit={(file) => void handleSubmitDeposit(file)}
+        onClose={() => setDepositing(null)}
       />
     </div>
   );

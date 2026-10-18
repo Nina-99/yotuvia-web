@@ -63,6 +63,7 @@ import {
   ApiWaitlistRepository,
   AssignPersonnelUseCase,
   CancelReservationUseCase,
+  UploadReservationProofUseCase,
   Config,
   CountAdminUnreadUseCase,
   CountStaffUnreadUseCase,
@@ -235,6 +236,7 @@ export const createReservationUseCase = new CreateReservationUseCase(reservation
 export const getClientReservationsUseCase = new GetClientReservationsUseCase(reservationRepository);
 export const generateQRUseCase = new GenerateQRUseCase(reservationRepository);
 export const cancelReservationUseCase = new CancelReservationUseCase(reservationRepository);
+export const uploadReservationProofUseCase = new UploadReservationProofUseCase(reservationRepository);
 export const getCenterReservationsUseCase = new GetCenterReservationsUseCase(adminReservationRepository);
 export const updateReservationStatusUseCase = new UpdateReservationStatusUseCase(adminReservationRepository);
 export const reviewProofUseCase = new ReviewProofUseCase(adminReservationRepository);
@@ -401,6 +403,7 @@ adminReservationRepository,
   getClientReservationsUseCase,
   generateQRUseCase,
   cancelReservationUseCase,
+  uploadReservationProofUseCase,
   getCenterReservationsUseCase,
   updateReservationStatusUseCase,
   reviewProofUseCase,
