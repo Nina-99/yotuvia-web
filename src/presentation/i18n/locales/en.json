@@ -1424,6 +1424,8 @@
       "call": "Call",
       "call_aria": "Call {name}",
       "whatsapp": "WhatsApp",
+      "add_to_calendar": "Add to calendar",
+      "add_to_calendar_aria": "Add {name}'s appointment to your calendar",
       "whatsapp_aria": "Message {name} on WhatsApp",
       "section_morning": "Morning",
       "section_afternoon": "Afternoon",

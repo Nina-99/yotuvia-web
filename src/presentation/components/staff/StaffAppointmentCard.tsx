@@ -3,6 +3,7 @@ import { telHref, whatsappHref } from "yotuvia-core";
 import type { Reservation } from "yotuvia-core";
 
 import { Badge, Button } from "@/presentation/components/ui";
+import { googleCalendarUrl } from "@/presentation/lib/calendar-link";
 import { formatCurrency, formatTime } from "@/presentation/lib/format";
 
 import { STAFF_STATUS_ACTIONS, STAFF_STATUS_VARIANT, staffStatusLabelKey } from "./reservation-status";
@@ -44,6 +45,10 @@ export function StaffAppointmentCard({
   const phone = reservation.client?.phone ?? "";
   const tel = telHref(phone);
   const whatsapp = whatsappHref(phone);
+  const calendarUrl = googleCalendarUrl(reservation, {
+    booking: t("client.reservations.calendar_label_booking"),
+    services: t("client.reservations.calendar_label_services"),
+  });
   const contactLinkClasses =
     "rounded text-sm font-medium text-link hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
 
@@ -69,7 +74,7 @@ export function StaffAppointmentCard({
         </span>
       </div>
 
-      {tel !== "" || whatsapp !== "" ? (
+      {tel !== "" || whatsapp !== "" || calendarUrl !== "" ? (
         <div className="flex flex-wrap items-center gap-4">
           {tel !== "" ? (
             <a
@@ -89,6 +94,17 @@ export function StaffAppointmentCard({
               aria-label={t("staff.agenda.whatsapp_aria", { name: clientName })}
             >
               {t("staff.agenda.whatsapp")}
+            </a>
+          ) : null}
+          {calendarUrl !== "" ? (
+            <a
+              href={calendarUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={contactLinkClasses}
+              aria-label={t("staff.agenda.add_to_calendar_aria", { name: clientName })}
+            >
+              {t("staff.agenda.add_to_calendar")}
             </a>
           ) : null}
         </div>
