@@ -27,7 +27,6 @@ import { useErrorMessage, getErrorStatus } from "@/presentation/lib/errors";
 import { formatCurrency, formatNumber, formatRating, formatTime } from "@/presentation/lib/format";
 import { CLIENT_APP_ROLES } from "@/presentation/lib/roles";
 import { ROUTES, centerBookingPath } from "@/presentation/lib/routes";
-import { PublicLayout } from "@/presentation/layouts/PublicLayout";
 
 /** Networks the API models, in presentation order. */
 type SocialNetwork = "instagram" | "facebook" | "tiktok" | "twitter" | "google";
@@ -181,7 +180,7 @@ export function CenterDetailPage() {
 
   if (centerId <= 0 || notFound) {
     return (
-      <PublicLayout>
+      <>
         <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
           <Card>
             <CardContent className="flex flex-col items-start gap-3 p-6">
@@ -196,13 +195,13 @@ export function CenterDetailPage() {
             </CardContent>
           </Card>
         </div>
-      </PublicLayout>
+      </>
     );
   }
 
   if (centerQuery.isPending) {
     return (
-      <PublicLayout>
+      <>
         <div
           role="status"
           aria-live="polite"
@@ -213,13 +212,13 @@ export function CenterDetailPage() {
           <Skeleton className="h-44 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
-      </PublicLayout>
+      </>
     );
   }
 
   if (centerQuery.isError || !center) {
     return (
-      <PublicLayout>
+      <>
         <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
           <Card role="alert">
             <CardContent className="flex flex-col items-start gap-3 p-6">
@@ -231,12 +230,12 @@ export function CenterDetailPage() {
             </CardContent>
           </Card>
         </div>
-      </PublicLayout>
+      </>
     );
   }
 
   return (
-    <PublicLayout>
+    <>
       <article className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
         <Link
           to={ROUTES.centers.search}
@@ -558,6 +557,6 @@ export function CenterDetailPage() {
           </p>
         ) : null}
       </article>
-    </PublicLayout>
+    </>
   );
 }

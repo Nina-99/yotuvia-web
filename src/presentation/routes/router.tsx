@@ -41,6 +41,12 @@ const AppLayout = lazy(() =>
   })),
 );
 
+const CentersLayout = lazy(() =>
+  import("@/presentation/layouts/CentersLayout").then((module) => ({
+    default: module.CentersLayout,
+  })),
+);
+
 const HomePage = lazy(() =>
   import("@/presentation/pages/HomePage").then((module) => ({
     default: module.HomePage,
@@ -351,20 +357,29 @@ export function AppRouter() {
       />
 
       {/*
-        PUBLIC center surface. Registered OUTSIDE the authenticated shell on
-        purpose: a signed-out visitor must be able to search centers and open a
-        center page. Both pages are lazy so the landing stays light.
+        SHARED center surface (search + detail). PUBLIC, so a signed-out visitor
+        can browse, but rendered through `CentersLayout`, which shows the
+        authenticated shell to a signed-in user and the public layout to a guest
+        — a client reaching these from the nav never leaves the app.
       */}
-      <Route path={ROUTES.centers.search} element={
+      <Route
+        element={
           <Suspense fallback={<RouteFallback />}>
-            <CenterSearchPage />
+            <CentersLayout />
           </Suspense>
-        } />
-      <Route path={ROUTES.centers.detail} element={
-          <Suspense fallback={<RouteFallback />}>
-            <CenterDetailPage />
-          </Suspense>
-        } />
+        }
+      >
+        <Route path={ROUTES.centers.search} element={
+            <Suspense fallback={<RouteFallback />}>
+              <CenterSearchPage />
+            </Suspense>
+          } />
+        <Route path={ROUTES.centers.detail} element={
+            <Suspense fallback={<RouteFallback />}>
+              <CenterDetailPage />
+            </Suspense>
+          } />
+      </Route>
 
       <Route element={<GuestOnly />}>
         <Route path={ROUTES.login} element={

@@ -36,7 +36,6 @@ import {
 } from "@/presentation/lib/center-filters";
 import { useErrorMessage } from "@/presentation/lib/errors";
 import { CLIENT_APP_ROLES } from "@/presentation/lib/roles";
-import { PublicLayout } from "@/presentation/layouts/PublicLayout";
 
 /**
  * The map is the PRIMARY element of this page: it renders by default, in the
@@ -432,7 +431,7 @@ export function CenterSearchPage() {
   const showChips = isAuthenticated && (chips.loading || chips.chips.length > 0);
 
   return (
-    <PublicLayout>
+    <>
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
         <h1 className="text-2xl font-bold tracking-tight text-text sm:text-3xl">
           {t("web.centers.search.title")}
@@ -676,6 +675,6 @@ export function CenterSearchPage() {
         onToggleFavorite={handleToggleFavorite}
         onClose={() => setSelectedCenter(null)}
       />
-    </PublicLayout>
+    </>
   );
 }
