@@ -47,6 +47,12 @@ const CentersLayout = lazy(() =>
   })),
 );
 
+const AdminNotificationsPage = lazy(() =>
+  import("@/presentation/pages/AdminNotificationsPage").then((module) => ({
+    default: module.AdminNotificationsPage,
+  })),
+);
+
 const HomePage = lazy(() =>
   import("@/presentation/pages/HomePage").then((module) => ({
     default: module.HomePage,
@@ -510,6 +516,11 @@ export function AppRouter() {
             <Route path={ROUTES.app.profile} element={
                 <Suspense fallback={<RouteFallback />}>
                   <ProfilePage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.app.notifications} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <AdminNotificationsPage />
                 </Suspense>
               } />
           </Route>

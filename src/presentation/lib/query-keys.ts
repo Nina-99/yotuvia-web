@@ -29,6 +29,7 @@ const availability = ["availability"] as const;
 const tiktok = ["tiktok"] as const;
 const waitlist = ["waitlist"] as const;
 const notifications = ["notifications"] as const;
+const adminNotifications = ["admin-notifications"] as const;
 
 export interface CenterSearchParams {
   term: string;
@@ -166,6 +167,17 @@ export const queryKeys = {
     all: notifications,
     list: (clientId: number) => [...notifications, "list", { clientId }] as const,
     unreadCount: (clientId: number) => [...notifications, "unread-count", { clientId }] as const,
+  },
+  /**
+   * The center owner's notifications (center claim-scoped: no id).
+   *
+   * Distinct root from the client `notifications` block so the two roles'
+   * caches never collide when the same browser holds both sessions.
+   */
+  adminNotifications: {
+    all: adminNotifications,
+    list: () => [...adminNotifications, "list"] as const,
+    unreadCount: () => [...adminNotifications, "unread-count"] as const,
   },
   /**
    * Client-area domain: the signed-in client's favorites and profile.

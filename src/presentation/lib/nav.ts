@@ -102,6 +102,10 @@ const ICONS = {
     "M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9",
     "M13.73 21a2 2 0 0 1-3.46 0",
   ],
+  notifications: [
+    "M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9",
+    "M13.73 21a2 2 0 0 1-3.46 0",
+  ],
   search: [
     "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z",
     "M21 21l-4.35-4.35",
@@ -142,6 +146,12 @@ export const APP_NAV_SECTIONS: readonly AppNavSection[] = [
     icon: ICONS.analytics,
   },
   { id: "content", path: ROUTES.app.content, labelKey: "web.app.nav.content", icon: ICONS.content },
+  {
+    id: "notifications",
+    path: ROUTES.app.notifications,
+    labelKey: "web.app.nav.notifications",
+    icon: ICONS.notifications,
+  },
   { id: "profile", path: ROUTES.app.profile, labelKey: "web.app.nav.profile", icon: ICONS.profile },
 ];
 

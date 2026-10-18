@@ -1666,6 +1666,7 @@
       "nav": {
         "label": "Main navigation",
         "dashboard": "Dashboard",
+        "notifications": "Notifications",
         "agenda": "Agenda",
         "clients": "Clients",
         "services": "Services",

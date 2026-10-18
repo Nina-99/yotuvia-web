@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import type { TFunction } from "i18next";
 import type { AppNotification } from "yotuvia-core";
 
 import {
@@ -19,28 +17,11 @@ import {
   useNotifications,
   useUnreadNotificationCount,
 } from "@/presentation/hooks/use-notifications";
+import { useNowTick } from "@/presentation/hooks/use-now-tick";
 import { useErrorMessage } from "@/presentation/lib/errors";
 import { formatDateTime } from "@/presentation/lib/format";
+import { formatRelativeTime } from "@/presentation/lib/relative-time";
 import { ROUTES } from "@/presentation/lib/routes";
-
-/** Re-renders the visible rows so relative times stay fresh. */
-function useNowTick(): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(interval);
-  }, []);
-  return now;
-}
-
-function relativeTime(iso: string, now: number, t: TFunction): string {
-  const minutes = Math.floor((now - new Date(iso).getTime()) / 60_000);
-  if (minutes < 1) return t("notifications.justNow");
-  if (minutes < 60) return t("notifications.minAgo", { count: minutes });
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return t("notifications.hrAgo", { count: hours });
-  return t("notifications.dayAgo", { count: Math.floor(hours / 24) });
-}
 
 /**
  * The signed-in client's notifications.
@@ -156,7 +137,7 @@ export function NotificationsPage() {
                         title={formatDateTime(item.createdAt, language)}
                         className="text-xs text-text-muted"
                       >
-                        {relativeTime(item.createdAt, now, t)}
+                        {formatRelativeTime(item.createdAt, now, t)}
                       </time>
                     </span>
                     <span className={item.isRead ? "text-sm text-text" : "text-sm font-semibold text-text"}>

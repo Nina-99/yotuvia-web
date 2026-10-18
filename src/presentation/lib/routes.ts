@@ -72,6 +72,8 @@ export const ROUTES = {
     analytics: "/app/analytics",
     content: "/app/content",
     profile: "/app/profile",
+    /** Center-owner notifications. */
+    notifications: "/app/notifications",
   },
   /**
    * Platform (`SUPER_ADMIN`) sections, nested under the shared authenticated
