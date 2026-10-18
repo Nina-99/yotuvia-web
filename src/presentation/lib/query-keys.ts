@@ -250,6 +250,8 @@ export const queryKeys = {
      * client-side (see `ReviewsPage`).
      */
     list: (centerId: number) => [...reviews, "list", { centerId }] as const,
+    /** Whether the signed-in client may review this center. */
+    canReview: (centerId: number) => [...reviews, "can-review", { centerId }] as const,
   },
   /**
    * Cross-center availability search (`GET /availability/search`).

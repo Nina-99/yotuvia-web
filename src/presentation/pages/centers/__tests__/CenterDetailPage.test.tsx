@@ -7,6 +7,8 @@ import type { BeautyCenter, FavoriteCenter, Personnel, Review, Service, User } f
 const mocks = vi.hoisted(() => ({
   getBeautyCenterUseCase: { execute: vi.fn() },
   getReviewsUseCase: { execute: vi.fn() },
+  canReviewUseCase: { execute: vi.fn() },
+  createReviewUseCase: { execute: vi.fn() },
   getClientServicesUseCase: { execute: vi.fn() },
   getPersonnelUseCase: { execute: vi.fn() },
   getClientFavoritesUseCase: { execute: vi.fn() },
@@ -27,6 +29,8 @@ vi.mock("@/di/container", () => ({
   dependencies: { authRepository: mocks.authRepository },
   getBeautyCenterUseCase: mocks.getBeautyCenterUseCase,
   getReviewsUseCase: mocks.getReviewsUseCase,
+  canReviewUseCase: mocks.canReviewUseCase,
+  createReviewUseCase: mocks.createReviewUseCase,
   getClientServicesUseCase: mocks.getClientServicesUseCase,
   getPersonnelUseCase: mocks.getPersonnelUseCase,
   getClientFavoritesUseCase: mocks.getClientFavoritesUseCase,
@@ -356,5 +360,72 @@ describe("CenterDetailPage services list", () => {
     await actor.click(within(serviceSection as HTMLElement).getByRole("button", { name: "Retry" }));
 
     expect(await screen.findByText("Corte")).toBeInTheDocument();
+  });
+});
+
+describe("CenterDetailPage write a review", () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage("en");
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.getBeautyCenterUseCase.execute.mockResolvedValue(CENTER);
+    mocks.getReviewsUseCase.execute.mockResolvedValue([]);
+    mocks.getClientServicesUseCase.execute.mockResolvedValue([]);
+    mocks.getPersonnelUseCase.execute.mockResolvedValue([]);
+    mocks.getClientFavoritesUseCase.execute.mockResolvedValue([]);
+  });
+
+  it("hides the write affordance from a signed-out visitor", async () => {
+    signOut();
+    mocks.canReviewUseCase.execute.mockResolvedValue(true);
+
+    renderWithProviders(<DetailTree />, { route: "/centers/7" });
+
+    await screen.findByRole("heading", { level: 1, name: "Studio Yotuvia" });
+    expect(screen.queryByRole("button", { name: "Write a review" })).toBeNull();
+    expect(mocks.canReviewUseCase.execute).not.toHaveBeenCalled();
+  });
+
+  it("lets an eligible client write a review", async () => {
+    const actor = userEvent.setup();
+    authenticate();
+    mocks.authRepository.getCurrentUser.mockResolvedValue(CLIENT);
+    mocks.authRepository.isAuthenticated.mockResolvedValue(true);
+    mocks.canReviewUseCase.execute.mockResolvedValue(true);
+    mocks.createReviewUseCase.execute.mockResolvedValue(undefined);
+
+    renderWithProviders(<DetailTree />, { route: "/centers/7" });
+
+    await actor.click(await screen.findByRole("button", { name: "Write a review" }));
+    await actor.click(screen.getByRole("radio", { name: "5 out of 5 stars" }));
+    await actor.type(screen.getByPlaceholderText("Tell us about your experience…"), "Great!");
+    await actor.click(screen.getByRole("button", { name: "Send" }));
+
+    await waitFor(() =>
+      expect(mocks.createReviewUseCase.execute).toHaveBeenCalledWith({
+        centerId: 7,
+        rating: 5,
+        comment: "Great!",
+      }),
+    );
+    expect(await screen.findByText("Thanks! Your review was published.")).toBeInTheDocument();
+  });
+
+  it("requires a rating before submitting", async () => {
+    const actor = userEvent.setup();
+    authenticate();
+    mocks.authRepository.getCurrentUser.mockResolvedValue(CLIENT);
+    mocks.authRepository.isAuthenticated.mockResolvedValue(true);
+    mocks.canReviewUseCase.execute.mockResolvedValue(true);
+
+    renderWithProviders(<DetailTree />, { route: "/centers/7" });
+
+    await actor.click(await screen.findByRole("button", { name: "Write a review" }));
+    await actor.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(await screen.findByText("Select a rating")).toBeInTheDocument();
+    expect(mocks.createReviewUseCase.execute).not.toHaveBeenCalled();
   });
 });

@@ -103,6 +103,8 @@ import {
   GetPersonnelProfileUseCase,
   GetPersonnelUseCase,
   GetReviewsUseCase,
+  CreateReviewUseCase,
+  CanReviewUseCase,
   GetServicesUseCase,
   GetSocialMediaUseCase,
   GetStaffAgendaUseCase,
@@ -291,6 +293,8 @@ export const acceptInvitationUseCase = new AcceptInvitationUseCase(personnelRepo
 
 /* ── Reviews ── */
 export const getReviewsUseCase = new GetReviewsUseCase(reviewRepository);
+export const createReviewUseCase = new CreateReviewUseCase(reviewRepository);
+export const canReviewUseCase = new CanReviewUseCase(reviewRepository);
 
 /* ── Dashboard ── */
 export const getDashboardStatsUseCase = new GetDashboardStatsUseCase(dashboardRepository);
@@ -445,6 +449,8 @@ adminReservationRepository,
 
   /* use cases — reviews */
   getReviewsUseCase,
+  createReviewUseCase,
+  canReviewUseCase,
 
   /* use cases — dashboard */
   getDashboardStatsUseCase,

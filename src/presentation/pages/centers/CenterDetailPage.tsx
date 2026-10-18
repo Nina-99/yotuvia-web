@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import type { BeautyCenterImage, Service, SocialMedia, WorkingHour } from "yotuvia-core";
 
-import { ReviewCard } from "@/presentation/components/reviews";
+import { ReviewCard, ReviewForm } from "@/presentation/components/reviews";
 import { LoyaltyProgramBadge } from "@/presentation/components/centers/LoyaltyProgramBadge";
 import {
   Badge,
@@ -21,6 +21,7 @@ import { useAddClientFavorite, useClientFavorites, useRemoveClientFavorite } fro
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useCenterPersonnel } from "@/presentation/hooks/use-personnel";
 import { useReviews } from "@/presentation/hooks/use-reviews";
+import { useCanReview } from "@/presentation/hooks/use-write-review";
 import { useClientServices } from "@/presentation/hooks/use-services";
 import { useErrorMessage, getErrorStatus } from "@/presentation/lib/errors";
 import { formatCurrency, formatNumber, formatRating, formatTime } from "@/presentation/lib/format";
@@ -122,6 +123,8 @@ export function CenterDetailPage() {
 
   const centerQuery = useBeautyCenter(centerId, language);
   const reviewsQuery = useReviews(centerId);
+  const canReviewQuery = useCanReview(centerId, isClient);
+  const canReview = canReviewQuery.data === true;
   const servicesQuery = useClientServices(centerId, { enabled: isAuthenticated });
   const personnelQuery = useCenterPersonnel(centerId, { enabled: isAuthenticated });
   const favoritesQuery = useClientFavorites(clientId);
@@ -538,6 +541,8 @@ export function CenterDetailPage() {
               ))}
             </ul>
           )}
+
+          {canReview ? <ReviewForm centerId={centerId} /> : null}
         </section>
 
         {center.url?.trim() ? (
