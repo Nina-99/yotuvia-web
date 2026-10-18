@@ -27,6 +27,7 @@ const profile = ["profile"] as const;
 const platform = ["platform"] as const;
 const availability = ["availability"] as const;
 const tiktok = ["tiktok"] as const;
+const waitlist = ["waitlist"] as const;
 
 export interface CenterSearchParams {
   term: string;
@@ -147,6 +148,17 @@ export const queryKeys = {
      * no filters, so the key carries only the client id.
      */
     clientList: (clientId: number) => [...reservations, "client-list", { clientId }] as const,
+  },
+  /**
+   * The signed-in client's waitlist entries.
+   *
+   * `all` covers repairing a claim (which also invalidates the reservations
+   * domain, since a claim creates a booking).
+   */
+  waitlist: {
+    all: waitlist,
+    /** Live entries by default; `history: true` is the full, any-status list. */
+    mine: (history: boolean) => [...waitlist, "mine", { history }] as const,
   },
   /**
    * Client-area domain: the signed-in client's favorites and profile.

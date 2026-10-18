@@ -94,6 +94,10 @@ const ICONS = {
     "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
     "M10 8.5l5.5 3.5-5.5 3.5z",
   ],
+  clientWaitlist: [
+    "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
+    "M12 7v5l3 2",
+  ],
   search: [
     "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z",
     "M21 21l-4.35-4.35",
@@ -162,9 +166,6 @@ export const PLATFORM_NAV_SECTIONS: readonly AppNavSection[] = [
 /**
  * Client (`CLIENT`) sidebar navigation.
  *
- * Deliberately small: the waitlist, videos and notifications do not exist on
- * this surface yet, so no section is invented to fill the sidebar.
- *
  * "Find a center" is the ONE entry that leaves the `/app` shell: the search page
  * is public (`ROUTES.centers.search`) and shared with the landing, so listing it
  * here gives the client a second entry point WITHOUT a second implementation.
@@ -189,6 +190,12 @@ export const CLIENT_NAV_SECTIONS: readonly AppNavSection[] = [
     path: ROUTES.client.reservations,
     labelKey: "web.app.nav.client_reservations",
     icon: ICONS.agenda,
+  },
+  {
+    id: "client-waitlist",
+    path: ROUTES.client.waitlist,
+    labelKey: "web.app.nav.client_waitlist",
+    icon: ICONS.clientWaitlist,
   },
   {
     id: "client-favorites",
