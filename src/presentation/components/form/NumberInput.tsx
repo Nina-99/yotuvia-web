@@ -1,15 +1,12 @@
 import { forwardRef } from "react";
 
+import { sanitizeNumberInput, type NumberVariant } from "yotuvia-core";
+
 import { cn } from "@/presentation/lib/cn";
 
-/**
- * Which characters a numeric field may hold.
- *
- *  - `integer` — whole operational values (minutes, steps, counts).
- *  - `decimal` — a canonical number with an optional dot decimal (`12.5`).
- *  - `money`   — an amount read the way the VIEWER typed it.
- */
-export type NumberVariant = "integer" | "decimal" | "money";
+// The variant taxonomy and the keystroke filter live in the core so web and
+// mobile filter a field identically; this module only renders it.
+export type { NumberVariant };
 
 export interface NumberInputProps {
   id?: string;
@@ -28,33 +25,6 @@ export interface NumberInputProps {
 
 const controlClasses =
   "w-full rounded-lg border bg-input px-3 py-2 text-sm text-input-text placeholder:text-input-placeholder transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
-
-/**
- * Keeps only what a value of `variant` can legitimately contain, preserving a
- * leading minus.
- *
- * `money` keeps BOTH `.` and `,` on purpose: the shared `parseAmount` rule reads
- * locale grouping (`1.234,56` AND `1,234.56`), and a native `type="number"`
- * input cannot even accept the comma that rule understands. Everything else is
- * the rule's business — this only stops letters and stray symbols at the
- * keystroke.
- */
-function sanitizeNumberInput(raw: string, variant: NumberVariant): string {
-  const sign = raw.startsWith("-") ? "-" : "";
-  if (variant === "integer") {
-    return sign + raw.replace(/[^0-9]/g, "");
-  }
-  if (variant === "decimal") {
-    const digits = raw.replace(/[^0-9.]/g, "");
-    const firstDot = digits.indexOf(".");
-    const body =
-      firstDot === -1
-        ? digits
-        : `${digits.slice(0, firstDot + 1)}${digits.slice(firstDot + 1).replace(/\./g, "")}`;
-    return sign + body;
-  }
-  return sign + raw.replace(/[^0-9.,]/g, "");
-}
 
 /**
  * A numeric control that blocks invalid characters as they are typed.
