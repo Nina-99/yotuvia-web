@@ -1888,8 +1888,16 @@
           "revenue": "Ingresos del mes",
           "appointments": "Turnos de hoy",
           "average_ticket": "Ticket promedio",
-          "average_rating": "Calificación promedio"
+          "average_rating": "Calificación promedio",
+          "services": "Servicios",
+          "personnel": "Equipo",
+          "reviews": "Reseñas"
         },
+        "balance_title": "Saldo YOTTU",
+        "balance_value": "{value} {currency}",
+        "balance_overdraft": "Límite de descubierto: {value}",
+        "balance_available": "Disponible: {value}",
+        "balance_open": "Abrir billetera",
         "rating_value": "{value} / 5",
         "pending_title": "Turnos pendientes",
         "pending_subtitle": "{count} turnos esperando confirmación",

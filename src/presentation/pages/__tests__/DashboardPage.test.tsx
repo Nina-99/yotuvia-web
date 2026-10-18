@@ -135,6 +135,11 @@ describe("DashboardPage", () => {
     expect(screen.getByText(/12,000/)).toBeInTheDocument();
     expect(screen.getByText("Haircut")).toBeInTheDocument();
     expect(screen.getByText("Ana Gómez")).toBeInTheDocument();
+    // Count KPIs and the token balance come from the same stats payload.
+    expect(screen.getByText("8")).toBeInTheDocument();
+    expect(screen.getByText("120")).toBeInTheDocument();
+    expect(screen.getByText("100 YOTTU")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open wallet" })).toHaveAttribute("href", ROUTES.app.tokens);
     expect(mocks.statsExecute).toHaveBeenCalledWith(7, undefined, undefined);
     expect(mocks.centerExecute).toHaveBeenCalledWith(7);
   });

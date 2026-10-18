@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { getFullName } from "yotuvia-core";
 import type { UpcomingReservation } from "yotuvia-core";
 
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
   Skeleton,
+  buttonClasses,
 } from "@/presentation/components/ui";
 import type { BadgeVariant } from "@/presentation/components/ui";
 import { useAdminCenter } from "@/presentation/hooks/use-admin-center";
@@ -18,6 +20,7 @@ import { useDashboardStats } from "@/presentation/hooks/use-dashboard";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import { useErrorMessage } from "@/presentation/lib/errors";
 import { formatCurrency, formatDate, formatNumber, formatRating, formatTime } from "@/presentation/lib/format";
+import { ROUTES } from "@/presentation/lib/routes";
 
 const STATUS_VARIANT: Readonly<Record<string, BadgeVariant>> = {
   PENDING: "warning",
@@ -163,7 +166,7 @@ export function DashboardPage() {
         <p aria-hidden="true" className="text-xs font-semibold uppercase tracking-wider text-text-secondary ytv-section-glow">
           {t("web.app.dashboard.summary_title")}
         </p>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <KpiCard
             label={t("web.app.dashboard.kpi.revenue")}
             value={formatCurrency(stats.revenueMonth, language, currency)}
@@ -182,6 +185,18 @@ export function DashboardPage() {
               value: formatRating(stats.averageRating, language),
             })}
           />
+          <KpiCard
+            label={t("web.app.dashboard.kpi.services")}
+            value={formatNumber(stats.totalServices, language)}
+          />
+          <KpiCard
+            label={t("web.app.dashboard.kpi.personnel")}
+            value={formatNumber(stats.totalPersonnel, language)}
+          />
+          <KpiCard
+            label={t("web.app.dashboard.kpi.reviews")}
+            value={formatNumber(stats.totalReviews, language)}
+          />
         </div>
       </section>
 
@@ -197,6 +212,39 @@ export function DashboardPage() {
           </CardContent>
         </Card>
       ) : null}
+
+      <section aria-labelledby="dashboard-balance" className="flex flex-col gap-3">
+        <h3 id="dashboard-balance" className="text-lg font-semibold text-text">
+          {t("web.app.dashboard.balance_title")}
+        </h3>
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
+            <div className="flex flex-col gap-1">
+              <p className="text-2xl font-bold text-text">
+                {t("web.app.dashboard.balance_value", {
+                  value: formatNumber(stats.balance, language),
+                  currency: "YOTTU",
+                })}
+              </p>
+              <p className="text-xs text-text-muted">
+                {t("web.app.dashboard.balance_overdraft", {
+                  value: formatNumber(stats.overdraftLimit, language),
+                })}
+                {" · "}
+                {t("web.app.dashboard.balance_available", {
+                  value: formatNumber(stats.availableBalance, language),
+                })}
+              </p>
+            </div>
+            <Link
+              to={ROUTES.app.tokens}
+              className={buttonClasses({ variant: "outline", size: "sm" })}
+            >
+              {t("web.app.dashboard.balance_open")}
+            </Link>
+          </CardContent>
+        </Card>
+      </section>
 
       <section aria-labelledby="dashboard-top-services" className="flex flex-col gap-3">
         <h3 id="dashboard-top-services" className="text-lg font-semibold text-text">

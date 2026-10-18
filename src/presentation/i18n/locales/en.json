@@ -1888,8 +1888,16 @@
           "revenue": "Revenue this month",
           "appointments": "Appointments today",
           "average_ticket": "Average ticket",
-          "average_rating": "Average rating"
+          "average_rating": "Average rating",
+          "services": "Services",
+          "personnel": "Team",
+          "reviews": "Reviews"
         },
+        "balance_title": "YOTTU balance",
+        "balance_value": "{value} {currency}",
+        "balance_overdraft": "Overdraft limit: {value}",
+        "balance_available": "Available: {value}",
+        "balance_open": "Open wallet",
         "rating_value": "{value} / 5",
         "pending_title": "Pending appointments",
         "pending_subtitle": "{count} appointments waiting to be confirmed",
