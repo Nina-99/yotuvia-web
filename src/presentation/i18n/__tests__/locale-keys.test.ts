@@ -54,6 +54,15 @@ function flatten(
 const TRANSLATION_CALL = /\bt\(\s*["']([^"']+)["']/g;
 
 /**
+ * A base key resolves when the literal leaf exists OR it is an i18next PLURAL:
+ * plural dictionaries store `key_one` / `key_other` and the call site stays
+ * `t("key", { count })`, so the base name is legitimately absent from the JSON.
+ */
+function resolves(flat: Record<string, string>, key: string): boolean {
+  return key in flat || `${key}_one` in flat || `${key}_other` in flat;
+}
+
+/**
  * Fallback keys reach the UI through the error helpers, which translate them
  * with `t()` internally, so they must resolve too.
  */
@@ -94,10 +103,10 @@ describe("i18n key resolution across the web source", () => {
 
   it("resolves every literal t() key in both locales", () => {
     const unresolved = usages
-      .filter(({ key }) => !(key in enFlat) || !(key in esFlat))
+      .filter(({ key }) => !resolves(enFlat, key) || !resolves(esFlat, key))
       .map(
         ({ key, file }) =>
-          `${key} (missing in ${[!(key in enFlat) ? "en" : null, !(key in esFlat) ? "es" : null]
+          `${key} (missing in ${[!resolves(enFlat, key) ? "en" : null, !resolves(esFlat, key) ? "es" : null]
             .filter(Boolean)
             .join("+")}) — ${file}`,
       )

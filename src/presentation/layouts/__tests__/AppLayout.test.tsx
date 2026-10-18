@@ -222,16 +222,16 @@ describe("AppLayout", () => {
     }
   });
 
-  it("gives a staff member its own three-section nav and none of the owner sections", () => {
+  it("gives a staff member its own nav and none of the owner sections", () => {
     authenticate(PERSONNEL);
 
     renderWithProviders(<ShellTree />, { route: ROUTES.staff.agenda });
 
-    for (const name of ["Agenda", "Scan QR", "Profile"]) {
+    for (const name of ["Agenda", "Scan QR", "Metrics", "Clients", "Notifications", "Profile"]) {
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
     }
     // No center section and no client section leaks into the staff nav.
-    for (const name of ["Dashboard", "Clients", "Tokens", "My reservations", "Favorites"]) {
+    for (const name of ["Dashboard", "Tokens", "My reservations", "Favorites"]) {
       expect(screen.queryByRole("link", { name })).not.toBeInTheDocument();
     }
     expect(screen.getByText("staff agenda content")).toBeInTheDocument();

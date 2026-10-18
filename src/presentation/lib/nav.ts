@@ -264,6 +264,12 @@ export const STAFF_NAV_SECTIONS: readonly AppNavSection[] = [
     icon: ICONS.analytics,
   },
   {
+    id: "staff-clients",
+    path: ROUTES.staff.clients,
+    labelKey: "web.app.nav.staff_clients",
+    icon: ICONS.clients,
+  },
+  {
     id: "staff-notifications",
     path: ROUTES.staff.notifications,
     labelKey: "web.app.nav.staff_notifications",

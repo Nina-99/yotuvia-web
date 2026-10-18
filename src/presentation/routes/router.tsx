@@ -294,6 +294,12 @@ const StaffMetricsPage = lazy(() =>
   })),
 );
 
+const StaffClientsPage = lazy(() =>
+  import("@/presentation/pages/staff/StaffClientsPage").then((module) => ({
+    default: module.StaffClientsPage,
+  })),
+);
+
 /**
  * Public center surface + the client booking flow.
  *
@@ -630,6 +636,11 @@ export function AppRouter() {
             <Route path={ROUTES.staff.metrics} element={
                 <Suspense fallback={<RouteFallback />}>
                   <StaffMetricsPage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.staff.clients} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <StaffClientsPage />
                 </Suspense>
               } />
           </Route>
