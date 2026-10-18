@@ -120,6 +120,7 @@ export const ROUTES = {
     scan: "/app/staff/scan",
     metrics: "/app/staff/metrics",
     clients: "/app/staff/clients",
+    videos: "/app/staff/videos",
     profile: "/app/staff/profile",
     /** The professional's notifications. */
     notifications: "/app/staff/notifications",

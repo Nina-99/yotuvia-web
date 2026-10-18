@@ -1696,6 +1696,7 @@
         "staff_scan": "Scan QR",
         "staff_metrics": "Metrics",
         "staff_clients": "Clients",
+        "staff_videos": "My videos",
         "staff_notifications": "Notifications",
         "staff_profile": "Profile"
       },
@@ -2995,6 +2996,7 @@
       "notification_mark_all_read": "Could not mark the notifications as read.",
       "staff_metrics_fetch": "We couldn't load your metrics. Please try again.",
       "staff_clients_fetch": "We couldn't load your clients. Please try again.",
+      "staff_videos_fetch": "We couldn't load your videos. Please try again.",
       "client_reservation_cancel": "We couldn't cancel the reservation. Please try again.",
       "client_deposit_submit": "We couldn't send the receipt. Please try again.",
       "client_reservation_qr": "We couldn't generate your check-in code. Please try again.",

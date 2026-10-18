@@ -1696,6 +1696,7 @@
         "staff_scan": "Escanear QR",
         "staff_metrics": "Métricas",
         "staff_clients": "Clientes",
+        "staff_videos": "Mis videos",
         "staff_notifications": "Notificaciones",
         "staff_profile": "Perfil"
       },
@@ -2995,6 +2996,7 @@
       "notification_mark_all_read": "No se pudieron marcar las notificaciones como leídas.",
       "staff_metrics_fetch": "No pudimos cargar tus métricas. Intentá de nuevo.",
       "staff_clients_fetch": "No pudimos cargar tus clientes. Intentá de nuevo.",
+      "staff_videos_fetch": "No pudimos cargar tus videos. Intentá de nuevo.",
       "client_reservation_cancel": "No pudimos cancelar la reserva. Intentá de nuevo.",
       "client_deposit_submit": "No pudimos enviar el comprobante. Intentá de nuevo.",
       "client_reservation_qr": "No pudimos generar tu código de check-in. Intentá de nuevo.",

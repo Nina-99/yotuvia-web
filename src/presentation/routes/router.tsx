@@ -300,6 +300,12 @@ const StaffClientsPage = lazy(() =>
   })),
 );
 
+const StaffVideosPage = lazy(() =>
+  import("@/presentation/pages/staff/StaffVideosPage").then((module) => ({
+    default: module.StaffVideosPage,
+  })),
+);
+
 /**
  * Public center surface + the client booking flow.
  *
@@ -641,6 +647,11 @@ export function AppRouter() {
             <Route path={ROUTES.staff.clients} element={
                 <Suspense fallback={<RouteFallback />}>
                   <StaffClientsPage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.staff.videos} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <StaffVideosPage />
                 </Suspense>
               } />
           </Route>
