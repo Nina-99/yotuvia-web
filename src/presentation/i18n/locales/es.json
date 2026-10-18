@@ -1694,6 +1694,7 @@
         "client_search": "Buscar centro",
         "staff_agenda": "Agenda",
         "staff_scan": "Escanear QR",
+        "staff_notifications": "Notificaciones",
         "staff_profile": "Perfil"
       },
       "platform": {

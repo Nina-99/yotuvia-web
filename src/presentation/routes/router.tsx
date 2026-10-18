@@ -282,6 +282,12 @@ const StaffProfilePage = lazy(() =>
   })),
 );
 
+const StaffNotificationsPage = lazy(() =>
+  import("@/presentation/pages/staff/StaffNotificationsPage").then((module) => ({
+    default: module.StaffNotificationsPage,
+  })),
+);
+
 /**
  * Public center surface + the client booking flow.
  *
@@ -608,6 +614,11 @@ export function AppRouter() {
             <Route path={ROUTES.staff.profile} element={
                 <Suspense fallback={<RouteFallback />}>
                   <StaffProfilePage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.staff.notifications} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <StaffNotificationsPage />
                 </Suspense>
               } />
           </Route>

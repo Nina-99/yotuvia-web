@@ -30,6 +30,7 @@ const tiktok = ["tiktok"] as const;
 const waitlist = ["waitlist"] as const;
 const notifications = ["notifications"] as const;
 const adminNotifications = ["admin-notifications"] as const;
+const staffNotifications = ["staff-notifications"] as const;
 
 export interface CenterSearchParams {
   term: string;
@@ -178,6 +179,12 @@ export const queryKeys = {
     all: adminNotifications,
     list: () => [...adminNotifications, "list"] as const,
     unreadCount: () => [...adminNotifications, "unread-count"] as const,
+  },
+  /** The professional's notifications (personnel claim-scoped: no id). */
+  staffNotifications: {
+    all: staffNotifications,
+    list: () => [...staffNotifications, "list"] as const,
+    unreadCount: () => [...staffNotifications, "unread-count"] as const,
   },
   /**
    * Client-area domain: the signed-in client's favorites and profile.
