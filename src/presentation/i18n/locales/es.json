@@ -1437,6 +1437,7 @@
       "status_success": "Turno actualizado",
       "prev_day": "Día anterior",
       "next_day": "Día siguiente",
+      "next_line": "Próximo: {time} · {name}",
       "go_today": "Hoy"
     },
     "scan": {

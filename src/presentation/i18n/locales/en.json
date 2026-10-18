@@ -1437,6 +1437,7 @@
       "status_success": "Appointment updated",
       "prev_day": "Previous day",
       "next_day": "Next day",
+      "next_line": "Next: {time} · {name}",
       "go_today": "Today"
     },
     "scan": {

@@ -5,11 +5,12 @@ import type { ReservationStatus } from "yotuvia-core";
 import { StaffAppointmentCard } from "@/presentation/components/staff";
 import { Button, Card, CardContent, CardHeader, CardTitle, Skeleton, useToast } from "@/presentation/components/ui";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
+import { useNowTick } from "@/presentation/hooks/use-now-tick";
 import { useStaffAgenda, useUpdateStaffReservationStatus } from "@/presentation/hooks/use-staff";
 import { addDays, isToday, timeSection, toDateKey } from "@/presentation/lib/dates";
 import type { TimeSection } from "@/presentation/lib/dates";
 import { toErrorKey, useErrorMessage } from "@/presentation/lib/errors";
-import { formatDate } from "@/presentation/lib/format";
+import { formatDate, formatTime } from "@/presentation/lib/format";
 
 const SECTION_ORDER: readonly TimeSection[] = ["morning", "afternoon", "evening"];
 
@@ -41,6 +42,27 @@ export function StaffAgendaPage() {
   const agendaQuery = useStaffAgenda({ from: selectedDate, to: selectedDate });
   const updateStatus = useUpdateStaffReservationStatus();
   const errorMessage = useErrorMessage(agendaQuery.error, "web.errors.staff_agenda_fetch");
+  // One shared tick keeps the "next appointment" strip fresh while the day runs.
+  const now = useNowTick();
+
+  /**
+   * The next appointment still ahead of the clock, ONLY when viewing today.
+   * Cancelled/completed rows are excluded: a finished or cancelled visit is not
+   * "next".
+   */
+  const nextAppointment = useMemo(() => {
+    if (!isToday(selectedDate)) return null;
+    const currentTime = new Date(now).toTimeString().slice(0, 5);
+    return (
+      (agendaQuery.data ?? [])
+        .filter(
+          (reservation) =>
+            (reservation.status === "PENDING" || reservation.status === "CONFIRMED") &&
+            reservation.startTime.slice(0, 5) >= currentTime,
+        )
+        .sort(byStartTime)[0] ?? null
+    );
+  }, [agendaQuery.data, selectedDate, now]);
 
   const sections = useMemo(() => {
     const reservations = agendaQuery.data ?? [];
@@ -73,7 +95,6 @@ export function StaffAgendaPage() {
         <h2 className="text-2xl font-bold text-text">{t("staff.agenda.title")}</h2>
         <p className="text-sm text-text-secondary">{t("staff.agenda.total", { count: total })}</p>
       </div>
-
       <div className="flex flex-wrap items-center gap-2">
         <Button
           size="sm"
@@ -100,6 +121,19 @@ export function StaffAgendaPage() {
           </Button>
         ) : null}
       </div>
+
+      {nextAppointment !== null && !agendaQuery.isPending && !agendaQuery.isError ? (
+        <p className="text-sm font-medium text-accent">
+          {t("staff.agenda.next_line", {
+            time: formatTime(nextAppointment.startTime),
+            name:
+              nextAppointment.client?.firstName || nextAppointment.client?.lastName
+                ? `${nextAppointment.client?.firstName ?? ""} ${nextAppointment.client?.lastName ?? ""}`.trim()
+                : nextAppointment.clientName?.trim() ||
+                  t("staff.agenda.client_fallback", { id: nextAppointment.clientId }),
+          })}
+        </p>
+      ) : null}
 
       {agendaQuery.isPending ? (
         <div

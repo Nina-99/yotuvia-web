@@ -160,6 +160,21 @@ describe("StaffAgendaPage", () => {
     expect(await screen.findByText("Appointment updated")).toBeInTheDocument();
   });
 
+  it("shows the next appointment ahead of the clock when viewing today", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date(`${TODAY}T09:00:00`));
+    mocks.getStaffAgendaUseCase.execute.mockResolvedValue([PENDING, CONFIRMED]);
+
+    try {
+      renderWithProviders(<StaffAgendaPage />, { route: ROUTES.staff.agenda });
+
+      // PENDING (Ana Díaz) is at 10:00, the earliest still ahead of 09:00.
+      expect(await screen.findByText(/Next: 10:00 · Ana Díaz/)).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("offers only the transitions the backend accepts", async () => {
     renderWithProviders(<StaffAgendaPage />, { route: ROUTES.staff.agenda });
 
