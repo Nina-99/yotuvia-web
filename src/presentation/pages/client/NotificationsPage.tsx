@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-import { NotificationsPanel } from "@/presentation/components/notifications";
+import { NotificationsPanel, WebPushCard } from "@/presentation/components/notifications";
 import { Button } from "@/presentation/components/ui";
 import { useAuthSession } from "@/presentation/hooks/use-auth-session";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
@@ -42,8 +42,10 @@ export function NotificationsPage() {
   const unreadCount = unreadQuery.data ?? 0;
 
   return (
-    <NotificationsPanel
-      title={t("notifications.title")}
+    <div className="flex flex-col gap-6">
+      <WebPushCard />
+      <NotificationsPanel
+        title={t("notifications.title")}
       notifications={listQuery.data ?? []}
       unreadCount={unreadCount}
       unreadText={t("notifications.unreadCount", { count: unreadCount })}
@@ -71,6 +73,7 @@ export function NotificationsPage() {
           </Button>
         ) : undefined
       }
-    />
+      />
+    </div>
   );
 }

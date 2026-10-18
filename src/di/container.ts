@@ -120,6 +120,7 @@ import {
   GetTopRatedCentersUseCase,
   GetTreatmentCatalogUseCase,
   GetUpcomingReservationUseCase,
+  GetVapidPublicKeyUseCase,
   GetVideosFeedUseCase,
   IncrementVideoBookTapsUseCase,
   IncrementVideoViewsUseCase,
@@ -257,6 +258,7 @@ export const countUnreadNotificationsUseCase = new CountUnreadNotificationsUseCa
 export const markNotificationReadUseCase = new MarkNotificationReadUseCase(notificationRepository);
 export const markAllNotificationsReadUseCase = new MarkAllNotificationsReadUseCase(notificationRepository);
 export const registerPushDeviceUseCase = new RegisterPushDeviceUseCase(notificationRepository);
+export const getVapidPublicKeyUseCase = new GetVapidPublicKeyUseCase(notificationRepository);
 
 export const getUpcomingReservationUseCase = new GetUpcomingReservationUseCase(reservationRepository);
 export const searchAvailabilityUseCase = new SearchAvailabilityUseCase(availabilityRepository);
@@ -373,6 +375,7 @@ adminReservationRepository,
   treatmentRepository,
   timeBlockRepository,
   visitNoteRepository,
+  notificationRepository,
 
   /* use cases — auth */
   loginUserUseCase,
@@ -388,6 +391,7 @@ adminReservationRepository,
   markNotificationReadUseCase,
   markAllNotificationsReadUseCase,
   registerPushDeviceUseCase,
+  getVapidPublicKeyUseCase,
   getUpcomingReservationUseCase,
   searchAvailabilityUseCase,
 

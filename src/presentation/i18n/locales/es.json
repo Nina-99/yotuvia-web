@@ -1689,6 +1689,17 @@
       "error_save": "No pudimos guardar la nota. Intenta de nuevo.",
       "error_delete": "No pudimos eliminar la nota. Intenta de nuevo."
     },
+    "push_notifications": {
+      "title": "Notificaciones push",
+      "description": "Recibí un aviso en este navegador cuando se confirme un turno, llegue un recordatorio o se libere un horario.",
+      "status_on": "Activadas en este dispositivo.",
+      "status_off": "Todavía no están activadas en este dispositivo.",
+      "enable": "Activar",
+      "disable": "Desactivar",
+      "blocked": "Las notificaciones están bloqueadas para este sitio. Permitilas en la configuración del navegador y recargá.",
+      "error_enable": "No pudimos activar las notificaciones. Intenta de nuevo.",
+      "error_disable": "No pudimos desactivar las notificaciones. Intenta de nuevo."
+    },
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Iniciar sesión",

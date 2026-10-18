@@ -1689,6 +1689,17 @@
       "error_save": "We couldn't save the note. Please try again.",
       "error_delete": "We couldn't delete the note. Please try again."
     },
+    "push_notifications": {
+      "title": "Push notifications",
+      "description": "Get notified in this browser when an appointment is confirmed, reminded or a slot opens up.",
+      "status_on": "Enabled on this device.",
+      "status_off": "Not enabled on this device yet.",
+      "enable": "Enable",
+      "disable": "Turn off",
+      "blocked": "Notifications are blocked for this site. Allow them in your browser settings and reload.",
+      "error_enable": "We couldn't enable notifications. Please try again.",
+      "error_disable": "We couldn't turn off notifications. Please try again."
+    },
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Sign in",
