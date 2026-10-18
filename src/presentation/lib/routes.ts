@@ -96,6 +96,8 @@ export const ROUTES = {
     profile: "/app/client/profile",
     /** Waitlist management: live entries plus the full history. */
     waitlist: "/app/client/waitlist",
+    /** In-app notifications for the client. */
+    notifications: "/app/client/notifications",
     /**
      * One professional's public profile, reached from a credited video avatar.
      * Registered path; build links with `professionalProfilePath`. Lives in the

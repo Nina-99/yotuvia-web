@@ -240,6 +240,12 @@ const WaitlistPage = lazy(() =>
   })),
 );
 
+const NotificationsPage = lazy(() =>
+  import("@/presentation/pages/client/NotificationsPage").then((module) => ({
+    default: module.NotificationsPage,
+  })),
+);
+
 /**
  * Staff-area pages are code-split for the same reason as the client area: a
  * staff member is the only role that renders them and the scan page additionally
@@ -546,6 +552,11 @@ export function AppRouter() {
             <Route path={ROUTES.client.waitlist} element={
                 <Suspense fallback={<RouteFallback />}>
                   <WaitlistPage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.client.notifications} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <NotificationsPage />
                 </Suspense>
               } />
           </Route>

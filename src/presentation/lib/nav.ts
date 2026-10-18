@@ -98,6 +98,10 @@ const ICONS = {
     "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
     "M12 7v5l3 2",
   ],
+  clientNotifications: [
+    "M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9",
+    "M13.73 21a2 2 0 0 1-3.46 0",
+  ],
   search: [
     "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z",
     "M21 21l-4.35-4.35",
@@ -196,6 +200,12 @@ export const CLIENT_NAV_SECTIONS: readonly AppNavSection[] = [
     path: ROUTES.client.waitlist,
     labelKey: "web.app.nav.client_waitlist",
     icon: ICONS.clientWaitlist,
+  },
+  {
+    id: "client-notifications",
+    path: ROUTES.client.notifications,
+    labelKey: "web.app.nav.client_notifications",
+    icon: ICONS.clientNotifications,
   },
   {
     id: "client-favorites",
