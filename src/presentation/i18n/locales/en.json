@@ -2260,6 +2260,13 @@
         "subtitle_plain": "Ytv wallet and top-up requests.",
         "no_center": "We couldn't find the center linked to your account.",
         "error_title": "We couldn't load your tokens",
+        "missions": {
+          "title": "Missions",
+          "body": "Complete missions and earn Ytv. Claimable ones appear first.",
+          "empty": "No missions right now.",
+          "claim": "Claim",
+          "claimed": "Claimed"
+        },
         "amount_value": "{value} Bs",
         "receipt_open": "View receipt",
         "receipt_missing": "No receipt attached",

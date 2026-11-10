@@ -2260,6 +2260,13 @@
         "subtitle_plain": "Billetera Ytv y solicitudes de recarga.",
         "no_center": "No pudimos encontrar el centro vinculado a tu cuenta.",
         "error_title": "No pudimos cargar tus tokens",
+        "missions": {
+          "title": "Misiones",
+          "body": "Completá misiones y ganá Ytv. Las reclamables aparecen primero.",
+          "empty": "No hay misiones por ahora.",
+          "claim": "Reclamar",
+          "claimed": "Reclamada"
+        },
         "amount_value": "{value} Bs",
         "receipt_open": "Ver comprobante",
         "receipt_missing": "Sin comprobante adjunto",

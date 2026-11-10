@@ -138,6 +138,9 @@ describe("TokensPage", () => {
 
     expect(await screen.findByText("Request #5")).toBeInTheDocument();
     expect(screen.getByText("Request #4")).toBeInTheDocument();
+    // Missions card resolves its copy from web.app.tokens.missions.*.
+    expect(screen.getByText("Missions")).toBeInTheDocument();
+    expect(screen.getByText("No missions right now.")).toBeInTheDocument();
     const pendingRow = screen.getByText("Request #5").closest("li");
     const approvedRow = screen.getByText("Request #4").closest("li");
     expect(pendingRow).not.toBeNull();
