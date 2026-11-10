@@ -55,7 +55,7 @@ describe("BoostCampaignDialog", () => {
     const onSubmit = vi.fn();
     renderDialog(onSubmit);
 
-    const budget = screen.getByLabelText("Budget (Yotuvia tokens)");
+    const budget = screen.getByLabelText("Budget (Ytv tokens)");
     await actor.clear(budget);
     await actor.type(budget, "0");
     await actor.click(screen.getByRole("button", { name: "Start campaign" }));
@@ -69,7 +69,7 @@ describe("BoostCampaignDialog", () => {
     const actor = userEvent.setup();
     renderDialog(vi.fn());
 
-    const budget = screen.getByLabelText("Budget (Yotuvia tokens)");
+    const budget = screen.getByLabelText("Budget (Ytv tokens)");
     await actor.clear(budget);
     await actor.type(budget, "1a2");
 

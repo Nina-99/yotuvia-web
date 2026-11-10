@@ -33,7 +33,7 @@ type StatusFilter = typeof FILTER_ALL | PlatformTopUpStatus;
 /**
  * Platform payments queue: EVERY centre's token top-ups in one list.
  *
- * PRODUCT CONSTRAINT: Yotuvia settles top-ups ONLY in YOTTU tokens. There is no
+ * PRODUCT CONSTRAINT: Yotuvia settles top-ups ONLY in Ytv tokens. There is no
  * payment gateway — a top-up is a transfer receipt a centre uploads, and
  * approving it credits that centre's token wallet. The copy never implies a
  * card provider.

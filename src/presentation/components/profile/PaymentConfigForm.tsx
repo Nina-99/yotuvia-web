@@ -30,7 +30,7 @@ const FORM_ID = "payment-config-form";
 /**
  * Payment configuration section (centre profile).
  *
- * PRODUCT CONSTRAINT: Yotuvia settles top-ups ONLY in YOTTU tokens. There is no
+ * PRODUCT CONSTRAINT: Yotuvia settles top-ups ONLY in Ytv tokens. There is no
  * card gateway anywhere in the stack — this section manages the center's
  * transfer QR, the contact phone and the bonus-tier ladder (tokens granted per
  * amount). The copy avoids implying a payment provider.

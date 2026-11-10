@@ -91,7 +91,7 @@ function parseIdList(raw: string | null): number[] {
  *   professional who cannot perform the whole bundle is rejected server-side
  *   with a 400 that is surfaced through the shared error mapping.
  * - There is NO online payment step: the platform's only payment medium is
- *   Yotuvia tokens and there is no payment gateway. A deposit hold the center may
+ *   Ytv tokens and there is no payment gateway. A deposit hold the center may
  *   apply is decided server-side — `POST /reservation/` answers
  *   `201 {message}` and `ApiReservationRepository.create` returns `void` — so the
  *   outcome is shown in the reservations list, never faked here.

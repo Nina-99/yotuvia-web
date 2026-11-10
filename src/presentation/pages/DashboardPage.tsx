@@ -223,7 +223,7 @@ export function DashboardPage() {
               <p className="text-2xl font-bold text-text">
                 {t("web.app.dashboard.balance_value", {
                   value: formatNumber(stats.balance, language),
-                  currency: "YOTTU",
+                  currency: "Ytv",
                 })}
               </p>
               <p className="text-xs text-text-muted">

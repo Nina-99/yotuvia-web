@@ -34,7 +34,7 @@ const FORM_ID = "platform-payment-config-form";
 /**
  * Platform centres: pick a centre and manage its TOKEN-payment configuration.
  *
- * PRODUCT CONSTRAINT: payments settle ONLY in Yotuvia tokens. There is no
+ * PRODUCT CONSTRAINT: payments settle ONLY in Ytv tokens. There is no
  * payment gateway — the QR below is the transfer QR customers scan to send the
  * amount, which the platform admin then validates in the payments queue. The
  * copy says so explicitly.

@@ -456,7 +456,7 @@ export function CenterProfileForm({ center, saving, errorKey, onSubmit }: Center
           {/*
            * Booking-deposit collection QR upload (upload-then-set): a successful
            * upload fills `depositQrUrl` and the normal save persists it. This
-           * is NOT the YOTTU top-up QR (`web.app.profile.payments.qr_*`,
+           * is NOT the Ytv top-up QR (`web.app.profile.payments.qr_*`,
            * `useUploadPaymentQr`) — distinct hook, distinct copy.
            */}
           <ImageUploadField
