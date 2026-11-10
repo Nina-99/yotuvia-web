@@ -1,12 +1,23 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiClient, getTokenBalance, getTokenHistory } from "yotuvia-core";
-import type { TokenBalance, TokenHistoryResponse, TokenTopUpAdmin } from "yotuvia-core";
+import {
+  apiClient,
+  claimMissionReward,
+  getTokenBalance,
+  getTokenHistory,
+  getTokenMissions,
+} from "yotuvia-core";
+import type {
+  TokenBalance,
+  TokenHistoryResponse,
+  TokenMission,
+  TokenTopUpAdmin,
+} from "yotuvia-core";
 
 import { attachErrorKey } from "@/presentation/lib/errors";
 import { queryKeys } from "@/presentation/lib/query-keys";
 
 /**
- * YOTTU token hooks for the owner tokens section.
+ * Ytv token hooks for the owner tokens section.
  *
  * WHY THESE CALL THE SOURCE LAYER DIRECTLY (no repository / use-case seam):
  * `yotuvia-core` ships no `TokenRepository` and no token use-case — the token
@@ -75,7 +86,7 @@ export function useAdminTopUps(page = 1, limit = TOPUPS_PAGE_LIMIT) {
   });
 }
 
-/** The authenticated center's own YOTTU wallet. */
+/** The authenticated center's own Ytv wallet. */
 export function useTokenBalance(centerId: number) {
   return useQuery<TokenBalance>({
     queryKey: queryKeys.tokens.balance(centerId),
@@ -111,6 +122,29 @@ export function useProcessTopUp() {
           trimmedNotes ? { status, notes: trimmedNotes } : { status },
         );
       },
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.tokens.all }),
+    }),
+    "web.errors.tokens_process",
+  );
+}
+
+/** GET /tokens/missions — every mission for the authenticated center. */
+export function useTokenMissions() {
+  return useQuery<TokenMission[]>({
+    queryKey: queryKeys.tokens.missions,
+    queryFn: getTokenMissions,
+  });
+}
+
+/**
+ * POST /tokens/missions/:id/claim — credits the reward once. Invalidates the
+ * tokens domain so the mission, the balance and the ledger refetch together.
+ */
+export function useClaimMissionReward() {
+  const queryClient = useQueryClient();
+  return attachErrorKey(
+    useMutation<void, Error, number>({
+      mutationFn: (missionId) => claimMissionReward(missionId),
       onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.tokens.all }),
     }),
     "web.errors.tokens_process",

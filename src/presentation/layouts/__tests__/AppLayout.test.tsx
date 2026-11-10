@@ -112,7 +112,7 @@ describe("AppLayout", () => {
       "Clients",
       "Services",
       "Staff",
-      "Tokens",
+      "Ytv",
       "Loyalty",
       "Reviews",
       "Promotions",
@@ -178,7 +178,7 @@ describe("AppLayout", () => {
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
     }
     // No center section and no platform section leaks into the client nav.
-    for (const name of ["Dashboard", "Agenda", "Clients", "Tokens", "Payments to validate"]) {
+    for (const name of ["Dashboard", "Agenda", "Clients", "Ytv", "Payments to validate"]) {
       expect(screen.queryByRole("link", { name })).not.toBeInTheDocument();
     }
     expect(screen.getByText("client home content")).toBeInTheDocument();
@@ -231,7 +231,7 @@ describe("AppLayout", () => {
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
     }
     // No center section and no client section leaks into the staff nav.
-    for (const name of ["Dashboard", "Tokens", "My reservations", "Favorites"]) {
+    for (const name of ["Dashboard", "Ytv", "My reservations", "Favorites"]) {
       expect(screen.queryByRole("link", { name })).not.toBeInTheDocument();
     }
     expect(screen.getByText("staff agenda content")).toBeInTheDocument();
@@ -255,7 +255,7 @@ describe("AppLayout", () => {
     expect(screen.getByRole("link", { name: "Payments to validate" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Centers" })).toBeInTheDocument();
     // None of the center sections leak into the platform nav.
-    for (const name of ["Dashboard", "Agenda", "Tokens", "Profile"]) {
+    for (const name of ["Dashboard", "Agenda", "Ytv", "Profile"]) {
       expect(screen.queryByRole("link", { name })).not.toBeInTheDocument();
     }
     expect(

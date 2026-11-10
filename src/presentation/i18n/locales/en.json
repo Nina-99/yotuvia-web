@@ -117,7 +117,7 @@
       "personnel": "Staff",
       "clients": "Clients",
       "appointments": "Appointments",
-      "tokens": "Tokens",
+      "tokens": "Ytv",
       "notifications": "Notifications",
       "profile": "Profile"
     },
@@ -311,7 +311,7 @@
       "greeting_morning": "Good morning 👋",
       "inactive": "Inactive",
       "daily_summary": "Daily summary",
-      "yotuvia_balance": "YOTUVIA balance",
+      "yotuvia_balance": "Ytv balance",
       "overdraft": "Overdraft",
       "recharge": "Recharge",
       "appointments_today": "Appointments today",
@@ -618,14 +618,16 @@
       "empty_subtitle": "Your clients' reviews will appear here"
     },
     "tokens": {
-      "title": "Tokens",
-      "balance_title": "YOTUVIA Balance",
+      "title": "Ytv wallet",
+      "balance_title": "Ytv balance",
       "missions": {
         "title": "Missions",
+        "body": "Complete missions and earn Ytv. Claimable ones appear first.",
+        "empty": "No missions right now.",
         "claim": "Claim",
         "claimed": "Claimed",
         "success_title": "Reward credited!",
-        "success_body": "{count} YOTUVIA added to your balance"
+        "success_body": "{count} Ytv added to your balance"
       },
       "receipt": {
         "title": "Payment receipt",
@@ -672,7 +674,7 @@
       "detail": {
         "title": "Top-up detail",
         "amount": "Amount",
-        "tokens": "Tokens",
+        "tokens": "Ytv",
         "bonus": "Bonus",
         "total": "Total",
         "status": "Status",
@@ -1736,7 +1738,7 @@
         "clients": "Clients",
         "services": "Services",
         "personnel": "Staff",
-        "tokens": "Tokens",
+        "tokens": "Ytv",
         "loyalty": "Loyalty",
         "reviews": "Reviews",
         "promotions": "Promotions",
@@ -1768,7 +1770,7 @@
         "payments": {
           "meta_title": "Payments to validate — Yotuvia",
           "title": "Payments to validate",
-          "subtitle": "Token top-ups from every center in one queue. Yotuvia settles them only in YOTTU tokens — there is no payment gateway.",
+          "subtitle": "Token top-ups from every center in one queue. Yotuvia settles them only in Ytv tokens — there is no payment gateway.",
           "queue_title": "Global top-up queue",
           "queue_body": "A top-up is a transfer receipt a center uploads. Approving it credits that center's token wallet.",
           "center_filter": "Filter by center",
@@ -1776,7 +1778,7 @@
           "status_filter": "Filter by status",
           "total": "{count} requests",
           "reference": "Request #{id}",
-          "tokens": "{value} tokens",
+          "tokens": "{value} Ytv",
           "created": "Requested {date}",
           "validated": "Reviewed {date}",
           "processed": "Processed",
@@ -1802,8 +1804,8 @@
           "empty": "There are no centers yet.",
           "config_title": "Payment config for {center}",
           "config_title_plain": "Payment config",
-          "config_body": "How this center's clients top up their YOTTU tokens.",
-          "qr_explainer": "This is the center's transfer QR. Yotuvia settles top-ups only in YOTTU tokens — there is no payment gateway. Customers scan the QR, transfer the amount and upload the receipt for validation.",
+          "config_body": "How this center's clients top up their Ytv tokens.",
+          "qr_explainer": "This is the center's transfer QR. Yotuvia settles top-ups only in Ytv tokens — there is no payment gateway. Customers scan the QR, transfer the amount and upload the receipt for validation.",
           "qr_title": "Transfer QR (token payment)",
           "qr_alt": "Token payment QR code of the selected center",
           "qr_empty": "This center has no QR uploaded yet",
@@ -1965,7 +1967,7 @@
           "personnel": "Team",
           "reviews": "Reviews"
         },
-        "balance_title": "YOTTU balance",
+        "balance_title": "Ytv balance",
         "balance_value": "{value} {currency}",
         "balance_overdraft": "Overdraft limit: {value}",
         "balance_available": "Available: {value}",
@@ -2251,27 +2253,40 @@
       },
       "tokens": {
         "meta": {
-          "title": "Tokens — Yotuvia"
+          "title": "Ytv — Yotuvia"
         },
-        "title": "Tokens",
-        "subtitle": "YOTTU wallet and top-up requests for {center}.",
-        "subtitle_plain": "YOTTU wallet and top-up requests.",
+        "title": "Ytv",
+        "subtitle": "Ytv wallet and top-up requests for {center}.",
+        "subtitle_plain": "Ytv wallet and top-up requests.",
         "no_center": "We couldn't find the center linked to your account.",
         "error_title": "We couldn't load your tokens",
         "amount_value": "{value} Bs",
         "receipt_open": "View receipt",
         "receipt_missing": "No receipt attached",
         "balance": {
-          "title": "YOTTU wallet",
-          "body": "Tokens are Yotuvia's only payment method: services are paid with this balance.",
-          "amount": "Available balance",
+          "title": "Ytv wallet",
+          "body": "Ytv is the only payment method: services are paid with this balance.",
+          "amount": "Total balance",
+          "reserved": "Held for ads",
+          "available": "Available",
+          "equivalence": "1 Ytv ≈ {value}",
           "overdraft": "Overdraft limit",
           "currency": "Currency"
         },
         "history": {
           "title": "Recent activity",
           "body": "Latest movements in your wallet ledger.",
-          "empty": "No wallet movements yet."
+          "empty": "No wallet movements yet.",
+          "type": {
+            "consumption": "Commission",
+            "boost_spend": "Advertising",
+            "topup": "Top-up",
+            "bonus": "Bonus",
+            "adjustment": "Adjustment",
+            "referral": "Referral",
+            "mission": "Mission",
+            "grace": "Legacy"
+          }
         },
         "queue": {
           "title": "Top-up requests",
@@ -2285,7 +2300,7 @@
             "rejected": "Rejected"
           },
           "reference": "Request #{id}",
-          "tokens": "{value} tokens",
+          "tokens": "{value} Ytv",
           "bonus": "+{value} bonus",
           "created": "Requested {date}",
           "validated": "Reviewed {date}",
@@ -2312,7 +2327,7 @@
           "title": "Review top-up #{id}",
           "body": "Approving credits the tokens to your wallet and cannot be undone. Rejecting closes the request permanently.",
           "amount": "Amount",
-          "tokens": "Tokens credited",
+          "tokens": "Ytv credited",
           "created": "Requested",
           "receipt": "Receipt",
           "notes": "Reviewer note",
@@ -2578,8 +2593,8 @@
         "boost": {
           "action": "Promote",
           "dialog_title": "Promote this post",
-          "dialog_body": "Run a paid campaign for \"{name}\". The budget is charged up front.",
-          "budget_label": "Budget (Yotuvia tokens)",
+          "dialog_body": "Run a paid campaign for \"{name}\". The budget is held up front.",
+          "budget_label": "Budget (Ytv)",
           "budget_hint": "Held up front and spent as impressions are delivered.",
           "bid_label": "Max bid per 1000 impressions (tokens)",
           "bid_hint": "You pay the second price set by the auction, never above this bid.",
@@ -2714,7 +2729,7 @@
           "deposit_qr_url": "Deposit QR URL",
           "deposit_qr_upload": "Upload deposit QR",
           "deposit_qr_pick": "Choose QR image",
-          "deposit_qr_hint": "JPG, PNG, WebP or GIF, up to 10 MB. This QR collects the booking deposit, not YOTTU top-ups.",
+          "deposit_qr_hint": "JPG, PNG, WebP or GIF, up to 10 MB. This QR collects the booking deposit, not Ytv top-ups.",
           "errors": {
             "address": "The address must be at least 5 characters long",
             "max": "This value is too long",
@@ -2806,8 +2821,8 @@
         },
         "payments": {
           "title": "Payment configuration",
-          "subtitle": "How customers top up their YOTTU tokens.",
-          "explainer": "Yotuvia only settles top-ups in YOTTU tokens. There is no card gateway: customers transfer the amount, you confirm it, and the tokens are credited.",
+          "subtitle": "How customers top up their Ytv tokens.",
+          "explainer": "Yotuvia only settles top-ups in Ytv tokens. There is no card gateway: customers transfer the amount, you confirm it, and the tokens are credited.",
           "qr_title": "Transfer QR",
           "qr_alt": "Payment QR code of the center",
           "qr_empty": "No QR uploaded yet",
@@ -2901,7 +2916,7 @@
         "loyalty_title": "Loyalty",
         "loyalty_body": "Punch cards and rewards that bring clients back.",
         "tokens_title": "Tokens",
-        "tokens_body": "Yotuvia balance, top-ups and receipts under control.",
+        "tokens_body": "Ytv balance, top-ups and receipts under control.",
         "content_title": "Content",
         "content_body": "Publish videos and promos to your own feed."
       },
@@ -2927,7 +2942,7 @@
       },
       "pricing": {
         "title": "Token pricing",
-        "subtitle": "Yotuvia is prepaid with YOTUVIA tokens: 1 unit of currency loads 1 token, and a larger load unlocks a bigger bonus.",
+        "subtitle": "Yotuvia is prepaid with Ytv tokens: 1 unit of currency loads 1 Ytv, and a larger load unlocks a bigger bonus.",
         "currency_hint": "Bonus ladder for this currency. Bonus tokens are added on top of the amount you load.",
         "amount_column": "Load",
         "bonus_column": "Bonus",
@@ -2936,7 +2951,7 @@
         "bonus_value": "+{percent}%",
         "total_value": "{tokens} tokens",
         "ladder_caption": "{currency} token bonus ladder",
-        "note": "Yotuvia only settles in YOTUVIA tokens. There is no card gateway or subscription: you transfer the amount, the center confirms the receipt and the tokens are credited to your balance.",
+        "note": "Yotuvia only settles in Ytv tokens. There is no card gateway or subscription: you transfer the amount, the center confirms the receipt and the tokens are credited to your balance.",
         "source_note": "Bonus tiers mirror the platform configuration (configs/tiers.json). They are the values the API applies when a top-up is approved.",
         "cta": "Create your account",
         "currencies": {
@@ -2948,7 +2963,7 @@
         "title": "Frequently asked questions",
         "subtitle": "Everything about tokens, data and getting started.",
         "q1": "Do I need a credit card to start?",
-        "a1": "No. Yotuvia has no card gateway: you load YOTUVIA tokens by transfer and the center confirms the receipt to credit your balance.",
+        "a1": "No. Yotuvia has no card gateway: you load Ytv tokens by transfer and the center confirms the receipt to credit your balance.",
         "q2": "Can clients book without an account?",
         "a2": "They can search and browse centers without signing in. To confirm a booking they sign in, so they can manage their appointments and QR codes.",
         "q3": "Does Yotuvia work for barbershops and aesthetic centers too?",
@@ -3413,7 +3428,7 @@
           },
           "tokens": {
             "title": "5. Tokens and payments",
-            "body": "Yotuvia is prepaid with YOTUVIA tokens. Tokens are loaded by bank transfer and credited once the center confirms the receipt. There is no card gateway and no online checkout in the Service.\n\nBonus percentages are published on the pricing page and are applied at the moment a top-up is approved. Tokens are a service credit: they are not a currency, do not earn interest and are not redeemable for cash, except where the law requires it."
+            "body": "Yotuvia is prepaid with Ytv tokens. Tokens are loaded by bank transfer and credited once the center confirms the receipt. There is no card gateway and no online checkout in the Service.\n\nBonus percentages are published on the pricing page and are applied at the moment a top-up is approved. Tokens are a service credit: they are not a currency, do not earn interest and are not redeemable for cash, except where the law requires it."
           },
           "acceptable_use": {
             "title": "6. Acceptable use",

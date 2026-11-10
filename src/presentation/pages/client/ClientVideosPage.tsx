@@ -158,9 +158,21 @@ export function ClientVideosPage() {
   );
 
   const recordWatch = useCallback(
-    (videoId: number, seconds: number, percentage: number, completed: boolean) => {
+    (
+      videoId: number,
+      seconds: number,
+      percentage: number,
+      completed: boolean,
+      impressionToken?: string,
+    ) => {
       void dependencies.recordVideoWatchUseCase
-        .execute({ feedPostId: videoId, watchDuration: seconds, watchPercentage: percentage, completed })
+        .execute({
+          feedPostId: videoId,
+          watchDuration: seconds,
+          watchPercentage: percentage,
+          completed,
+          impressionToken,
+        })
         .catch(() => undefined);
     },
     [],

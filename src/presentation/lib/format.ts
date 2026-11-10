@@ -25,11 +25,13 @@ export function formatCurrency(
   value: number,
   language: string,
   currency: string = "USD",
+  currencyDisplay: "symbol" | "narrowSymbol" | "code" = "symbol",
 ): string {
   try {
     return new Intl.NumberFormat(localeFor(language), {
       style: "currency",
       currency,
+      currencyDisplay,
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(value);
@@ -41,6 +43,19 @@ export function formatCurrency(
 /** Formats an integer/decimal with the locale's grouping separators. */
 export function formatNumber(value: number, language: string): string {
   return new Intl.NumberFormat(localeFor(language)).format(value);
+}
+
+/** Formats a Ytv amount with the fixed unit suffix: `1.250,50 Ytv`. */
+export function formatYtv(
+  value: number,
+  language: string,
+  maxFractionDigits: number = 2,
+): string {
+  const amount = new Intl.NumberFormat(localeFor(language), {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxFractionDigits,
+  }).format(value);
+  return `${amount} Ytv`;
 }
 
 /** Formats a rating with a single decimal (e.g. `4.6`). */

@@ -117,7 +117,7 @@
       "personnel": "Profesionales",
       "clients": "Clientes",
       "appointments": "Turnos",
-      "tokens": "Tokens",
+      "tokens": "Ytv",
       "notifications": "Notificaciones",
       "profile": "Perfil"
     },
@@ -311,7 +311,7 @@
       "greeting_morning": "Buenos días 👋",
       "inactive": "Inactivo",
       "daily_summary": "Resumen del día",
-      "yotuvia_balance": "Saldo YOTUVIA",
+      "yotuvia_balance": "Saldo Ytv",
       "overdraft": "Sobregiro",
       "recharge": "Recargar",
       "appointments_today": "Turnos hoy",
@@ -618,14 +618,16 @@
       "empty_subtitle": "Las reseñas de tus clientes aparecen acá"
     },
     "tokens": {
-      "title": "Tokens",
-      "balance_title": "Saldo YOTUVIA",
+      "title": "Billetera Ytv",
+      "balance_title": "Saldo Ytv",
       "missions": {
         "title": "Misiones",
+        "body": "Completá misiones y ganá Ytv. Las reclamables aparecen primero.",
+        "empty": "No hay misiones por ahora.",
         "claim": "Reclamar",
         "claimed": "Reclamada",
         "success_title": "¡Recompensa acreditada!",
-        "success_body": "Sumaste {count} YOTUVIA a tu saldo"
+        "success_body": "Sumaste {count} Ytv a tu saldo"
       },
       "receipt": {
         "title": "Comprobante de pago",
@@ -672,7 +674,7 @@
       "detail": {
         "title": "Detalle de recarga",
         "amount": "Monto",
-        "tokens": "Tokens",
+        "tokens": "Ytv",
         "bonus": "Bono",
         "total": "Total",
         "status": "Estado",
@@ -1736,7 +1738,7 @@
         "clients": "Clientes",
         "services": "Servicios",
         "personnel": "Personal",
-        "tokens": "Tokens",
+        "tokens": "Ytv",
         "loyalty": "Fidelidad",
         "reviews": "Reseñas",
         "promotions": "Promociones",
@@ -1768,7 +1770,7 @@
         "payments": {
           "meta_title": "Pagos por validar — Yotuvia",
           "title": "Pagos por validar",
-          "subtitle": "Recargas de tokens de todos los centros en una sola cola. Yotuvia las liquida únicamente en tokens YOTTU: no hay pasarela de pagos.",
+          "subtitle": "Recargas de tokens de todos los centros en una sola cola. Yotuvia las liquida únicamente en tokens Ytv: no hay pasarela de pagos.",
           "queue_title": "Cola global de recargas",
           "queue_body": "Una recarga es un comprobante de transferencia que sube un centro. Al aprobarla se acreditan los tokens en la billetera de ese centro.",
           "center_filter": "Filtrar por centro",
@@ -1776,7 +1778,7 @@
           "status_filter": "Filtrar por estado",
           "total": "{count} solicitudes",
           "reference": "Solicitud #{id}",
-          "tokens": "{value} tokens",
+          "tokens": "{value} Ytv",
           "created": "Solicitada {date}",
           "validated": "Revisada {date}",
           "processed": "Procesada",
@@ -1802,8 +1804,8 @@
           "empty": "Todavía no hay centros.",
           "config_title": "Configuración de pagos de {center}",
           "config_title_plain": "Configuración de pagos",
-          "config_body": "Cómo recargan tokens YOTTU los clientes de este centro.",
-          "qr_explainer": "Este es el QR de transferencia del centro. Yotuvia liquida las recargas únicamente en tokens YOTTU: no hay pasarela de pagos. El cliente escanea el QR, transfiere el monto y sube el comprobante para su validación.",
+          "config_body": "Cómo recargan tokens Ytv los clientes de este centro.",
+          "qr_explainer": "Este es el QR de transferencia del centro. Yotuvia liquida las recargas únicamente en tokens Ytv: no hay pasarela de pagos. El cliente escanea el QR, transfiere el monto y sube el comprobante para su validación.",
           "qr_title": "QR de transferencia (pago con tokens)",
           "qr_alt": "Código QR de pago con tokens del centro seleccionado",
           "qr_empty": "Este centro todavía no tiene un QR cargado",
@@ -1965,7 +1967,7 @@
           "personnel": "Equipo",
           "reviews": "Reseñas"
         },
-        "balance_title": "Saldo YOTTU",
+        "balance_title": "Saldo Ytv",
         "balance_value": "{value} {currency}",
         "balance_overdraft": "Límite de descubierto: {value}",
         "balance_available": "Disponible: {value}",
@@ -2251,27 +2253,40 @@
       },
       "tokens": {
         "meta": {
-          "title": "Tokens — Yotuvia"
+          "title": "Ytv — Yotuvia"
         },
-        "title": "Tokens",
-        "subtitle": "Billetera YOTTU y solicitudes de recarga de {center}.",
-        "subtitle_plain": "Billetera YOTTU y solicitudes de recarga.",
+        "title": "Ytv",
+        "subtitle": "Billetera Ytv y solicitudes de recarga de {center}.",
+        "subtitle_plain": "Billetera Ytv y solicitudes de recarga.",
         "no_center": "No pudimos encontrar el centro vinculado a tu cuenta.",
         "error_title": "No pudimos cargar tus tokens",
         "amount_value": "{value} Bs",
         "receipt_open": "Ver comprobante",
         "receipt_missing": "Sin comprobante adjunto",
         "balance": {
-          "title": "Billetera YOTTU",
-          "body": "Los tokens son el único método de pago de Yotuvia: los servicios se pagan con este saldo.",
-          "amount": "Saldo disponible",
+          "title": "Billetera Ytv",
+          "body": "Ytv es el único método de pago: los servicios se pagan con este saldo.",
+          "amount": "Saldo total",
+          "reserved": "Retenido para publicidad",
+          "available": "Disponible",
+          "equivalence": "1 Ytv ≈ {value}",
           "overdraft": "Límite de sobregiro",
           "currency": "Moneda"
         },
         "history": {
           "title": "Actividad reciente",
           "body": "Últimos movimientos del libro de tu billetera.",
-          "empty": "Todavía no hay movimientos en tu billetera."
+          "empty": "Todavía no hay movimientos en tu billetera.",
+          "type": {
+            "consumption": "Comisión",
+            "boost_spend": "Publicidad",
+            "topup": "Recarga",
+            "bonus": "Bono",
+            "adjustment": "Ajuste",
+            "referral": "Referido",
+            "mission": "Misión",
+            "grace": "Legado"
+          }
         },
         "queue": {
           "title": "Solicitudes de recarga",
@@ -2285,7 +2300,7 @@
             "rejected": "Rechazadas"
           },
           "reference": "Solicitud #{id}",
-          "tokens": "{value} tokens",
+          "tokens": "{value} Ytv",
           "bonus": "+{value} de bonus",
           "created": "Solicitada {date}",
           "validated": "Revisada {date}",
@@ -2312,7 +2327,7 @@
           "title": "Revisar recarga #{id}",
           "body": "Aprobar acredita los tokens en tu billetera y no se puede deshacer. Rechazar cierra la solicitud de forma permanente.",
           "amount": "Monto",
-          "tokens": "Tokens acreditados",
+          "tokens": "Ytv acreditados",
           "created": "Solicitada",
           "receipt": "Comprobante",
           "notes": "Nota de revisión",
@@ -2578,8 +2593,8 @@
         "boost": {
           "action": "Promocionar",
           "dialog_title": "Promocionar esta publicación",
-          "dialog_body": "Creá una campaña paga para \"{name}\". El presupuesto se cobra por adelantado.",
-          "budget_label": "Presupuesto (tokens Yotuvia)",
+          "dialog_body": "Creá una campaña paga para \"{name}\". El presupuesto se retiene por adelantado.",
+          "budget_label": "Presupuesto (Ytv)",
           "budget_hint": "Se retiene por adelantado y se consume a medida que se entregan impresiones.",
           "bid_label": "Puja máxima por 1000 impresiones (tokens)",
           "bid_hint": "Pagás el segundo precio que fija la subasta, nunca más que esta puja.",
@@ -2714,7 +2729,7 @@
           "deposit_qr_url": "URL del QR de la seña",
           "deposit_qr_upload": "Subir QR de la seña",
           "deposit_qr_pick": "Elegir imagen del QR",
-          "deposit_qr_hint": "JPG, PNG, WebP o GIF, hasta 10 MB. Este QR cobra la seña de la reserva, no recargas YOTTU.",
+          "deposit_qr_hint": "JPG, PNG, WebP o GIF, hasta 10 MB. Este QR cobra la seña de la reserva, no recargas Ytv.",
           "errors": {
             "address": "La dirección debe tener al menos 5 caracteres",
             "max": "Este valor es demasiado largo",
@@ -2806,8 +2821,8 @@
         },
         "payments": {
           "title": "Configuración de pagos",
-          "subtitle": "Cómo recargan tokens YOTTU tus clientes.",
-          "explainer": "Yotuvia liquida las recargas únicamente en tokens YOTTU. No hay pasarela de tarjetas: el cliente transfiere el monto, vos lo confirmás y se acreditan los tokens.",
+          "subtitle": "Cómo recargan tokens Ytv tus clientes.",
+          "explainer": "Yotuvia liquida las recargas únicamente en tokens Ytv. No hay pasarela de tarjetas: el cliente transfiere el monto, vos lo confirmás y se acreditan los tokens.",
           "qr_title": "QR de transferencia",
           "qr_alt": "Código QR de pago del centro",
           "qr_empty": "Todavía no hay un QR cargado",
@@ -2901,7 +2916,7 @@
         "loyalty_title": "Fidelidad",
         "loyalty_body": "Tarjetas de sellos y recompensas que hacen volver a tus clientes.",
         "tokens_title": "Tokens",
-        "tokens_body": "Saldo Yotuvia, recargas y comprobantes bajo control.",
+        "tokens_body": "Saldo Ytv, recargas y comprobantes bajo control.",
         "content_title": "Contenido",
         "content_body": "Publicá videos y promociones en tu propio feed."
       },
@@ -2927,7 +2942,7 @@
       },
       "pricing": {
         "title": "Precio de los tokens",
-        "subtitle": "Yotuvia se paga por adelantado con tokens YOTUVIA: 1 unidad de moneda carga 1 token y una carga mayor desbloquea un bono mayor.",
+        "subtitle": "Yotuvia se paga por adelantado con tokens Ytv: 1 unidad de moneda carga 1 token y una carga mayor desbloquea un bono mayor.",
         "currency_hint": "Escala de bonos de esta moneda. Los tokens de bono se suman al monto que cargas.",
         "amount_column": "Carga",
         "bonus_column": "Bono",
@@ -2936,7 +2951,7 @@
         "bonus_value": "+{percent}%",
         "total_value": "{tokens} tokens",
         "ladder_caption": "Escala de bonos de tokens en {currency}",
-        "note": "Yotuvia solo se liquida en tokens YOTUVIA. No hay pasarela de tarjetas ni suscripciones: transferís el monto, el centro confirma el recibo y los tokens se acreditan en tu saldo.",
+        "note": "Yotuvia solo se liquida en tokens Ytv. No hay pasarela de tarjetas ni suscripciones: transferís el monto, el centro confirma el recibo y los tokens se acreditan en tu saldo.",
         "source_note": "Las escalas de bonos reflejan la configuración de la plataforma (configs/tiers.json). Son los valores que la API aplica al aprobar una recarga.",
         "cta": "Crea tu cuenta",
         "currencies": {
@@ -2948,7 +2963,7 @@
         "title": "Preguntas frecuentes",
         "subtitle": "Todo sobre tokens, datos y primeros pasos.",
         "q1": "¿Necesito una tarjeta de crédito para empezar?",
-        "a1": "No. Yotuvia no tiene pasarela de tarjetas: cargas tokens YOTUVIA por transferencia y el centro confirma el recibo para acreditar tu saldo.",
+        "a1": "No. Yotuvia no tiene pasarela de tarjetas: cargas tokens Ytv por transferencia y el centro confirma el recibo para acreditar tu saldo.",
         "q2": "¿Los clientes pueden reservar sin cuenta?",
         "a2": "Pueden buscar y ver centros sin iniciar sesión. Para confirmar una reserva inician sesión, así gestionan sus turnos y códigos QR.",
         "q3": "¿Yotuvia sirve para barberías y centros de estética?",
@@ -3413,7 +3428,7 @@
           },
           "tokens": {
             "title": "5. Tokens y pagos",
-            "body": "Yotuvia se paga por adelantado con tokens YOTUVIA. Los tokens se cargan por transferencia bancaria y se acreditan cuando el centro confirma el recibo. No hay pasarela de tarjetas ni pago en línea dentro del Servicio.\n\nLos porcentajes de bono se publican en la página de precios y se aplican al aprobarse una recarga. Los tokens son un crédito de servicio: no son una moneda, no generan intereses y no son reembolsables en efectivo, salvo cuando la ley lo exija."
+            "body": "Yotuvia se paga por adelantado con tokens Ytv. Los tokens se cargan por transferencia bancaria y se acreditan cuando el centro confirma el recibo. No hay pasarela de tarjetas ni pago en línea dentro del Servicio.\n\nLos porcentajes de bono se publican en la página de precios y se aplican al aprobarse una recarga. Los tokens son un crédito de servicio: no son una moneda, no generan intereses y no son reembolsables en efectivo, salvo cuando la ley lo exija."
           },
           "acceptable_use": {
             "title": "6. Uso aceptable",

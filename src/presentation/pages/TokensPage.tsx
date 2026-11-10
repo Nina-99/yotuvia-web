@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TokenTopUpAdmin } from "yotuvia-core";
 
-import { TopUpProcessDialog, topUpStatusMeta } from "@/presentation/components/tokens";
+import { MissionListCard, TopUpProcessDialog, topUpStatusMeta } from "@/presentation/components/tokens";
 import {
   Badge,
   Button,
@@ -27,16 +27,16 @@ import {
 } from "@/presentation/hooks/use-tokens";
 import type { TopUpStatus } from "@/presentation/hooks/use-tokens";
 import { toErrorKey, useErrorMessage } from "@/presentation/lib/errors";
-import { formatDateTime, formatNumber } from "@/presentation/lib/format";
+import { formatCurrency, formatDateTime, formatNumber, formatYtv } from "@/presentation/lib/format";
 
 const STATUS_FILTER_ALL = "all";
 type StatusFilter = "all" | TopUpStatus;
 
 /**
- * Owner tokens section: YOTTU wallet, recent ledger activity and the manual
+ * Owner tokens section: Ytv wallet, recent ledger activity and the manual
  * top-up review queue.
  *
- * Payments in Yotuvia happen ONLY with YOTTU tokens — there is no payment
+ * Payments in Yotuvia happen ONLY with Ytv tokens — there is no payment
  * gateway. A top-up is a receipt (image or URL) a center uploads; an admin
  * approves or rejects it here, and approval credits the wallet. The web is the
  * first client to expose the approval action.
@@ -142,7 +142,12 @@ export function TokensPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("web.app.tokens.balance.title")}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle>{t("web.app.tokens.balance.title")}</CardTitle>
+            <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-bold tracking-wide text-text-muted">
+              YTV
+            </span>
+          </div>
           <CardDescription>{t("web.app.tokens.balance.body")}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -160,27 +165,57 @@ export function TokensPage() {
               </Button>
             </div>
           ) : balance ? (
-            <dl className="flex flex-wrap gap-x-10 gap-y-3">
-              <div className="flex flex-col">
-                <dt className="text-xs text-text-muted">{t("web.app.tokens.balance.amount")}</dt>
-                <dd className="text-2xl font-bold text-text">
-                  {formatNumber(balance.balance, language)}
-                </dd>
+            <>
+            <>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                  {t("web.app.tokens.balance.available")}
+                </span>
+                <span className="text-3xl font-bold text-text">
+                  {formatYtv(balance.available ?? balance.balance, language)}
+                </span>
               </div>
-              <div className="flex flex-col">
-                <dt className="text-xs text-text-muted">{t("web.app.tokens.balance.overdraft")}</dt>
-                <dd className="text-sm text-text">
-                  {formatNumber(balance.overdraft_limit, language)}
-                </dd>
-              </div>
-              <div className="flex flex-col">
-                <dt className="text-xs text-text-muted">{t("web.app.tokens.balance.currency")}</dt>
-                <dd className="text-sm text-text">{balance.currency}</dd>
-              </div>
-            </dl>
+              <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm">
+                <div className="flex flex-col">
+                  <dt className="text-xs text-text-muted">
+                    {t("web.app.tokens.balance.amount")}
+                  </dt>
+                  <dd className="text-text">{formatYtv(balance.balance, language)}</dd>
+                </div>
+                <div className="flex flex-col">
+                  <dt className="text-xs text-text-muted">
+                    {t("web.app.tokens.balance.reserved")}
+                  </dt>
+                  <dd className="text-text">{formatYtv(balance.reserved ?? 0, language)}</dd>
+                </div>
+                <div className="flex flex-col">
+                  <dt className="text-xs text-text-muted">
+                    {t("web.app.tokens.balance.overdraft")}
+                  </dt>
+                  <dd className="text-text">
+                    {formatYtv(balance.overdraft_limit, language)}
+                  </dd>
+                </div>
+              </dl>
+              {balance.currency ? (
+                <p className="mt-3 text-xs text-text-muted">
+                  {t("web.app.tokens.balance.equivalence", {
+                    value: formatCurrency(
+                      balance.fiat_rate ?? 1,
+                      language,
+                      balance.currency,
+                      "narrowSymbol",
+                    ),
+                  })}
+                </p>
+              ) : null}
+            </>
+            </>
           ) : null}
         </CardContent>
       </Card>
+
+      <MissionListCard />
 
       <Card>
         <CardHeader>
@@ -209,12 +244,15 @@ export function TokensPage() {
             <ul className="flex flex-col divide-y divide-border">
               {history.map((entry) => (
                 <li key={entry.id} className="flex flex-wrap items-center gap-2 py-2">
-                  <span className="text-sm font-semibold text-text">
-                    {entry.amount > 0
-                      ? `+${formatNumber(entry.amount, language)}`
-                      : formatNumber(entry.amount, language)}
+                  <span className="text-sm font-semibold tabular-nums text-text">
+                    {entry.amount > 0 ? "+" : entry.amount < 0 ? "−" : ""}
+                    {formatYtv(Math.abs(entry.amount), language, 3)}
                   </span>
-                  <Badge variant="default">{entry.type}</Badge>
+                  <Badge variant="default">
+                    {t(`web.app.tokens.history.type.${entry.type}`, {
+                      defaultValue: entry.type,
+                    })}
+                  </Badge>
                   {entry.description ? (
                     <span className="min-w-0 flex-1 truncate text-sm text-text-muted">
                       {entry.description}
@@ -307,9 +345,12 @@ export function TokensPage() {
                         <Badge variant={meta.variant}>{t(meta.labelKey)}</Badge>
                       </div>
                       <span className="text-xs text-text-muted">
-                        {t("web.app.tokens.amount_value", {
-                          value: formatNumber(topUp.amount_bs, language),
-                        })}
+                        {formatCurrency(
+                          topUp.amount_bs,
+                          language,
+                          balance?.currency,
+                          "narrowSymbol",
+                        )}
                         {" · "}
                         {t("web.app.tokens.queue.tokens", {
                           value: formatNumber(topUp.tokens_received, language),

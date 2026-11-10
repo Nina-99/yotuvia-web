@@ -62,7 +62,7 @@ export interface VideoReelCardProps {
   onBook: (video: Video) => void;
   /** Fired once when the slide becomes visible (counts a view). */
   onView: (videoId: number) => void;
-  onRecordWatch: (videoId: number, seconds: number, percentage: number, completed: boolean) => void;
+  onRecordWatch: (videoId: number, seconds: number, percentage: number, completed: boolean, impressionToken?: string) => void;
   /** The visitor's position, or null until they ask for it. */
   userCoords: { latitude: number; longitude: number } | null;
   /** Ask the browser for the position. Only ever called on a click. */
@@ -302,10 +302,10 @@ export function VideoReelCard({
       if (seconds >= MIN_WATCH_SECONDS) {
         const duration = node.duration > 0 ? node.duration : seconds;
         const percentage = Math.min(100, Math.round((seconds / duration) * 100));
-        onRecordWatch(video.id, seconds, percentage, percentage >= 90);
+        onRecordWatch(video.id, seconds, percentage, percentage >= 90, video.impressionToken);
       }
     }
-  }, [isVisible, paused, video.id, onView, onRecordWatch]);
+  }, [isVisible, paused, video.id, video.impressionToken, onView, onRecordWatch]);
 
   // External posts count a view exactly like an uploaded one: once, when the
   // slide becomes visible. The effect above bails out first because external
@@ -325,11 +325,11 @@ export function VideoReelCard({
         if (seconds >= MIN_WATCH_SECONDS && node) {
           const duration = node.duration > 0 ? node.duration : seconds;
           const percentage = Math.min(100, Math.round((seconds / duration) * 100));
-          onRecordWatch(video.id, seconds, percentage, percentage >= 90);
+          onRecordWatch(video.id, seconds, percentage, percentage >= 90, video.impressionToken);
         }
       }
     },
-    [video.id, onRecordWatch],
+    [video.id, video.impressionToken, onRecordWatch],
   );
 
   const handleTogglePause = useCallback(() => {

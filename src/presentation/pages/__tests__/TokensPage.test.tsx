@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   put: vi.fn(),
   getTokenBalance: vi.fn(),
   getTokenHistory: vi.fn(),
+  getTokenMissions: vi.fn(),
+  claimMissionReward: vi.fn(),
   centerExecute: vi.fn(),
   authRepository: {
     getCurrentUser: vi.fn(),
@@ -25,6 +27,8 @@ vi.mock("yotuvia-core", async (importOriginal) => {
     apiClient: { get: mocks.get, put: mocks.put },
     getTokenBalance: mocks.getTokenBalance,
     getTokenHistory: mocks.getTokenHistory,
+    getTokenMissions: mocks.getTokenMissions,
+    claimMissionReward: mocks.claimMissionReward,
   };
 });
 
@@ -125,6 +129,7 @@ describe("TokensPage", () => {
     mocks.centerExecute.mockResolvedValue({ id: 7, name: "Studio Yotuvia", currency: "VES" });
     mocks.getTokenBalance.mockResolvedValue(BALANCE);
     mocks.getTokenHistory.mockResolvedValue(HISTORY);
+    mocks.getTokenMissions.mockResolvedValue([]);
     mockWire([PENDING, APPROVED]);
   });
 
@@ -140,8 +145,9 @@ describe("TokensPage", () => {
     expect(within(pendingRow as HTMLElement).getByText("Pending")).toBeInTheDocument();
     expect(within(approvedRow as HTMLElement).getByText("Approved")).toBeInTheDocument();
     expect(screen.getByText("2 requests")).toBeInTheDocument();
-    // Wallet balance formatted with the locale separators.
-    expect(screen.getByText("120")).toBeInTheDocument();
+    // Wallet balance formatted with the locale separators. Total and available
+    // can both render the same number when nothing is held, so allow both.
+    expect(screen.getAllByText("120 Ytv").length).toBeGreaterThan(0);
     // Ledger entry description from the API response.
     expect(screen.getByText("Haircut")).toBeInTheDocument();
     // Receipt opens in a new tab when present, degrades to text when absent.

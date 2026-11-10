@@ -284,11 +284,13 @@ export const queryKeys = {
      * `status` filter, so the page filters the loaded rows client-side.
      */
     topups: (page: number, limit: number) => [...tokens, "topups", { page, limit }] as const,
-    /** The authenticated center's own YOTTU wallet. */
+    /** The authenticated center's own Ytv wallet. */
     balance: (centerId: number) => [...tokens, "balance", { centerId }] as const,
     /** Wallet ledger page. */
     history: (centerId: number, page: number, limit: number) =>
       [...tokens, "history", { centerId, page, limit }] as const,
+    /** Missions for the authenticated center (claimable-first ordering is client-side). */
+    missions: [...tokens, "missions"] as const,
   },
   loyalty: {
     all: loyalty,
