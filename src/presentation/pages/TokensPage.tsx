@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TokenTopUpAdmin } from "yotuvia-core";
 
-import { MissionListCard, TopUpProcessDialog, topUpStatusMeta } from "@/presentation/components/tokens";
+import { MissionListCard, ReferralsCard, TopUpProcessDialog, topUpStatusMeta } from "@/presentation/components/tokens";
 import {
   Badge,
   Button,
@@ -216,6 +216,8 @@ export function TokensPage() {
       </Card>
 
       <MissionListCard />
+
+      <ReferralsCard />
 
       <Card>
         <CardHeader>

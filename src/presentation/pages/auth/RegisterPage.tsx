@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { createReferralByCode } from "yotuvia-core";
 import type { AuthResult } from "yotuvia-core";
 
 import { SocialLoginButtons } from "@/presentation/components/auth/SocialLoginButtons";
@@ -59,6 +60,8 @@ export function RegisterPage() {
   const setSession = useAuthStore((state) => state.setSession);
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const referralCode = (searchParams.get("ref") ?? "").trim().toUpperCase();
   const { toast } = useToast();
 
   const onSubmit = async (values: RegisterFormValues) => {
@@ -76,6 +79,16 @@ export function RegisterPage() {
   // location state, exactly like the login page.
   async function handleAuthenticated(result: AuthResult): Promise<void> {
     setSession(result.user);
+    // A referral link (/register?ref=CODE) applies the code right after the
+    // centre account is created. Best-effort: a stale/invalid code never blocks
+    // registration.
+    if (referralCode && result.user.role === "BEAUTY_CENTER") {
+      try {
+        await createReferralByCode({ code: referralCode });
+      } catch {
+        // Ignored: the code can be entered later from the referrals card.
+      }
+    }
     if ((result.sessionsEvicted ?? 0) > 0) {
       toast(t("web.auth.register.sessions_evicted"), { variant: "warning" });
     } else {

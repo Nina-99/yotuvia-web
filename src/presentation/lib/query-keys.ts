@@ -291,6 +291,10 @@ export const queryKeys = {
       [...tokens, "history", { centerId, page, limit }] as const,
     /** Missions for the authenticated center (claimable-first ordering is client-side). */
     missions: [...tokens, "missions"] as const,
+    /** The authenticated center's referral code + count. */
+    referralInfo: [...tokens, "referral-info"] as const,
+    /** Referrals created by the authenticated center. */
+    referrals: [...tokens, "referrals"] as const,
   },
   loyalty: {
     all: loyalty,

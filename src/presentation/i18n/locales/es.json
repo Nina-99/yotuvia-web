@@ -2267,6 +2267,27 @@
           "claim": "Reclamar",
           "claimed": "Reclamada"
         },
+        "referrals": {
+          "title": "Referidos",
+          "body": "Invitá a otro centro y ganá Ytv cuando se verifique y empiece a operar.",
+          "code": "Tu código",
+          "copy_code": "Copiar código",
+          "copy_link": "Copiar enlace",
+          "share": "Compartir",
+          "copied": "Copiado",
+          "share_text": "Sumate a Yotuvia con mi código de referido",
+          "error": "No pudimos cargar tus referidos.",
+          "enter_title": "¿Tenés un código?",
+          "enter_placeholder": "ABC123",
+          "enter_button": "Aplicar código",
+          "list_title": "Centros invitados",
+          "empty": "Todavía no hay referidos.",
+          "status": {
+            "pending": "Pendiente",
+            "credited": "Acreditado",
+            "expired": "Vencido"
+          }
+        },
         "amount_value": "{value} Bs",
         "receipt_open": "Ver comprobante",
         "receipt_missing": "Sin comprobante adjunto",

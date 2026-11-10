@@ -2267,6 +2267,27 @@
           "claim": "Claim",
           "claimed": "Claimed"
         },
+        "referrals": {
+          "title": "Referrals",
+          "body": "Invite another center and earn Ytv when it verifies and starts operating.",
+          "code": "Your code",
+          "copy_code": "Copy code",
+          "copy_link": "Copy link",
+          "share": "Share",
+          "copied": "Copied",
+          "share_text": "Join Yotuvia with my referral code",
+          "error": "We couldn't load your referral data.",
+          "enter_title": "Have a code?",
+          "enter_placeholder": "ABC123",
+          "enter_button": "Apply code",
+          "list_title": "Invited centers",
+          "empty": "No referrals yet.",
+          "status": {
+            "pending": "Pending",
+            "credited": "Credited",
+            "expired": "Expired"
+          }
+        },
         "amount_value": "{value} Bs",
         "receipt_open": "View receipt",
         "receipt_missing": "No receipt attached",

@@ -2,11 +2,17 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import {
   apiClient,
   claimMissionReward,
+  createReferralByCode,
+  getReferralInfo,
+  getReferrals,
   getTokenBalance,
   getTokenHistory,
   getTokenMissions,
 } from "yotuvia-core";
 import type {
+  CreateReferralPayload,
+  Referral,
+  ReferralInfo,
   TokenBalance,
   TokenHistoryResponse,
   TokenMission,
@@ -145,6 +151,34 @@ export function useClaimMissionReward() {
   return attachErrorKey(
     useMutation<void, Error, number>({
       mutationFn: (missionId) => claimMissionReward(missionId),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.tokens.all }),
+    }),
+    "web.errors.tokens_process",
+  );
+}
+
+/** GET /tokens/referral-info — code + count for the authenticated center. */
+export function useReferralInfo() {
+  return useQuery<ReferralInfo>({
+    queryKey: queryKeys.tokens.referralInfo,
+    queryFn: getReferralInfo,
+  });
+}
+
+/** GET /tokens/referrals — the center's referral history. */
+export function useReferrals() {
+  return useQuery<Referral[]>({
+    queryKey: queryKeys.tokens.referrals,
+    queryFn: getReferrals,
+  });
+}
+
+/** POST /tokens/referrals — enter another center's code. */
+export function useCreateReferral() {
+  const queryClient = useQueryClient();
+  return attachErrorKey(
+    useMutation<void, Error, CreateReferralPayload>({
+      mutationFn: (payload) => createReferralByCode(payload),
       onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.tokens.all }),
     }),
     "web.errors.tokens_process",

@@ -10,6 +10,9 @@ const mocks = vi.hoisted(() => ({
   getTokenHistory: vi.fn(),
   getTokenMissions: vi.fn(),
   claimMissionReward: vi.fn(),
+  getReferralInfo: vi.fn(),
+  getReferrals: vi.fn(),
+  createReferralByCode: vi.fn(),
   centerExecute: vi.fn(),
   authRepository: {
     getCurrentUser: vi.fn(),
@@ -29,6 +32,9 @@ vi.mock("yotuvia-core", async (importOriginal) => {
     getTokenHistory: mocks.getTokenHistory,
     getTokenMissions: mocks.getTokenMissions,
     claimMissionReward: mocks.claimMissionReward,
+    getReferralInfo: mocks.getReferralInfo,
+    getReferrals: mocks.getReferrals,
+    createReferralByCode: mocks.createReferralByCode,
   };
 });
 
@@ -130,6 +136,8 @@ describe("TokensPage", () => {
     mocks.getTokenBalance.mockResolvedValue(BALANCE);
     mocks.getTokenHistory.mockResolvedValue(HISTORY);
     mocks.getTokenMissions.mockResolvedValue([]);
+    mocks.getReferralInfo.mockResolvedValue({ referral_code: "ABC123", referral_count: 0 });
+    mocks.getReferrals.mockResolvedValue([]);
     mockWire([PENDING, APPROVED]);
   });
 
@@ -138,9 +146,10 @@ describe("TokensPage", () => {
 
     expect(await screen.findByText("Request #5")).toBeInTheDocument();
     expect(screen.getByText("Request #4")).toBeInTheDocument();
-    // Missions card resolves its copy from web.app.tokens.missions.*.
+    // Missions and referrals cards resolve their copy and code.
     expect(screen.getByText("Missions")).toBeInTheDocument();
     expect(screen.getByText("No missions right now.")).toBeInTheDocument();
+    expect(screen.getByText("ABC123")).toBeInTheDocument();
     const pendingRow = screen.getByText("Request #5").closest("li");
     const approvedRow = screen.getByText("Request #4").closest("li");
     expect(pendingRow).not.toBeNull();
