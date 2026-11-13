@@ -197,6 +197,25 @@ describe("LoginPage", () => {
     expect(await screen.findByText("app home")).toBeInTheDocument();
   });
 
+  it("auto-verifies a magic link on mount", async () => {
+    mocks.verifyCodeExecute.mockResolvedValue({
+      kind: "session",
+      session: { user: USER, token: "access-token", refreshToken: "refresh-token" },
+    });
+
+    renderWithProviders(
+      <Routes>
+        <Route path={ROUTES.login} element={<LoginPage />} />
+        <Route path={ROUTES.appHome} element={<div>app home</div>} />
+      </Routes>,
+      { route: `${ROUTES.login}?email=ana%40example.com&code=123456` },
+    );
+
+    expect(await screen.findByText("app home")).toBeInTheDocument();
+    expect(mocks.verifyCodeExecute).toHaveBeenCalledWith("ana@example.com", "123456");
+    expect(mocks.verifyCodeExecute).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps the legacy password login reachable behind a link", async () => {
     mocks.loginExecute.mockResolvedValue({
       user: USER,

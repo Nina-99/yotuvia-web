@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { createReferralByCode } from "yotuvia-core";
@@ -65,6 +65,7 @@ export function EmailFirstAuth({ intent = "login" }: { intent?: "login" | "regis
   const [registrationTicket, setRegistrationTicket] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
+  const autoVerified = useRef(false);
 
   const detailsForm = useZodForm({
     schema: completeRegistrationSchema,
@@ -180,6 +181,33 @@ export function EmailFirstAuth({ intent = "login" }: { intent?: "login" | "regis
     setCode("");
     setStep("email");
   };
+
+  // Magic link: a URL carrying email + code verifies automatically. Possession
+  // of the emailed link proves control of the address, and the guard keeps it to
+  // one attempt per mount. On failure the code step stays usable for a retry.
+  useEffect(() => {
+    if (autoVerified.current) return;
+    if (!linkedEmail || !linkedCode) return;
+    autoVerified.current = true;
+
+    void (async () => {
+      try {
+        const result = await verifyCode.mutateAsync({
+          email: linkedEmail,
+          code: linkedCode,
+        });
+        if (result.kind === "session") {
+          await handleAuthenticated(result.session);
+          return;
+        }
+        setRegistrationTicket(result.registrationTicket);
+        setStep("role");
+      } catch {
+        // `verifyCode.errorKey` surfaces on the code step.
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot guard
+  }, [linkedEmail, linkedCode]);
 
   return (
     <AuthLayout>
