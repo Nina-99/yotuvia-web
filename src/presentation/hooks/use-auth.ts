@@ -1,16 +1,24 @@
 import { useMutation } from "@tanstack/react-query";
-import type { AuthResult, RegisterData } from "yotuvia-core";
+import type {
+  AuthResult,
+  CompleteRegistrationData,
+  RegisterData,
+  VerifyCodeResult,
+} from "yotuvia-core";
 
 import {
+  completeRegistrationUseCase,
   dependencies,
   forgotPasswordUseCase,
   loginUserUseCase,
   logoutAllUseCase,
   registerUserUseCase,
+  requestLoginCodeUseCase,
   resendVerificationUseCase,
   resetPasswordUseCase,
   socialLoginUseCase,
   verifyEmailUseCase,
+  verifyLoginCodeUseCase,
 } from "@/di/container";
 import { attachErrorKey } from "@/presentation/lib/errors";
 import type { SocialAccountType } from "@/presentation/lib/social-auth/types";
@@ -50,6 +58,33 @@ export function useRegister() {
   return attachErrorKey(
     useMutation<AuthResult, Error, RegisterData>({
       mutationFn: (data) => registerUserUseCase.execute(data),
+    }),
+    "errors.auth_register",
+  );
+}
+
+export function useRequestLoginCode() {
+  return attachErrorKey(
+    useMutation<void, Error, { email: string }>({
+      mutationFn: ({ email }) => requestLoginCodeUseCase.execute(email),
+    }),
+    "web.errors.unknown",
+  );
+}
+
+export function useVerifyLoginCode() {
+  return attachErrorKey(
+    useMutation<VerifyCodeResult, Error, { email: string; code: string }>({
+      mutationFn: ({ email, code }) => verifyLoginCodeUseCase.execute(email, code),
+    }),
+    "web.errors.auth_code",
+  );
+}
+
+export function useCompleteRegistration() {
+  return attachErrorKey(
+    useMutation<AuthResult, Error, CompleteRegistrationData>({
+      mutationFn: (data) => completeRegistrationUseCase.execute(data),
     }),
     "errors.auth_register",
   );

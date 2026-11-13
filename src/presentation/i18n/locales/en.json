@@ -1713,7 +1713,7 @@
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Sign in",
-    "go_to_app": "Go to app",
+      "go_to_app": "Go to app",
       "open_menu": "Open menu",
       "close_menu": "Close menu",
       "language_label": "Language",
@@ -3128,7 +3128,8 @@
       "staff_avatar_upload": "We couldn't upload your photo. Please try again.",
       "center_logo_upload": "We couldn't upload your logo. Please try again.",
       "center_cover_upload": "We couldn't upload your cover. Please try again.",
-      "loyalty_history_fetch": "Could not load the loyalty history."
+      "loyalty_history_fetch": "Could not load the loyalty history.",
+      "auth_code": "That code is invalid or expired"
     },
     "forms": {
       "validation": {
@@ -3187,6 +3188,21 @@
         "forgot_link": "Forgot your password?",
         "register_prompt": "Don't have an account?",
         "register_link": "Create one"
+      },
+      "email_first": {
+        "subtitle": "Sign in or create your account with your email",
+        "register_subtitle": "Create your account with your email",
+        "continue": "Continue",
+        "code_sent": "We sent a 6-digit code to {{email}}",
+        "code_label": "Code",
+        "verify": "Verify",
+        "resend": "Resend code",
+        "resend_in": "Resend code in {{seconds}}s",
+        "change_email": "Use another email",
+        "use_password": "Sign in with password",
+        "role_title": "Choose your account type",
+        "details_title": "Finish your account",
+        "ticket_missing": "Verify your email again to continue."
       },
       "register": {
         "meta": {

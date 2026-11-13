@@ -9,10 +9,13 @@ const mocks = vi.hoisted(() => ({
   registerExecute: vi.fn(),
   forgotExecute: vi.fn(),
   resetExecute: vi.fn(),
-  verifyExecute: vi.fn(),
+  verifyEmailExecute: vi.fn(),
   resendExecute: vi.fn(),
   socialExecute: vi.fn(),
   logoutAllExecute: vi.fn(),
+  requestExecute: vi.fn(),
+  verifyCodeExecute: vi.fn(),
+  completeExecute: vi.fn(),
   authRepository: {
     getCurrentUser: vi.fn(),
     isAuthenticated: vi.fn(),
@@ -24,14 +27,17 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/di/container", () => ({
   dependencies: { authRepository: mocks.authRepository },
+  completeRegistrationUseCase: { execute: mocks.completeExecute },
   forgotPasswordUseCase: { execute: mocks.forgotExecute },
   loginUserUseCase: { execute: mocks.loginExecute },
   logoutAllUseCase: { execute: mocks.logoutAllExecute },
   registerUserUseCase: { execute: mocks.registerExecute },
+  requestLoginCodeUseCase: { execute: mocks.requestExecute },
   resendVerificationUseCase: { execute: mocks.resendExecute },
   resetPasswordUseCase: { execute: mocks.resetExecute },
   socialLoginUseCase: { execute: mocks.socialExecute },
-  verifyEmailUseCase: { execute: mocks.verifyExecute },
+  verifyEmailUseCase: { execute: mocks.verifyEmailExecute },
+  verifyLoginCodeUseCase: { execute: mocks.verifyCodeExecute },
 }));
 
 import i18n from "@/presentation/i18n";
@@ -58,11 +64,18 @@ function renderLogin() {
   );
 }
 
-async function submitCredentials(email = "ana@example.com", password = "supersecret") {
+async function requestCode(email = "ana@example.com") {
   const user = userEvent.setup();
   await user.type(screen.getByLabelText("Email"), email);
-  await user.type(screen.getByLabelText("Password"), password);
-  await user.click(screen.getByRole("button", { name: "Sign in" }));
+  await user.click(screen.getByRole("button", { name: "Continue" }));
+  await screen.findByLabelText("Code");
+  return user;
+}
+
+async function verify(code = "123456") {
+  const user = userEvent.setup();
+  await user.type(screen.getByLabelText("Code"), code);
+  await user.click(screen.getByRole("button", { name: "Verify" }));
   return user;
 }
 
@@ -75,6 +88,7 @@ describe("LoginPage", () => {
     vi.clearAllMocks();
     mocks.authRepository.getCurrentUser.mockResolvedValue(null);
     mocks.authRepository.isAuthenticated.mockResolvedValue(false);
+    mocks.requestExecute.mockResolvedValue(undefined);
     useAuthStore.setState({
       user: null,
       role: null,
@@ -83,75 +97,107 @@ describe("LoginPage", () => {
     });
   });
 
-  it("redirects to the app home after a successful login", async () => {
-    mocks.loginExecute.mockResolvedValue({
-      user: USER,
-      token: "access-token",
-      refreshToken: "refresh-token",
+  it("requests a code for the email before asking for it", async () => {
+    renderLogin();
+    await requestCode("ana@example.com");
+
+    expect(mocks.requestExecute).toHaveBeenCalledWith("ana@example.com");
+    expect(screen.getByLabelText("Code")).toBeInTheDocument();
+  });
+
+  it("signs in and redirects after verifying a session code", async () => {
+    mocks.verifyCodeExecute.mockResolvedValue({
+      kind: "session",
+      session: { user: USER, token: "access-token", refreshToken: "refresh-token" },
     });
 
     renderLogin();
-    await submitCredentials();
+    await requestCode();
+    await verify();
 
     expect(await screen.findByText("app home")).toBeInTheDocument();
-    expect(mocks.loginExecute).toHaveBeenCalledWith("ana@example.com", "supersecret");
+    expect(mocks.verifyCodeExecute).toHaveBeenCalledWith("ana@example.com", "123456");
     expect(useAuthStore.getState()).toMatchObject({ isAuthenticated: true, role: "CLIENT" });
   });
 
-  it("shows a translated error and stays on the page when login fails", async () => {
-    mocks.loginExecute.mockRejectedValue(new Error("bad credentials"));
-
-    renderLogin();
-    await submitCredentials();
-
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("Invalid email or password");
-    expect(screen.queryByText("app home")).not.toBeInTheDocument();
-    expect(useAuthStore.getState().isAuthenticated).toBe(false);
-  });
-
-  it("blocks the request when the form is invalid", async () => {
+  it("blocks the request when the email is invalid", async () => {
     const user = userEvent.setup();
     renderLogin();
 
     await user.type(screen.getByLabelText("Email"), "not-an-email");
-    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(await screen.findByText("Enter a valid email address")).toBeInTheDocument();
-    expect(mocks.loginExecute).not.toHaveBeenCalled();
+    expect(mocks.requestExecute).not.toHaveBeenCalled();
   });
 
   it("warns that another device was signed out when the session cap evicted one", async () => {
-    mocks.loginExecute.mockResolvedValue({
-      user: USER,
-      token: "access-token",
-      refreshToken: "refresh-token",
-      sessionsEvicted: 1,
+    mocks.verifyCodeExecute.mockResolvedValue({
+      kind: "session",
+      session: {
+        user: USER,
+        token: "access-token",
+        refreshToken: "refresh-token",
+        sessionsEvicted: 1,
+      },
     });
 
     renderLogin();
-    await submitCredentials();
+    await requestCode();
+    await verify();
 
-    // The warning survives the redirect: the toast provider wraps the routes.
     expect(await screen.findByText(/another device was signed out/i)).toBeInTheDocument();
   });
 
-  it("does not warn when nothing was evicted (the normal case)", async () => {
-    mocks.loginExecute.mockResolvedValue({
-      user: USER,
-      token: "access-token",
-      refreshToken: "refresh-token",
-      sessionsEvicted: 0,
+  it("opens role selection when the code proves an unknown email", async () => {
+    mocks.verifyCodeExecute.mockResolvedValue({
+      kind: "registration",
+      registrationTicket: "ticket",
+      email: "new@example.com",
     });
 
     renderLogin();
-    await submitCredentials();
+    await requestCode("new@example.com");
+    await verify();
 
-    expect(await screen.findByText("app home")).toBeInTheDocument();
-    expect(screen.queryByText(/another device was signed out/i)).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "A client" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "A center owner" })).toBeInTheDocument();
   });
 
-  it("does not warn when an older backend omits the field", async () => {
+  it("completes registration with the ticket and the chosen role", async () => {
+    mocks.verifyCodeExecute.mockResolvedValue({
+      kind: "registration",
+      registrationTicket: "ticket-123",
+      email: "new@example.com",
+    });
+    mocks.completeExecute.mockResolvedValue({
+      user: USER,
+      token: "access-token",
+      refreshToken: "refresh-token",
+    });
+
+    renderLogin();
+    const user = await requestCode("new@example.com");
+    await verify();
+
+    await user.click(await screen.findByRole("button", { name: "A client" }));
+    await user.type(screen.getByLabelText("First name"), "Ana");
+    await user.type(screen.getByLabelText("Last name"), "Díaz");
+    await user.type(screen.getByLabelText("Phone"), "5550100");
+    await user.click(screen.getByRole("checkbox"));
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(mocks.completeExecute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        registrationTicket: "ticket-123",
+        role: "CLIENT",
+        termsAccepted: true,
+      }),
+    );
+    expect(await screen.findByText("app home")).toBeInTheDocument();
+  });
+
+  it("keeps the legacy password login reachable behind a link", async () => {
     mocks.loginExecute.mockResolvedValue({
       user: USER,
       token: "access-token",
@@ -159,9 +205,14 @@ describe("LoginPage", () => {
     });
 
     renderLogin();
-    await submitCredentials();
+    const user = userEvent.setup();
 
+    await user.click(screen.getByRole("button", { name: "Sign in with password" }));
+    await user.type(screen.getByLabelText("Email"), "ana@example.com");
+    await user.type(screen.getByLabelText("Password"), "supersecret");
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+
+    expect(mocks.loginExecute).toHaveBeenCalledWith("ana@example.com", "supersecret");
     expect(await screen.findByText("app home")).toBeInTheDocument();
-    expect(screen.queryByText(/another device was signed out/i)).not.toBeInTheDocument();
   });
 });

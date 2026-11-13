@@ -1713,7 +1713,7 @@
     "layout": {
       "brand_name": "Yotuvia",
       "sign_in": "Iniciar sesión",
-    "go_to_app": "Ir a la app",
+      "go_to_app": "Ir a la app",
       "open_menu": "Abrir menú",
       "close_menu": "Cerrar menú",
       "language_label": "Idioma",
@@ -3128,7 +3128,8 @@
       "staff_avatar_upload": "No pudimos subir tu foto. Intentá de nuevo.",
       "center_logo_upload": "No pudimos subir tu logo. Intentá de nuevo.",
       "center_cover_upload": "No pudimos subir tu portada. Intentá de nuevo.",
-      "loyalty_history_fetch": "No se pudo cargar el historial de fidelidad."
+      "loyalty_history_fetch": "No se pudo cargar el historial de fidelidad.",
+      "auth_code": "Ese código es inválido o expiró"
     },
     "forms": {
       "validation": {
@@ -3187,6 +3188,21 @@
         "forgot_link": "¿Olvidaste tu contraseña?",
         "register_prompt": "¿No tienes una cuenta?",
         "register_link": "Crea una"
+      },
+      "email_first": {
+        "subtitle": "Iniciá sesión o creá tu cuenta con tu email",
+        "register_subtitle": "Creá tu cuenta con tu email",
+        "continue": "Continuar",
+        "code_sent": "Te enviamos un código de 6 dígitos a {{email}}",
+        "code_label": "Código",
+        "verify": "Verificar",
+        "resend": "Reenviar código",
+        "resend_in": "Reenviar código en {{seconds}}s",
+        "change_email": "Usar otro email",
+        "use_password": "Iniciar sesión con contraseña",
+        "role_title": "Elegí el tipo de cuenta",
+        "details_title": "Terminá de crear tu cuenta",
+        "ticket_missing": "Verificá tu email de nuevo para continuar."
       },
       "register": {
         "meta": {

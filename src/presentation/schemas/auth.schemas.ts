@@ -6,6 +6,7 @@ import {
   phone as corePhone,
   required,
   type AppRole,
+  type CompleteRegistrationData,
   type RegisterData,
 } from "yotuvia-core";
 
@@ -140,6 +141,69 @@ export function toRegisterData(values: RegisterFormValues): RegisterData {
     role,
     email: values.email,
     password: values.password,
+    firstName: values.firstName?.trim() || undefined,
+    lastName: values.lastName?.trim() || undefined,
+    phone: values.phone?.trim() || undefined,
+    name: values.name?.trim() || undefined,
+    termsAccepted: values.termsAccepted,
+  };
+}
+
+/**
+ * Role profile collected AFTER the email is verified. No email or password:
+ * the email comes from the registration ticket and passwordless accounts have
+ * no password.
+ */
+export const completeRegistrationSchema = z
+  .object({
+    role: z.enum(registrationRoles),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    phone: z.string().optional(),
+    name: z.string().optional(),
+    termsAccepted: z.boolean().refine((value) => value, {
+      message: validationKeys.termsRequired,
+    }),
+  })
+  .superRefine((values, ctx) => {
+    if (values.phone && !missing(values.phone)) {
+      const failure = corePhone(values.phone);
+      if (!failure.valid) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["phone"],
+          message: failure.valid ? validationKeys.required : messageKeyFor(failure.issue.code),
+        });
+      }
+    }
+
+    if (values.role === "CLIENT") {
+      for (const field of ["firstName", "lastName", "phone"] as const) {
+        if (missing(values[field])) {
+          ctx.addIssue({ code: "custom", path: [field], message: validationKeys.required });
+        }
+      }
+      return;
+    }
+
+    if (missing(values.name)) {
+      ctx.addIssue({ code: "custom", path: ["name"], message: validationKeys.required });
+    }
+    if (missing(values.phone)) {
+      ctx.addIssue({ code: "custom", path: ["phone"], message: validationKeys.required });
+    }
+  });
+
+export type CompleteRegistrationFormValues = z.infer<typeof completeRegistrationSchema>;
+
+/** Maps the verified profile onto the core `CompleteRegistrationData` contract. */
+export function toCompleteRegistrationData(
+  values: CompleteRegistrationFormValues,
+  registrationTicket: string,
+): CompleteRegistrationData {
+  return {
+    registrationTicket,
+    role: values.role,
     firstName: values.firstName?.trim() || undefined,
     lastName: values.lastName?.trim() || undefined,
     phone: values.phone?.trim() || undefined,

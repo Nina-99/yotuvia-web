@@ -128,6 +128,9 @@ import {
   PauseBoostCampaignUseCase,
   LoginUserUseCase,
   LogoutAllUseCase,
+  CompleteRegistrationUseCase,
+  RequestLoginCodeUseCase,
+  VerifyLoginCodeUseCase,
   MarkAdminNotificationReadUseCase,
   MarkAllNotificationsReadUseCase,
   MarkNotificationReadUseCase,
@@ -221,6 +224,9 @@ export const resetPasswordUseCase = new ResetPasswordUseCase(authRepository);
 export const verifyEmailUseCase = new VerifyEmailUseCase(authRepository);
 export const resendVerificationUseCase = new ResendVerificationUseCase(authRepository);
 export const logoutAllUseCase = new LogoutAllUseCase(authRepository);
+export const requestLoginCodeUseCase = new RequestLoginCodeUseCase(authRepository);
+export const verifyLoginCodeUseCase = new VerifyLoginCodeUseCase(authRepository);
+export const completeRegistrationUseCase = new CompleteRegistrationUseCase(authRepository);
 
 /* ── Services ── */
 export const getServicesUseCase = new GetServicesUseCase(serviceRepository);
@@ -386,6 +392,9 @@ adminReservationRepository,
   verifyEmailUseCase,
   resendVerificationUseCase,
   logoutAllUseCase,
+  requestLoginCodeUseCase,
+  verifyLoginCodeUseCase,
+  completeRegistrationUseCase,
   getNotificationsUseCase,
   countUnreadNotificationsUseCase,
   markNotificationReadUseCase,
