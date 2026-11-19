@@ -22,7 +22,7 @@ export function StaffScanPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-text">{t("staff.scan.title")}</h2>
+        <h2 className="ytv-display text-3xl font-bold text-text">{t("staff.scan.title")}</h2>
         <p className="text-sm text-text-secondary">{t("staff.scan.meta_hint")}</p>
       </div>
 

@@ -60,7 +60,7 @@ export function ClientHomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold text-text">
+      <h2 className="ytv-display text-3xl font-bold text-text">
         {firstName
           ? t("client.home.greeting", { name: firstName })
           : t("client.home.title")}

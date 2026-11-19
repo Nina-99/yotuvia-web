@@ -62,10 +62,23 @@ export function AppSidebar({
           aria-label={t("web.layout.brand_name")}
           className="flex items-center gap-2 rounded-lg px-1 py-1 text-base font-bold tracking-tight text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <span className="ytv-breathe flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-sm font-bold text-on-accent">
-            Y
-          </span>
-          {!isCollapsed ? <span>{t("web.layout.brand_name")}</span> : null}
+          {isCollapsed ? (
+            <span className="ytv-logo-shine ytv-logo-shine--monogram">
+              <img
+                src="/brand/yotuvia-monogram.svg"
+                alt={t("web.layout.brand_name")}
+                className="h-8 w-auto"
+              />
+            </span>
+          ) : (
+            <span className="ytv-logo-shine ytv-logo-shine--wordmark">
+              <img
+                src="/brand/yotuvia-wordmark.svg"
+                alt={t("web.layout.brand_name")}
+                className="h-6 w-auto"
+              />
+            </span>
+          )}
         </Link>
 
         {variant === "desktop" && onToggleCollapse ? (

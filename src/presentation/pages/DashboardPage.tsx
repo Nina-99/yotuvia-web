@@ -18,6 +18,7 @@ import { useAdminCenter } from "@/presentation/hooks/use-admin-center";
 import { useAuthSession } from "@/presentation/hooks/use-auth-session";
 import { useDashboardStats } from "@/presentation/hooks/use-dashboard";
 import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
+import { cn } from "@/presentation/lib/cn";
 import { useErrorMessage } from "@/presentation/lib/errors";
 import { formatCurrency, formatDate, formatNumber, formatRating, formatTime } from "@/presentation/lib/format";
 import { ROUTES } from "@/presentation/lib/routes";
@@ -33,12 +34,52 @@ function statusLabelKey(status: string): string {
   return `admin.appointments.label_${status.toLowerCase()}`;
 }
 
-function KpiCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
+type KpiTone = "accent" | "success" | "info" | "warning";
+
+const KPI_DOT: Record<KpiTone, string> = {
+  accent: "bg-accent",
+  success: "bg-success",
+  info: "bg-info",
+  warning: "bg-warning",
+};
+
+const KPI_BAR: Record<KpiTone, string> = {
+  accent: "bg-accent",
+  success: "bg-success",
+  info: "bg-info",
+  warning: "bg-warning",
+};
+
+/**
+ * KPI card: a colored top bar + dot anchors the metric in the eye, and the value
+ * is the protagonist. Color here is a wayfinding cue (one dot per metric), not
+ * decoration — the label stays readable regardless of tone.
+ */
+function KpiCard({
+  label,
+  value,
+  hint,
+  tone = "accent",
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  tone?: KpiTone;
+}) {
   return (
-    <Card>
+    <Card className="relative overflow-hidden">
+      <span
+        aria-hidden="true"
+        className={cn("absolute inset-x-0 top-0 h-0.5 opacity-80", KPI_BAR[tone])}
+      />
       <CardContent className="flex flex-col gap-1 p-4">
-        <p className="text-xs font-medium text-text-muted">{label}</p>
-        <p className="text-2xl font-bold text-text">{value}</p>
+        <div className="flex items-center gap-2">
+          <span aria-hidden="true" className={cn("h-2 w-2 rounded-full", KPI_DOT[tone])} />
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+            {label}
+          </p>
+        </div>
+        <p className="text-3xl font-extrabold tracking-tight text-text">{value}</p>
         {hint ? <p className="text-xs text-text-secondary">{hint}</p> : null}
       </CardContent>
     </Card>
@@ -154,7 +195,7 @@ export function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-text">
+        <h2 className="ytv-display text-3xl font-bold text-text">
           {t("web.app.dashboard.greeting", {
             name: user ? getFullName(user) : centerName,
           })}
@@ -170,10 +211,12 @@ export function DashboardPage() {
           <KpiCard
             label={t("web.app.dashboard.kpi.revenue")}
             value={formatCurrency(stats.revenueMonth, language, currency)}
+            tone="success"
           />
           <KpiCard
             label={t("web.app.dashboard.kpi.appointments")}
             value={formatNumber(stats.appointmentsToday, language)}
+            tone="info"
           />
           <KpiCard
             label={t("web.app.dashboard.kpi.average_ticket")}
@@ -184,10 +227,12 @@ export function DashboardPage() {
             value={t("web.app.dashboard.rating_value", {
               value: formatRating(stats.averageRating, language),
             })}
+            tone="warning"
           />
           <KpiCard
             label={t("web.app.dashboard.kpi.services")}
             value={formatNumber(stats.totalServices, language)}
+            tone="info"
           />
           <KpiCard
             label={t("web.app.dashboard.kpi.personnel")}
@@ -196,6 +241,7 @@ export function DashboardPage() {
           <KpiCard
             label={t("web.app.dashboard.kpi.reviews")}
             value={formatNumber(stats.totalReviews, language)}
+            tone="warning"
           />
         </div>
       </section>
@@ -213,14 +259,36 @@ export function DashboardPage() {
         </Card>
       ) : null}
 
+      {stats.tokenHealth && stats.tokenHealth.state !== "ok" ? (
+        <Card
+          className={
+            stats.tokenHealth.state === "suspended"
+              ? "border-danger/40 bg-danger/10"
+              : "border-warning/40 bg-warning/10"
+          }
+          role="alert"
+        >
+          <CardContent className="flex flex-col gap-1 p-4">
+            <p className="text-sm font-semibold text-text">
+              {t(`web.app.dashboard.token_health.${stats.tokenHealth.state}_title`)}
+            </p>
+            <p className="text-xs text-text-muted">
+              {t(`web.app.dashboard.token_health.${stats.tokenHealth.state}_body`, {
+                days: stats.tokenHealth.deficitDays,
+              })}
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <section aria-labelledby="dashboard-balance" className="flex flex-col gap-3">
         <h3 id="dashboard-balance" className="text-lg font-semibold text-text">
           {t("web.app.dashboard.balance_title")}
         </h3>
-        <Card>
+        <Card className="ytv-feature-card">
           <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
             <div className="flex flex-col gap-1">
-              <p className="text-2xl font-bold text-text">
+              <p className="text-3xl font-extrabold tracking-tight text-text">
                 {t("web.app.dashboard.balance_value", {
                   value: formatNumber(stats.balance, language),
                   currency: "Ytv",

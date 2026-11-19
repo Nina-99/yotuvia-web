@@ -184,7 +184,7 @@ export function CenterDetailPage() {
         <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
           <Card>
             <CardContent className="flex flex-col items-start gap-3 p-6">
-              <h1 className="text-2xl font-bold text-text">{t("web.centers.detail.not_found_title")}</h1>
+              <h1 className="ytv-display text-3xl font-bold text-text">{t("web.centers.detail.not_found_title")}</h1>
               <p className="text-sm text-text-muted">{t("web.centers.detail.not_found_body")}</p>
               <Link
                 to={ROUTES.centers.search}
@@ -222,7 +222,7 @@ export function CenterDetailPage() {
         <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
           <Card role="alert">
             <CardContent className="flex flex-col items-start gap-3 p-6">
-              <h1 className="text-2xl font-bold text-text">{t("web.centers.detail.error_title")}</h1>
+              <h1 className="ytv-display text-3xl font-bold text-text">{t("web.centers.detail.error_title")}</h1>
               <p className="text-sm text-text-muted">{centerError}</p>
               <Button variant="outline" onClick={() => void centerQuery.refetch()}>
                 {t("common.retry")}

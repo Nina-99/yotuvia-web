@@ -15,7 +15,7 @@ export function Skeleton({ className, shimmer = false, ...rest }: SkeletonProps)
   return (
     <div
       aria-hidden="true"
-      className={cn("animate-pulse rounded-md bg-card2", shimmer && "ytv-shimmer", className)}
+      className={cn("animate-pulse rounded-md bg-card2 ytv-skeleton", shimmer && "ytv-shimmer", className)}
       {...rest}
     />
   );

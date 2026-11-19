@@ -37,12 +37,14 @@ vi.mock("recharts", () => {
   return {
     ResponsiveContainer: Wrapper,
     LineChart: Wrapper,
+    AreaChart: Wrapper,
     BarChart: Wrapper,
     CartesianGrid: Empty,
     XAxis: Empty,
     YAxis: Empty,
     Tooltip: Empty,
     Line: Empty,
+    Area: Empty,
     Bar: Empty,
   };
 });

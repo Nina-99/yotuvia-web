@@ -377,7 +377,7 @@ export function BookingPage() {
         >
           {t("web.centers.booking.back_to_center")}
         </Link>
-        <h2 className="text-2xl font-bold text-text">
+        <h2 className="ytv-display text-3xl font-bold text-text">
           {isEditing
             ? t("web.centers.booking.edit_title", { center: centerName })
             : t("web.centers.booking.title", { center: centerName })}

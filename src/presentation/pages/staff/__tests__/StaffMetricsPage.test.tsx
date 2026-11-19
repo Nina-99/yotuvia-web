@@ -4,6 +4,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { metricsRangeToDateRange } from "yotuvia-core";
 import type { StaffMetricsSummary } from "yotuvia-core";
 
 const mocks = vi.hoisted(() => ({
@@ -73,7 +74,14 @@ describe("StaffMetricsPage", () => {
     await screen.findByText("Corte");
     await actor.click(screen.getByRole("button", { name: "Today" }));
 
-    await waitFor(() => expect(mocks.getStaffMetricsUseCase.execute).toHaveBeenCalledTimes(2));
+    // The page starts on `week`; on a Monday the day and week ranges coincide,
+    // so the query dedupes and does not refetch. Assert the real contract.
+    const week = metricsRangeToDateRange("week");
+    const day = metricsRangeToDateRange("day");
+    const differ = week.from !== day.from || week.to !== day.to;
+    await waitFor(() =>
+      expect(mocks.getStaffMetricsUseCase.execute).toHaveBeenCalledTimes(differ ? 2 : 1),
+    );
   });
 
   it("rejects an invalid custom range without querying the server", async () => {

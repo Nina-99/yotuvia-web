@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import { imageUrl, isSafeAssetUrl } from "yotuvia-core";
 import type { Reservation, ReservationStatus } from "yotuvia-core";
 
 import {
@@ -209,9 +210,9 @@ function ReservationRow({
               </span>
             ) : null}
           </div>
-          {reservation.proofImageUrl ? (
+          {isSafeAssetUrl(reservation.proofImageUrl) ? (
             <a
-              href={reservation.proofImageUrl}
+              href={imageUrl(reservation.proofImageUrl)}
               target="_blank"
               rel="noreferrer"
               className="text-xs font-medium text-link underline"
@@ -450,7 +451,7 @@ export function AgendaPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-text">{t("web.app.agenda.title")}</h2>
+          <h2 className="ytv-display text-3xl font-bold text-text">{t("web.app.agenda.title")}</h2>
           <p className="text-sm text-text-secondary">
             {t("web.app.agenda.total", { count: total })}
           </p>

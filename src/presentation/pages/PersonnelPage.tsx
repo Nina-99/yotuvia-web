@@ -177,7 +177,7 @@ export function PersonnelPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-text">{t("web.app.personnel.title")}</h2>
+          <h2 className="ytv-display text-3xl font-bold text-text">{t("web.app.personnel.title")}</h2>
           <p className="text-sm text-text-secondary">
             {t("web.app.personnel.total", { count: personnel.length })}
           </p>

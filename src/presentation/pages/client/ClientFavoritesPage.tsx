@@ -78,7 +78,7 @@ export function ClientFavoritesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold text-text">{t("client.favorites.title")}</h2>
+      <h2 className="ytv-display text-3xl font-bold text-text">{t("client.favorites.title")}</h2>
 
       {favoritesQuery.isPending ? (
         <div

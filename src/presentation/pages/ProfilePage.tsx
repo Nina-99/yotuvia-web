@@ -225,7 +225,7 @@ export function ProfilePage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-text">{t("web.app.profile.title")}</h2>
+          <h2 className="ytv-display text-3xl font-bold text-text">{t("web.app.profile.title")}</h2>
           <p className="text-sm text-text-secondary">{t("web.app.profile.subtitle")}</p>
         </div>
         <Badge variant={center.isActive ? "success" : "warning"}>

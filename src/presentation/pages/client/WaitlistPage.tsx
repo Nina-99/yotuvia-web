@@ -204,7 +204,7 @@ export function WaitlistPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-text">{t("client.waitlist.title")}</h2>
+        <h2 className="ytv-display text-3xl font-bold text-text">{t("client.waitlist.title")}</h2>
       </div>
 
       <div role="tablist" className="flex gap-2">

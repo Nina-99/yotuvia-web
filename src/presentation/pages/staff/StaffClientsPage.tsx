@@ -109,7 +109,7 @@ export function StaffClientsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold text-text">{t("staff.clients.title")}</h2>
+      <h2 className="ytv-display text-3xl font-bold text-text">{t("staff.clients.title")}</h2>
 
       <div className="sm:max-w-xs">
         <Input

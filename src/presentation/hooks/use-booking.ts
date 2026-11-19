@@ -100,6 +100,10 @@ export function useCreateClientReservation() {
         ),
     }),
     "web.errors.client_booking_create",
+    // The API answers 409 both for a slot conflict and for a centre that cannot
+    // take new bookings right now. One careful message covers both, and it is
+    // far kinder than the generic "conflict".
+    { 409: "web.errors.client_booking_unavailable" },
   );
 }
 

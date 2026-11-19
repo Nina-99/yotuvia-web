@@ -25,10 +25,13 @@ export function BrandLink({ className }: BrandLinkProps) {
         className,
       )}
     >
-      <span className="ytv-breathe flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-sm font-bold text-on-accent">
-        Y
+      <span className="ytv-logo-shine ytv-logo-shine--wordmark">
+        <img
+          src="/brand/yotuvia-wordmark.svg"
+          alt={t("web.layout.brand_name")}
+          className="h-6 w-auto"
+        />
       </span>
-      <span>{t("web.layout.brand_name")}</span>
     </Link>
   );
 }

@@ -172,7 +172,7 @@ export function StaffMetricsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold text-text">{t("staff.metrics.title")}</h2>
+      <h2 className="ytv-display text-3xl font-bold text-text">{t("staff.metrics.title")}</h2>
 
       {selector}
 
@@ -195,34 +195,40 @@ export function StaffMetricsPage() {
           <section aria-label={t("staff.metrics.section_highlights")} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <MetricCard
               label={t("staff.metrics.appointments")}
+              tone="info"
               value={formatCount(totals.appointments)}
               delta={deltas?.appointments.pct ?? null}
             />
             <MetricCard
               label={t("staff.metrics.completed")}
+              tone="success"
               value={formatCount(totals.completed)}
               delta={deltas?.completed.pct ?? null}
             />
             <MetricCard
               label={t("staff.metrics.cancelled")}
+              tone="warning"
               value={formatCount(totals.cancelled)}
               delta={deltas?.cancelled.pct ?? null}
               deltaGoodWhenPositive={false}
             />
             <MetricCard
               label={t("staff.metrics.no_show")}
+              tone="warning"
               value={formatCount(totals.noShow)}
               delta={deltas?.noShow.pct ?? null}
               deltaGoodWhenPositive={false}
             />
             <MetricCard
               label={t("staff.metrics.revenue")}
+              tone="success"
               value={formatMoney(totals.revenue)}
               hint={t("staff.metrics.revenue_hint")}
               delta={deltas?.revenue.pct ?? null}
             />
             <MetricCard
               label={t("staff.metrics.average_ticket")}
+              tone="accent"
               value={
                 averageTicket(totals.revenue, totals.completed) === null
                   ? t("staff.metrics.average_ticket_none")
@@ -235,6 +241,7 @@ export function StaffMetricsPage() {
           <section aria-label={t("staff.metrics.section_highlights")} className="grid gap-3 sm:grid-cols-2">
             <MetricCard
               label={t("staff.metrics.best_day")}
+              tone="accent"
               value={
                 bestRevenueDay(metrics.revenueSeries) === null
                   ? t("staff.metrics.best_day_none")
@@ -248,11 +255,13 @@ export function StaffMetricsPage() {
             />
             <MetricCard
               label={t("staff.metrics.streak")}
+              tone="warning"
               value={t("staff.metrics.streak_days", { count: activeDayStreak(metrics.appointmentsSeries) })}
             />
             {metrics.occupancy ? (
               <MetricCard
                 label={t("staff.metrics.section_occupancy")}
+                tone="info"
                 value={`${formatNumber(metrics.occupancy.ratePct, language)}%`}
                 hint={t("staff.metrics.occupancy_detail", {
                   booked: formatMinutes(metrics.occupancy.bookedMinutes),

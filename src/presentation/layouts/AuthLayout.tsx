@@ -22,7 +22,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="ytv-ambient flex min-h-screen flex-col bg-background text-text">
+    <div className="ytv-ambient-brand flex min-h-screen flex-col bg-background text-text">
       <header className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <BrandLink />
         <div className="flex items-center gap-3">

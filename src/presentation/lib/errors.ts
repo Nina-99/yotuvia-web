@@ -56,12 +56,22 @@ export function isNetworkError(error: unknown): boolean {
  * @param error       Any thrown value.
  * @param fallbackKey Key returned when the error cannot be classified.
  */
-export function toErrorKey(error: unknown, fallbackKey: string = ERROR_FALLBACK_KEY): string {
+export function toErrorKey(
+  error: unknown,
+  fallbackKey: string = ERROR_FALLBACK_KEY,
+  /**
+   * Per-call status overrides. A booking 409 ("this centre is not taking
+   * reservations") deserves its own careful copy instead of the generic
+   * "conflict", and the caller is the only one that knows the context.
+   */
+  overrides?: Readonly<Record<number, string>>,
+): string {
   if (error == null) return fallbackKey;
   if (isNetworkError(error)) return "web.errors.network";
 
   const status = getErrorStatus(error);
   if (status !== undefined) {
+    if (overrides && status in overrides) return overrides[status];
     if (status in STATUS_ERROR_KEYS) return STATUS_ERROR_KEYS[status];
     if (status >= 500) return "web.errors.server";
     return fallbackKey;
@@ -98,9 +108,11 @@ export type MutationWithErrorKey<TData, TError, TVariables, TContext> = UseMutat
 export function attachErrorKey<TData, TError, TVariables, TContext>(
   mutation: UseMutationResult<TData, TError, TVariables, TContext>,
   fallbackKey: string,
+  overrides?: Readonly<Record<number, string>>,
 ): MutationWithErrorKey<TData, TError, TVariables, TContext> {
   return {
     ...mutation,
-    errorKey: mutation.error == null ? null : toErrorKey(mutation.error, fallbackKey),
+    errorKey:
+      mutation.error == null ? null : toErrorKey(mutation.error, fallbackKey, overrides),
   };
 }

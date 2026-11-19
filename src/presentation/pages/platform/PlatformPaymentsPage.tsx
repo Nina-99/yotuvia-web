@@ -20,12 +20,13 @@ import { useDocumentTitle } from "@/presentation/hooks/use-document-title";
 import {
   PLATFORM_TOPUPS_PAGE_LIMIT,
   usePlatformCenters,
+  usePlatformTopUpReconciliation,
   usePlatformTopUps,
   useProcessPlatformTopUp,
 } from "@/presentation/hooks/use-platform";
 import type { PlatformTopUpStatus } from "@/presentation/hooks/use-platform";
 import { toErrorKey, useErrorMessage } from "@/presentation/lib/errors";
-import { formatDateTime, formatNumber } from "@/presentation/lib/format";
+import { formatDateTime, formatNumber, formatYtv } from "@/presentation/lib/format";
 
 const FILTER_ALL = "all";
 type StatusFilter = typeof FILTER_ALL | PlatformTopUpStatus;
@@ -77,10 +78,16 @@ export function PlatformPaymentsPage() {
 
   const topUpsQuery = usePlatformTopUps(params);
   const centersQuery = usePlatformCenters();
+  const reconciliationQuery = usePlatformTopUpReconciliation();
   const processTopUp = useProcessPlatformTopUp();
 
   const queueError = useErrorMessage(topUpsQuery.error, "web.errors.platform_tokens_fetch");
   const centersError = useErrorMessage(centersQuery.error, "web.errors.platform_centers_fetch");
+  const reconciliationError = useErrorMessage(
+    reconciliationQuery.error,
+    "web.errors.platform_reconciliation_fetch",
+  );
+  const reconciliation = reconciliationQuery.data;
 
   const topUps = topUpsQuery.data?.topups ?? [];
   const total = topUpsQuery.data?.total ?? 0;
@@ -137,9 +144,137 @@ export function PlatformPaymentsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-text">{t("web.app.platform.payments.title")}</h2>
+        <h2 className="ytv-display text-3xl font-bold text-text">{t("web.app.platform.payments.title")}</h2>
         <p className="text-sm text-text-secondary">{t("web.app.platform.payments.subtitle")}</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle>{t("web.app.platform.payments.reconciliation.title")}</CardTitle>
+            {reconciliation && reconciliation.drift_count > 0 ? (
+              <Badge variant="danger">
+                {t("web.app.platform.payments.reconciliation.drift_badge", {
+                  count: reconciliation.drift_count,
+                })}
+              </Badge>
+            ) : null}
+          </div>
+          <CardDescription>{t("web.app.platform.payments.reconciliation.body")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {reconciliationQuery.isPending ? (
+            <div
+              role="status"
+              aria-live="polite"
+              aria-label={t("common.loading")}
+              className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+            >
+              {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton key={index} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : reconciliationQuery.isError ? (
+            <div role="alert" className="flex flex-col items-start gap-2">
+              <p className="text-sm text-text-muted">{reconciliationError}</p>
+              <Button variant="outline" size="sm" onClick={() => void reconciliationQuery.refetch()}>
+                {t("common.retry")}
+              </Button>
+            </div>
+          ) : reconciliation ? (
+            <div className="flex flex-col gap-3">
+              <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-lg border border-border p-3">
+                  <dt className="text-xs text-text-muted">
+                    {t("web.app.platform.payments.reconciliation.pending")}
+                  </dt>
+                  <dd className="text-lg font-semibold text-text">
+                    {formatNumber(reconciliation.pending_count, language)}
+                  </dd>
+                  <p className="text-xs text-text-muted">
+                    {t("web.app.platform.payments.reconciliation.pending_hint", {
+                      amount: formatNumber(reconciliation.pending_amount_bs, language),
+                    })}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-border p-3">
+                  <dt className="text-xs text-text-muted">
+                    {t("web.app.platform.payments.reconciliation.backlog")}
+                  </dt>
+                  <dd
+                    className={
+                      reconciliation.pending_over_24h > 0
+                        ? "text-lg font-semibold text-danger"
+                        : "text-lg font-semibold text-success"
+                    }
+                  >
+                    {formatNumber(reconciliation.pending_over_24h, language)}
+                  </dd>
+                  <p className="text-xs text-text-muted">
+                    {reconciliation.pending_over_24h > 0
+                      ? t("web.app.platform.payments.reconciliation.backlog_breach", {
+                          hours: formatNumber(
+                            Math.round(reconciliation.oldest_pending_age_hours),
+                            language,
+                          ),
+                        })
+                      : t("web.app.platform.payments.reconciliation.backlog_ok")}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-border p-3">
+                  <dt className="text-xs text-text-muted">
+                    {t("web.app.platform.payments.reconciliation.approved")}
+                  </dt>
+                  <dd className="text-lg font-semibold text-text">
+                    {formatNumber(reconciliation.approved_count, language)}
+                  </dd>
+                  <p className="text-xs text-text-muted">
+                    {t("web.app.platform.payments.reconciliation.approved_hint", {
+                      tokens: formatYtv(reconciliation.approved_tokens, language),
+                    })}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-border p-3">
+                  <dt className="text-xs text-text-muted">
+                    {t("web.app.platform.payments.reconciliation.rejected")}
+                  </dt>
+                  <dd className="text-lg font-semibold text-text">
+                    {formatNumber(reconciliation.rejected_count, language)}
+                  </dd>
+                  <p className="text-xs text-text-muted">
+                    {t("web.app.platform.payments.reconciliation.rejected_hint", {
+                      amount: formatNumber(reconciliation.rejected_amount_bs, language),
+                    })}
+                  </p>
+                </div>
+              </dl>
+
+              {reconciliation.drift_count > 0 ? (
+                <div
+                  role="alert"
+                  className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-sm text-danger"
+                >
+                  <p className="font-semibold">
+                    {t("web.app.platform.payments.reconciliation.drift_title")}
+                  </p>
+                  <p>
+                    {t("web.app.platform.payments.reconciliation.drift_body", {
+                      count: reconciliation.drift_count,
+                    })}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-text-muted">
+                  {t("web.app.platform.payments.reconciliation.drift_ok")}
+                </p>
+              )}
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

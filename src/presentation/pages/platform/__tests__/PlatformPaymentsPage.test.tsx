@@ -7,6 +7,7 @@ import type { PlatformTopUp } from "yotuvia-core/platform";
 const mocks = vi.hoisted(() => ({
   getPlatformTopUps: vi.fn(),
   getPlatformCenters: vi.fn(),
+  getPlatformTopUpReconciliation: vi.fn(),
   processPlatformTopUp: vi.fn(),
   getPlatformPaymentConfig: vi.fn(),
   updatePlatformPaymentConfig: vi.fn(),
@@ -32,6 +33,7 @@ vi.mock("yotuvia-core/platform", async (importOriginal) => {
     ...actual,
     getPlatformTopUps: mocks.getPlatformTopUps,
     getPlatformCenters: mocks.getPlatformCenters,
+    getPlatformTopUpReconciliation: mocks.getPlatformTopUpReconciliation,
     processPlatformTopUp: mocks.processPlatformTopUp,
     getPlatformPaymentConfig: mocks.getPlatformPaymentConfig,
     updatePlatformPaymentConfig: mocks.updatePlatformPaymentConfig,
@@ -112,6 +114,20 @@ function mockQueue(topups: PlatformTopUp[], total = topups.length) {
   mocks.getPlatformTopUps.mockResolvedValue({ topups, total, page: 1, limit: 20 });
 }
 
+/** Balanced reconciliation: everything settled, no drift. */
+const RECONCILIATION = {
+  pending_count: 4,
+  pending_amount_bs: 1200,
+  pending_over_24h: 0,
+  oldest_pending_age_hours: 0,
+  approved_count: 2,
+  approved_amount_bs: 700,
+  approved_tokens: 70,
+  rejected_count: 1,
+  rejected_amount_bs: 100,
+  drift_count: 0,
+};
+
 function authenticate() {
   useAuthStore.setState({
     user: ADMIN,
@@ -130,6 +146,7 @@ describe("PlatformPaymentsPage", () => {
     vi.clearAllMocks();
     authenticate();
     mocks.getPlatformCenters.mockResolvedValue(CENTERS);
+    mocks.getPlatformTopUpReconciliation.mockResolvedValue(RECONCILIATION);
     mockQueue([PENDING, APPROVED, ORPHAN, MISSING_CENTER]);
   });
 
@@ -258,5 +275,29 @@ describe("PlatformPaymentsPage", () => {
     await user.click(screen.getByRole("button", { name: "Retry" }));
 
     expect(await screen.findByText("Request #4")).toBeInTheDocument();
+  });
+
+  it("renders the manual payment reconciliation summary", async () => {
+    renderWithProviders(<PlatformPaymentsPage />, { route: ROUTES.platform.payments });
+
+    expect(await screen.findByText("Manual payment health")).toBeInTheDocument();
+    expect(await screen.findByText("70 Ytv credited")).toBeInTheDocument();
+    expect(screen.getByText("Nothing older than 24h")).toBeInTheDocument();
+    expect(screen.getByText("The ledger matches every approved top-up")).toBeInTheDocument();
+  });
+
+  it("warns when the ledger drifts from the declared top-ups", async () => {
+    mocks.getPlatformTopUpReconciliation.mockResolvedValue({
+      ...RECONCILIATION,
+      drift_count: 2,
+      pending_over_24h: 1,
+      oldest_pending_age_hours: 30,
+    });
+
+    renderWithProviders(<PlatformPaymentsPage />, { route: ROUTES.platform.payments });
+
+    expect(await screen.findByText("Ledger drift detected")).toBeInTheDocument();
+    expect(screen.getByText(/Investigate before trusting wallet balances/)).toBeInTheDocument();
+    expect(screen.getByText("Oldest is 30h old")).toBeInTheDocument();
   });
 });

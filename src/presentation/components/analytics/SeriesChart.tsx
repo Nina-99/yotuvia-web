@@ -1,11 +1,11 @@
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -53,6 +53,7 @@ export function SeriesChart({
 }: SeriesChartProps) {
   const { t } = useTranslation();
   const captionId = useId();
+  const gradientId = `ytv-series-${captionId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   if (points.length === 0) {
     return (
@@ -101,7 +102,13 @@ export function SeriesChart({
               <Bar dataKey="value" className="fill-accent" radius={[3, 3, 0, 0]} />
             </BarChart>
           ) : (
-            <LineChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+            <AreaChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="label" tick={{ fill: "currentColor", fontSize: 11 }} />
               <YAxis
@@ -117,14 +124,15 @@ export function SeriesChart({
                   color: "var(--color-text)",
                 }}
               />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="value"
-                className="stroke-accent"
+                stroke="var(--color-accent)"
                 strokeWidth={2}
+                fill={`url(#${gradientId})`}
                 dot={false}
               />
-            </LineChart>
+            </AreaChart>
           )}
         </ResponsiveContainer>
       </div>

@@ -81,7 +81,7 @@ function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+    <header className="ytv-barber-accent sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <BrandLink />
 
@@ -208,7 +208,7 @@ export interface PublicLayoutProps {
 
 export function PublicLayout({ children }: PublicLayoutProps) {
   return (
-    <div className="ytv-ambient flex min-h-screen flex-col bg-background text-text">
+    <div className="ytv-ambient-brand flex min-h-screen flex-col bg-background text-text">
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

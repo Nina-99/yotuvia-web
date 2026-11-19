@@ -150,7 +150,7 @@ describe("DashboardPage", () => {
     renderWithProviders(<DashboardPage />, { route: ROUTES.appHome });
 
     await screen.findByText("42");
-    expect(screen.getByRole("heading", { level: 2 })).toHaveClass("text-2xl");
+    expect(screen.getByRole("heading", { level: 2 })).toHaveClass("text-3xl");
   });
 
   it("renders the error state and recovers on retry", async () => {

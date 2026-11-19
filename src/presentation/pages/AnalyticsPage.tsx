@@ -210,7 +210,7 @@ export function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-text">{t("web.app.analytics.title")}</h2>
+        <h2 className="ytv-display text-3xl font-bold text-text">{t("web.app.analytics.title")}</h2>
         <p className="text-sm text-text-secondary">
           {centerQuery.data?.name
             ? t("web.app.analytics.subtitle", { center: centerQuery.data.name })
@@ -227,26 +227,31 @@ export function AnalyticsPage() {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             label={t("web.app.analytics.kpi.revenue")}
+            tone="success"
             value={formatMoney(stats.revenueMonth)}
             delta={extended ? stats.revenueDeltaPct : null}
           />
           <MetricCard
             label={t("web.app.analytics.kpi.appointments")}
+            tone="info"
             value={formatCount(stats.appointmentsToday)}
             delta={extended ? stats.appointmentsDeltaPct : null}
           />
           <MetricCard
             label={t("web.app.analytics.kpi.average_ticket")}
+            tone="accent"
             value={formatMoney(stats.averageTicket)}
           />
           <MetricCard
             label={t("web.app.analytics.kpi.average_rating")}
+            tone="warning"
             value={t("web.app.analytics.rating_value", {
               value: formatRating(stats.averageRating, language),
             })}
           />
           <MetricCard
             label={t("web.app.analytics.kpi.balance")}
+            tone="info"
             value={formatCount(stats.availableBalance)}
             hint={t("web.app.analytics.kpi.balance_hint", {
               overdraft: formatCount(stats.overdraftLimit),
@@ -256,6 +261,7 @@ export function AnalyticsPage() {
             <>
               <MetricCard
                 label={t("web.app.analytics.kpi.cancellation_rate")}
+                tone="warning"
                 value={`${formatNumber(stats.cancellationRatePct, language)}%`}
                 hint={t("web.app.analytics.kpi.cancellation_hint", {
                   cancelled: formatCount(stats.cancelledCount),
@@ -265,10 +271,12 @@ export function AnalyticsPage() {
               />
               <MetricCard
                 label={t("web.app.analytics.kpi.new_clients")}
+                tone="success"
                 value={formatCount(stats.newClients)}
               />
               <MetricCard
                 label={t("web.app.analytics.kpi.recurring_clients")}
+                tone="accent"
                 value={formatCount(stats.recurringClients)}
               />
             </>

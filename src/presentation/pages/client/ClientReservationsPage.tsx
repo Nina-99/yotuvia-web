@@ -188,7 +188,7 @@ export function ClientReservationsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-text">{t("client.reservations.title")}</h2>
+        <h2 className="ytv-display text-3xl font-bold text-text">{t("client.reservations.title")}</h2>
         <p className="text-sm text-text-secondary">
           {t("client.reservations.total", { count: reservations.length })}
         </p>

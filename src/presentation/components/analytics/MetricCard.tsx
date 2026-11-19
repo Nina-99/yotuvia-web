@@ -23,7 +23,16 @@ export interface MetricCardProps {
   delta?: number | null;
   /** Whether a positive delta is a good outcome (true for revenue, false for churn). */
   deltaGoodWhenPositive?: boolean;
+  /** Wayfinding dot color for this metric. */
+  tone?: "accent" | "success" | "info" | "warning";
 }
+
+const METRIC_DOT: Record<NonNullable<MetricCardProps["tone"]>, string> = {
+  accent: "bg-accent",
+  success: "bg-success",
+  info: "bg-info",
+  warning: "bg-warning",
+};
 
 export function MetricCard({
   label,
@@ -31,6 +40,7 @@ export function MetricCard({
   hint,
   delta = null,
   deltaGoodWhenPositive = true,
+  tone = "accent",
 }: MetricCardProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage ?? i18n.language;
@@ -38,7 +48,7 @@ export function MetricCard({
   const hasDelta = delta !== null && Number.isFinite(delta);
   const isUp = hasDelta && delta > 0;
   const isDown = hasDelta && delta < 0;
-  const tone = !hasDelta
+  const deltaTone = !hasDelta
     ? "text-text-muted"
     : isUp === deltaGoodWhenPositive
       ? "text-success"
@@ -52,12 +62,17 @@ export function MetricCard({
   return (
     <Card>
       <CardContent className="flex flex-col gap-1 p-4">
-        <p className="text-xs font-medium text-text-muted">{label}</p>
-        <p className="text-2xl font-bold text-text">{value}</p>
+        <div className="flex items-center gap-2">
+          <span aria-hidden="true" className={cn("h-2 w-2 rounded-full", METRIC_DOT[tone])} />
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+            {label}
+          </p>
+        </div>
+        <p className="text-3xl font-extrabold tracking-tight text-text">{value}</p>
         {hint ? <p className="text-xs text-text-secondary">{hint}</p> : null}
         {hasDelta ? (
           <p
-            className={cn("flex items-center gap-1 text-xs font-medium", tone)}
+            className={cn("flex items-center gap-1 text-xs font-medium", deltaTone)}
             aria-label={t("web.app.analytics.delta.aria", {
               direction: directionPhrase,
               value: `${formatNumber(Math.abs(delta), language)}%`,

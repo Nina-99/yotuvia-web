@@ -257,7 +257,7 @@ export function ContentPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-text">{t("web.app.content.title")}</h2>
+        <h2 className="ytv-display text-3xl font-bold text-text">{t("web.app.content.title")}</h2>
         <p className="text-sm text-text-secondary">
           {centerQuery.data?.name
             ? t("web.app.content.subtitle", { center: centerQuery.data.name })
