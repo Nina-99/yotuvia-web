@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: typecheck · test · build
+    runs-on: ubuntu-latest
+    steps:
+      # yotuvia-web depends on yotuvia-core via `file:../yotuvia-core`, so the
+      # checkout layout MUST put core as a sibling of this repo, exactly like the
+      # local workspace. Both are checked out under the workspace root:
+      #   $GITHUB_WORKSPACE/yotuvia-core
+      #   $GITHUB_WORKSPACE/yotuvia-web
+      #
+      # PREREQUISITE: yotuvia-core must be published to GitHub under the same
+      # owner. If its repo name differs, change `repository:` below.
+      - name: Checkout web
+        uses: actions/checkout@v4
+        with:
+          path: yotuvia-web
+
+      - name: Checkout shared core
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/yotuvia-core
+          path: yotuvia-core
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install + build core
+        working-directory: yotuvia-core
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+
+      - name: Install web
+        working-directory: yotuvia-web
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        working-directory: yotuvia-web
+        run: bun run typecheck
+
+      - name: Test
+        working-directory: yotuvia-web
+        run: bun run test
+
+      - name: Build
+        working-directory: yotuvia-web
+        run: bun run build
