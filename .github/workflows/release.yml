@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build web dist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout web
+        uses: actions/checkout@v4
+        with:
+          path: yotuvia-web
+
+      - name: Checkout shared core
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/yotuvia-core
+          path: yotuvia-core
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install + build core
+        working-directory: yotuvia-core
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+
+      - name: Install web
+        working-directory: yotuvia-web
+        run: bun install --frozen-lockfile
+
+      # Vite bakes these at build time and does NOT read .env files on the
+      # runner. Configure them as repository Variables (Settings > Secrets and
+      # variables > Actions > Variables). Unset client ids disable the social
+      # buttons; unset legal URLs ship the REPLACE-ME placeholders.
+      - name: Build web
+        working-directory: yotuvia-web
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_FACEBOOK_APP_ID: ${{ vars.VITE_FACEBOOK_APP_ID }}
+          YOTUVIA_API_URL: /api
+          YOTUVIA_TERMS_URL: ${{ vars.YOTUVIA_TERMS_URL }}
+          YOTUVIA_PRIVACY_URL: ${{ vars.YOTUVIA_PRIVACY_URL }}
+        run: bun run build
+
+      - name: Package
+        run: |
+          tar -czf yotuvia-web-dist.tar.gz -C yotuvia-web/dist .
+          sha256sum yotuvia-web-dist.tar.gz > yotuvia-web-dist.tar.gz.sha256
+          cat yotuvia-web-dist.tar.gz.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: yotuvia-web-dist.tar.gz*
+          if-no-files-found: error
+
+  release:
+    name: publish release assets
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: assets/*
+          generate_release_notes: true
