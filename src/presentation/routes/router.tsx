@@ -209,6 +209,12 @@ const PlatformCentersPage = lazy(() =>
   })),
 );
 
+const PlatformAdsPage = lazy(() =>
+  import("@/presentation/pages/platform/PlatformAdsPage").then((module) => ({
+    default: module.PlatformAdsPage,
+  })),
+);
+
 /**
  * Client-area pages are code-split for the same reason as the platform console:
  * a center owner or a platform admin never renders them, so shipping the client
@@ -570,6 +576,11 @@ export function AppRouter() {
             <Route path={ROUTES.platform.payments} element={
                 <Suspense fallback={<RouteFallback />}>
                   <PlatformPaymentsPage />
+                </Suspense>
+              } />
+            <Route path={ROUTES.platform.ads} element={
+                <Suspense fallback={<RouteFallback />}>
+                  <PlatformAdsPage />
                 </Suspense>
               } />
             <Route path={ROUTES.platform.centers} element={

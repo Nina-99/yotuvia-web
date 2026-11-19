@@ -379,6 +379,10 @@ export const queryKeys = {
     topups: (params: PlatformTopUpsKeyParams) => [...platform, "topups", params] as const,
     /** `{ id, name }` summaries of every centre (used to resolve queue names). */
     centers: () => [...platform, "centers"] as const,
+    /** Platform-wide advertising revenue (`GET admin/platform/ads/overview`). */
+    ads: () => [...platform, "ads"] as const,
+    /** Manual top-up money-path health (`GET .../tokens/reconciliation`). */
+    reconciliation: () => [...platform, "reconciliation"] as const,
     /** Payment configuration of one chosen centre (platform-scoped read). */
     payment: (centerId: number) => [...platform, "payment", { centerId }] as const,
   },

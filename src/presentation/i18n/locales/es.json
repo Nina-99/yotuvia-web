@@ -1764,7 +1764,8 @@
         "staff_notifications": "Notificaciones",
         "staff_profile": "Perfil",
         "blocks": "Bloqueos",
-        "staff_blocks": "Bloqueos"
+        "staff_blocks": "Bloqueos",
+        "platform_ads": "Publicidad"
       },
       "platform": {
         "payments": {
@@ -1791,7 +1792,24 @@
           "no_results_title": "No hay solicitudes con estos filtros",
           "no_results_body": "Probá con otro centro u otro estado, o limpiá los filtros.",
           "approved_toast": "Recarga aprobada",
-          "rejected_toast": "Recarga rechazada"
+          "rejected_toast": "Recarga rechazada",
+          "reconciliation": {
+            "title": "Salud del pago manual",
+            "body": "Las recargas se liquidan a mano: este es el estado de esa vía de dinero.",
+            "pending": "Pendientes",
+            "pending_hint": "{amount} en transferencias por revisar",
+            "backlog": "Antigüedad",
+            "backlog_ok": "Nada con más de 24h",
+            "backlog_breach": "La más vieja tiene {hours}h",
+            "approved": "Aprobadas",
+            "approved_hint": "{tokens} acreditados",
+            "rejected": "Rechazadas",
+            "rejected_hint": "{amount} en transferencias cerradas",
+            "drift_badge": "{count} desvío",
+            "drift_title": "Desvío en el libro contable",
+            "drift_body": "{count} recarga(s) aprobada(s) se acreditaron por un monto distinto al declarado. Investiga antes de confiar en los saldos.",
+            "drift_ok": "El libro coincide con cada recarga aprobada"
+          }
         },
         "centers": {
           "meta_title": "Centros — Yotuvia",
@@ -1811,6 +1829,29 @@
           "qr_empty": "Este centro todavía no tiene un QR cargado",
           "save_success": "Configuración de pagos guardada",
           "upload_success": "QR subido"
+        },
+        "ads": {
+          "meta_title": "Ingresos por publicidad",
+          "title": "Publicidad",
+          "subtitle": "Lo que la publicidad recaudó de verdad, y a qué CPM está cerrando el mercado.",
+          "error": "No pudimos cargar el resumen de publicidad.",
+          "revenue": "Ingresos",
+          "revenue_hint": "{active} de {total} campañas activas",
+          "cpm": "CPM efectivo",
+          "cpm_hint": "Ytv por 1000 vistas entregadas",
+          "impressions": "Vistas facturadas",
+          "impressions_hint": "{undelivered} subastas ganadas sin entregar",
+          "delivery": "Entregado",
+          "delivery_hint": "de cada subasta ganada",
+          "daily_title": "Entrega por día",
+          "daily_empty": "Todavía no hay vistas facturadas.",
+          "daily_tooltip": "{day}: {impressions} vistas, {spend} Ytv",
+          "top_title": "Mayores anunciantes",
+          "top_empty": "Ninguna campaña gastó presupuesto todavía.",
+          "col_center": "Centro",
+          "col_spent": "Gastado",
+          "col_impressions": "Vistas",
+          "col_delivery": "Entregado"
         }
       },
       "topbar": {
@@ -1953,6 +1994,14 @@
         "back_home": "Volver al inicio"
       },
       "dashboard": {
+        "token_health": {
+          "low_title": "Te estás quedando sin Ytv",
+          "low_body": "Recargá para seguir recibiendo reservas.",
+          "deficit_title": "Tu centro no puede recibir reservas nuevas",
+          "deficit_body": "El saldo de Ytv no cubre una comisión ({days} días en descubierto). Recargá para reactivarlo.",
+          "suspended_title": "Tu cuenta está suspendida",
+          "suspended_body": "Dejó de aparecer en las búsquedas. Recargá Ytv y se reactiva automáticamente."
+        },
         "meta": {
           "title": "Panel — Yotuvia"
         },
@@ -3087,6 +3136,7 @@
       "profile_payment_save": "No pudimos guardar la configuración de pagos. Intentá de nuevo.",
       "profile_payment_upload": "No pudimos subir el QR. Intentá de nuevo.",
       "platform_tokens_fetch": "No pudimos cargar la cola de recargas de la plataforma. Intentá de nuevo.",
+      "platform_reconciliation_fetch": "No pudimos cargar el resumen de reconciliación de pagos. Intentá de nuevo.",
       "platform_tokens_process": "No pudimos procesar la recarga. Intentá de nuevo.",
       "platform_centers_fetch": "No pudimos cargar los centros. Intentá de nuevo.",
       "platform_payment_fetch": "No pudimos cargar la configuración de pagos de ese centro. Intentá de nuevo.",
@@ -3118,6 +3168,7 @@
       "client_favorite_add": "No pudimos guardar el favorito. Intentá de nuevo.",
       "client_availability_fetch": "No pudimos cargar los horarios disponibles. Intentá de nuevo.",
       "client_booking_create": "No pudimos crear la reserva. Intentá de nuevo.",
+      "client_booking_unavailable": "No pudimos crear la reserva. Puede que ese horario ya no esté disponible o que el centro no esté tomando reservas en este momento. Probá con otro horario u otro centro.",
       "client_booking_update": "No pudimos actualizar la reserva. Intentá de nuevo.",
       "staff_agenda_fetch": "No pudimos cargar tu agenda. Intentá de nuevo.",
       "staff_agenda_status": "No pudimos actualizar el turno. Intentá de nuevo.",
@@ -3193,11 +3244,11 @@
         "subtitle": "Iniciá sesión o creá tu cuenta con tu email",
         "register_subtitle": "Creá tu cuenta con tu email",
         "continue": "Continuar",
-        "code_sent": "Te enviamos un código de 6 dígitos a {{email}}",
+        "code_sent": "Te enviamos un código de 6 dígitos a {email}",
         "code_label": "Código",
         "verify": "Verificar",
         "resend": "Reenviar código",
-        "resend_in": "Reenviar código en {{seconds}}s",
+        "resend_in": "Reenviar código en {seconds}s",
         "change_email": "Usar otro email",
         "use_password": "Iniciar sesión con contraseña",
         "role_title": "Elegí el tipo de cuenta",

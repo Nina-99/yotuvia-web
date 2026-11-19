@@ -77,6 +77,12 @@ const ICONS = {
     "M12 6v12",
     "M15 9.5a3 3 0 0 0-3-2 3 3 0 0 0 0 5 3 3 0 0 1 0 5 3 3 0 0 1-3-2",
   ],
+  platformAds: [
+    "M3 3v18h18",
+    "M7 16v-5",
+    "M12 16V8",
+    "M17 16v-3",
+  ],
   platformCenters: [
     "M3 21h18",
     "M5 21V7l7-4 7 4v14",
@@ -173,6 +179,12 @@ export const PLATFORM_NAV_SECTIONS: readonly AppNavSection[] = [
     path: ROUTES.platform.payments,
     labelKey: "web.app.nav.platform_payments",
     icon: ICONS.platformPayments,
+  },
+  {
+    id: "platform-ads",
+    path: ROUTES.platform.ads,
+    labelKey: "web.app.nav.platform_ads",
+    icon: ICONS.platformAds,
   },
   {
     id: "platform-centers",

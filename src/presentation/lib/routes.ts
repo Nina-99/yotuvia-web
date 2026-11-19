@@ -85,6 +85,7 @@ export const ROUTES = {
   platform: {
     payments: "/app/platform/payments",
     centers: "/app/platform/centers",
+    ads: "/app/platform/ads",
   },
   /**
    * Client area, nested under the same authenticated shell and mirrored from

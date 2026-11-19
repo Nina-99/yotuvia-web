@@ -1764,7 +1764,8 @@
         "staff_notifications": "Notifications",
         "staff_profile": "Profile",
         "blocks": "Time off",
-        "staff_blocks": "Time off"
+        "staff_blocks": "Time off",
+        "platform_ads": "Advertising"
       },
       "platform": {
         "payments": {
@@ -1791,7 +1792,24 @@
           "no_results_title": "No requests match these filters",
           "no_results_body": "Try another center or status, or clear the filters.",
           "approved_toast": "Top-up approved",
-          "rejected_toast": "Top-up rejected"
+          "rejected_toast": "Top-up rejected",
+          "reconciliation": {
+            "title": "Manual payment health",
+            "body": "Top-ups are settled by hand — this is the state of that money path.",
+            "pending": "Pending",
+            "pending_hint": "{amount} in transfers awaiting review",
+            "backlog": "Aging backlog",
+            "backlog_ok": "Nothing older than 24h",
+            "backlog_breach": "Oldest is {hours}h old",
+            "approved": "Approved",
+            "approved_hint": "{tokens} credited",
+            "rejected": "Rejected",
+            "rejected_hint": "{amount} in transfers closed",
+            "drift_badge": "{count} drift",
+            "drift_title": "Ledger drift detected",
+            "drift_body": "{count} approved top-up(s) were credited a different amount than declared. Investigate before trusting wallet balances.",
+            "drift_ok": "The ledger matches every approved top-up"
+          }
         },
         "centers": {
           "meta_title": "Centers — Yotuvia",
@@ -1811,6 +1829,29 @@
           "qr_empty": "This center has no QR uploaded yet",
           "save_success": "Payment configuration saved",
           "upload_success": "QR uploaded"
+        },
+        "ads": {
+          "meta_title": "Advertising revenue",
+          "title": "Advertising",
+          "subtitle": "What the ad book actually collected, and what the market is clearing at.",
+          "error": "Could not load the advertising overview.",
+          "revenue": "Revenue",
+          "revenue_hint": "{active} of {total} campaigns running",
+          "cpm": "Effective CPM",
+          "cpm_hint": "Ytv per 1000 delivered views",
+          "impressions": "Views billed",
+          "impressions_hint": "{undelivered} auction wins never delivered",
+          "delivery": "Delivered",
+          "delivery_hint": "of every auction won",
+          "daily_title": "Daily delivery",
+          "daily_empty": "No views billed yet.",
+          "daily_tooltip": "{day}: {impressions} views, {spend} Ytv",
+          "top_title": "Top advertisers",
+          "top_empty": "No campaign has spent budget yet.",
+          "col_center": "Center",
+          "col_spent": "Spent",
+          "col_impressions": "Views",
+          "col_delivery": "Delivered"
         }
       },
       "topbar": {
@@ -1953,6 +1994,14 @@
         "back_home": "Back to home"
       },
       "dashboard": {
+        "token_health": {
+          "low_title": "Your Ytv are running low",
+          "low_body": "Top up to keep receiving reservations.",
+          "deficit_title": "Your centre cannot take new reservations",
+          "deficit_body": "Not enough Ytv to cover a commission ({days} days in deficit). Top up to resume.",
+          "suspended_title": "Your account is suspended",
+          "suspended_body": "It stopped appearing in searches. Top up Ytv and it reactivates automatically."
+        },
         "meta": {
           "title": "Dashboard — Yotuvia"
         },
@@ -3087,6 +3136,7 @@
       "profile_payment_save": "We couldn't save the payment configuration. Please try again.",
       "profile_payment_upload": "We couldn't upload the QR image. Please try again.",
       "platform_tokens_fetch": "We couldn't load the platform top-up queue. Please try again.",
+      "platform_reconciliation_fetch": "We couldn't load the payment reconciliation summary. Please try again.",
       "platform_tokens_process": "We couldn't process the top-up. Please try again.",
       "platform_centers_fetch": "We couldn't load the centers. Please try again.",
       "platform_payment_fetch": "We couldn't load that center's payment configuration. Please try again.",
@@ -3118,6 +3168,7 @@
       "client_favorite_add": "We couldn't save the favorite. Please try again.",
       "client_availability_fetch": "We couldn't load the available times. Please try again.",
       "client_booking_create": "We couldn't create the reservation. Please try again.",
+      "client_booking_unavailable": "We couldn't create the reservation. That time may no longer be available, or the center isn't taking bookings right now. Try another time or another center.",
       "client_booking_update": "We couldn't update the reservation. Please try again.",
       "staff_agenda_fetch": "We couldn't load your agenda. Please try again.",
       "staff_agenda_status": "We couldn't update the appointment. Please try again.",
@@ -3193,11 +3244,11 @@
         "subtitle": "Sign in or create your account with your email",
         "register_subtitle": "Create your account with your email",
         "continue": "Continue",
-        "code_sent": "We sent a 6-digit code to {{email}}",
+        "code_sent": "We sent a 6-digit code to {email}",
         "code_label": "Code",
         "verify": "Verify",
         "resend": "Resend code",
-        "resend_in": "Resend code in {{seconds}}s",
+        "resend_in": "Resend code in {seconds}s",
         "change_email": "Use another email",
         "use_password": "Sign in with password",
         "role_title": "Choose your account type",

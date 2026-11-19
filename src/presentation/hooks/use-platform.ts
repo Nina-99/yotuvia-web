@@ -1,7 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  getPlatformAdsOverview,
   getPlatformCenters,
   getPlatformPaymentConfig,
+  getPlatformTopUpReconciliation,
   getPlatformTopUps,
   processPlatformTopUp,
   updatePlatformPaymentConfig,
@@ -160,4 +162,32 @@ export function useUploadPlatformPaymentQr() {
     }),
     "web.errors.platform_payment_upload",
   );
+}
+
+/**
+ * The platform's advertising revenue view.
+ *
+ * Source-direct like the rest of this file (there is no platform repository in
+ * core). Refetched on mount only: ad spend moves with qualified views, not with
+ * every screen focus, so polling would add noise without adding truth.
+ */
+export function usePlatformAdsOverview() {
+  return useQuery({
+    queryKey: queryKeys.platform.ads(),
+    queryFn: getPlatformAdsOverview,
+    staleTime: 60_000,
+  });
+}
+
+/**
+ * Health of the manual money path: per-status totals, pending backlog aging and
+ * ledger drift. Refetched with the queue (a decision changes every number), and
+ * stale for a minute otherwise — operators glance at it, they do not watch it.
+ */
+export function usePlatformTopUpReconciliation() {
+  return useQuery({
+    queryKey: queryKeys.platform.reconciliation(),
+    queryFn: getPlatformTopUpReconciliation,
+    staleTime: 60_000,
+  });
 }
