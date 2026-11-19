@@ -17,9 +17,9 @@
   color-scheme: dark;
 
   --ytv-background: #16140f;
-  --ytv-card: #221f1a;
-  --ytv-card2: #2e2b25;
-  --ytv-border: #3a362e;
+  --ytv-card: #26221b;
+  --ytv-card2: #332f27;
+  --ytv-border: #443e34;
   --ytv-text: #ececec;
   --ytv-text-muted: #888;
   --ytv-text-secondary: #666;
@@ -30,6 +30,16 @@
   --ytv-overlay: rgba(0, 0, 0, 0.5);
   --ytv-on-accent: #121212;
   --ytv-disabled: #2c2c2e;
+  /* Brand secondary: wine pulled from the logo, and the barber-pole red used
+   * ONLY as a hairline micro-accent (never as ambient light — too close to the
+   * danger red semantically). */
+  --ytv-wine: #6e1230;
+  --ytv-barber-red: #b3261e;
+  --ytv-barber-cream: #f3e7cf;
+  /* Deep cool tone used ONLY as a background-depth lamp in the app shell —
+   * gives the warm gold a thermal counterpoint so large dark areas read as
+   * "lit space" instead of a flat black panel. Never a semantic color. */
+  --ytv-depth: #1b2740;
 }
 
 @theme inline {
@@ -129,7 +139,7 @@ html {
 .ytv-elev-1 {
   border: 1px solid var(--ytv-border);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
@@ -137,7 +147,7 @@ html {
   border: 1px solid var(--ytv-border);
   background-color: var(--ytv-card2);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
     0 4px 12px -4px rgba(0, 0, 0, 0.5);
 }
 
@@ -294,15 +304,126 @@ html {
   background-image:
     radial-gradient(
       90rem 45rem at 50% -12%,
-      color-mix(in srgb, var(--color-accent) 7%, transparent),
+      color-mix(in srgb, var(--color-accent) 11%, transparent),
       transparent 62%
     ),
     radial-gradient(
       55rem 30rem at 100% -5%,
-      color-mix(in srgb, var(--color-accent) 4%, transparent),
+      color-mix(in srgb, var(--color-accent) 6%, transparent),
       transparent 55%
+    ),
+    radial-gradient(
+      60rem 40rem at 0% 112%,
+      color-mix(in srgb, var(--ytv-depth) 8%, transparent),
+      transparent 60%
     );
   background-repeat: no-repeat;
+}
+
+/*
+ * Public/auth ambient: the gold pools PLUS a deep-wine pool pulled from the
+ * brand logo — a second warm "lamp" for marketing/auth surfaces. Deliberately
+ * NOT applied to the app shell: on operational screens red-adjacent light reads
+ * as an alert. Static (no animation) so it renders identically under reduced
+ * motion.
+ */
+.ytv-ambient-brand {
+  background-image:
+    radial-gradient(
+      90rem 45rem at 50% -12%,
+      color-mix(in srgb, var(--color-accent) 9%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      55rem 30rem at 100% -5%,
+      color-mix(in srgb, var(--color-accent) 5%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      60rem 40rem at -5% 108%,
+      color-mix(in srgb, var(--ytv-wine) 12%, transparent),
+      transparent 60%
+    );
+  background-repeat: no-repeat;
+}
+
+/*
+ * Barber-pole hairline: a 3px red/cream edge used as a MICRO brand accent (in
+ * the public header). Never an ambient light — that role belongs to the wine
+ * pool above. Static decoration.
+ */
+.ytv-barber-accent {
+  position: relative;
+}
+
+.ytv-barber-accent::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--ytv-barber-red) 0 10px,
+    var(--ytv-barber-cream) 10px 20px
+  );
+  opacity: 0.9;
+}
+
+/* Gold-tinted skeleton surface: branded loading instead of flat grey. */
+.ytv-skeleton {
+  background-color: color-mix(in srgb, var(--color-accent) 12%, var(--ytv-card2));
+}
+
+/*
+ * Marketing display type (Bodoni Moda, self-hosted via Fontsource). Applied ONLY
+ * to public landing headings — never to app UI, where numbers and labels need
+ * the neutral sans. Scoped by the landing section title ids.
+ */
+.ytv-display,
+#hero-title,
+#centers-title,
+#faq-title,
+#features-title,
+#pricing-title,
+#how-it-works-title,
+#client-features-title,
+#final-cta-title {
+  font-family: "Bodoni Moda Variable", "Bodoni Moda", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.005em;
+}
+
+/*
+ * Feature card: a PRIMARY surface with a gold ring + faint top-left wash so the
+ * eye finds the most important card first (balance, hero KPI). Same palette,
+ * just elevated emphasis.
+ */
+.ytv-feature-card {
+  border-color: color-mix(in srgb, var(--color-accent) 35%, var(--ytv-border));
+  background-image: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-accent) 8%, transparent),
+    transparent 55%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 30px -18px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  /* Gold hover glow for interactive surfaces. */
+  .ytv-hover-glow {
+    transition:
+      box-shadow 180ms ease-out,
+      border-color 180ms ease-out;
+  }
+
+  .ytv-hover-glow:hover {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent),
+      0 8px 24px -10px color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
 }
 
 /*
@@ -450,6 +571,60 @@ body::after {
     }
     50% {
       box-shadow: 0 0 20px -2px color-mix(in srgb, var(--color-accent) 40%, transparent);
+    }
+  }
+
+  /*
+   * Reflective sweep across the brand logo, matching the gold-shine treatment
+   * used on `bg-accent` elements. The moving white band is MASKED by the logo's
+   * own SVG, so the highlight follows the glyph shape instead of the box.
+   */
+  .ytv-logo-shine {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .ytv-logo-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(
+      115deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.65) 50%,
+      transparent 60%
+    );
+    background-size: 250% 100%;
+    background-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    animation: ytv-logo-shine 5.5s ease-in-out infinite;
+  }
+
+  .ytv-logo-shine--wordmark::after {
+    -webkit-mask-image: url(/brand/yotuvia-wordmark.svg);
+    mask-image: url(/brand/yotuvia-wordmark.svg);
+  }
+
+  .ytv-logo-shine--monogram::after {
+    -webkit-mask-image: url(/brand/yotuvia-monogram.svg);
+    mask-image: url(/brand/yotuvia-monogram.svg);
+  }
+
+  @keyframes ytv-logo-shine {
+    0% {
+      background-position: 160% 0;
+    }
+    45% {
+      background-position: -60% 0;
+    }
+    100% {
+      background-position: -60% 0;
     }
   }
 }

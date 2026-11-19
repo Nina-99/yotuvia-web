@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
+import type { Plugin } from 'vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 // yotuvia-core is a local, versioned package consumed from its build output.
@@ -56,6 +57,65 @@ function vendorChunkFor(id: string): string | undefined {
   return undefined
 }
 
+/**
+ * Content-Security-Policy injected into PRODUCTION builds only.
+ *
+ * The session tokens live in `localStorage`, so any script that manages to run
+ * on this origin can read them and take the account over. This policy removes
+ * the two cheapest ways to get one to run — an inline `<script>` and a script
+ * from an arbitrary origin — and blocks plugins/objects and base-tag hijacking.
+ *
+ * Deliberate allowances:
+ * - `'unsafe-inline'` for styles: components use the `style` attribute.
+ * - `https:` for images: avatars come from Google/Facebook, map tiles from
+ *   CARTO.
+ * - `blob:` for workers: maplibre-gl builds its worker from a Blob.
+ *
+ * `frame-ancestors` is NOT here on purpose: browsers ignore it in a `<meta>`
+ * tag. It belongs in the nginx `add_header` (see docs/deployment/nginx.md),
+ * together with HSTS and the rest of the transport hardening.
+ *
+ * Development is untouched (`apply: 'build'`): Vite's HMR client needs inline
+ * scripts.
+ */
+const PRODUCTION_CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "form-action 'self'",
+  "script-src 'self' https://accounts.google.com https://connect.facebook.net https://www.gstatic.com",
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://accounts.google.com https://www.googleapis.com https://graph.facebook.com https://basemaps.cartocdn.com https://*.cartocdn.com",
+  "worker-src 'self' blob:",
+  "frame-src https://accounts.google.com https://www.facebook.com",
+].join('; ')
+
+function productionCspPlugin(): Plugin {
+  return {
+    name: 'yotuvia:csp',
+    apply: 'build',
+    transformIndexHtml(html) {
+      return {
+        html,
+        tags: [
+          {
+            tag: 'meta',
+            attrs: { 'http-equiv': 'Content-Security-Policy', content: PRODUCTION_CSP },
+            injectTo: 'head-prepend',
+          },
+          {
+            tag: 'meta',
+            attrs: { name: 'referrer', content: 'strict-origin-when-cross-origin' },
+            injectTo: 'head-prepend',
+          },
+        ],
+      }
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, projectRoot, '')
@@ -89,6 +149,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      productionCspPlugin(),
       react({
         babel: {
           plugins: [['babel-plugin-react-compiler']],
